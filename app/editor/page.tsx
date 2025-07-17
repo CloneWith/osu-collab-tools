@@ -219,9 +219,12 @@ export default function EditorPage() {
         break
 
       case "create":
-        setIsDrawing(true)
-        setStartPoint(coords)
         setSelectedRect(null)
+
+        if (coords.x <= imageSize.width && coords.y <= imageSize.height) {
+          setIsDrawing(true)
+          setStartPoint(coords)
+        }
         break
 
       case "delete":
@@ -302,6 +305,8 @@ export default function EditorPage() {
       const newRect: Rectangle = {
         ...currentRect,
         id: Date.now().toString(),
+        width: Math.min(currentRect.width, imageSize.width - currentRect.x),
+        height: Math.min(currentRect.height, imageSize.height - currentRect.y),
       }
 
       setRectangles((prev) => [...prev, newRect])
