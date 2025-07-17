@@ -321,8 +321,11 @@ export default function EditorPage() {
     }
   }
 
-  const updateRectangle = (id: string, field: keyof Rectangle, value: string) => {
-    setRectangles((prev) => prev.map((rect) => (rect.id === id ? { ...rect, [field]: value } : rect)))
+  const updateRectangle = (id: string, field: keyof Rectangle,
+                           value: string, castToNumber: boolean = false) => {
+    console.log("updateRectangle", id, field, value)
+    setRectangles((prev) => prev.map((rect)=>
+        (rect.id === id ? { ...rect, [field]: castToNumber ? Number(value) : value } : rect)))
   }
 
   const deleteRectangle = (id: string) => {
@@ -364,7 +367,7 @@ ${areas}
         )
         .join("\n")
 
-    return `[imagemap]\n${areas}\n[/imagemap]`
+    return `[imagemap]\n图像链接\n${areas}\n[/imagemap]`
   }
 
   // 获取工具按钮的样式
@@ -659,7 +662,7 @@ ${areas}
                           <input
                             type="number"
                             value={Math.round(rectangles.find((r) => r.id === selectedRect)?.x || 0)}
-                            onChange={(e) => updateRectangle(selectedRect, "x", e.target.value)}
+                            onChange={(e) => updateRectangle(selectedRect, "x", e.target.value, true)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                           />
                         </div>
@@ -668,7 +671,7 @@ ${areas}
                           <input
                             type="number"
                             value={Math.round(rectangles.find((r) => r.id === selectedRect)?.y || 0)}
-                            onChange={(e) => updateRectangle(selectedRect, "y", e.target.value)}
+                            onChange={(e) => updateRectangle(selectedRect, "y", e.target.value, true)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                           />
                         </div>
@@ -677,7 +680,7 @@ ${areas}
                           <input
                             type="number"
                             value={Math.round(rectangles.find((r) => r.id === selectedRect)?.width || 0)}
-                            onChange={(e) => updateRectangle(selectedRect, "width", e.target.value)}
+                            onChange={(e) => updateRectangle(selectedRect, "width", e.target.value, true)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                           />
                         </div>
@@ -686,7 +689,7 @@ ${areas}
                           <input
                             type="number"
                             value={Math.round(rectangles.find((r) => r.id === selectedRect)?.height || 0)}
-                            onChange={(e) => updateRectangle(selectedRect, "height", e.target.value)}
+                            onChange={(e) => updateRectangle(selectedRect, "height", e.target.value, true)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                           />
                         </div>
