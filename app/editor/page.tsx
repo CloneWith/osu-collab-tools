@@ -367,11 +367,6 @@ ${areas}
     return `[imagemap]\n${areas}\n[/imagemap]`
   }
 
-  const copyToClipboard = () => {
-    const code = generateImageMapHtml()
-    navigator.clipboard.writeText(code)
-  }
-
   // 获取工具按钮的样式
   const getToolButtonClass = (tool: EditorTool) => {
     return `p-2 rounded-md ${
@@ -707,8 +702,9 @@ ${areas}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-medium">生成的HTML代码</h3>
-                  <Button onClick={copyToClipboard} disabled={rectangles.length === 0} size="sm">
-                    <Download className="w-4 h-4 mr-2" />
+                  <Button onClick={() => navigator.clipboard.writeText(generateImageMapHtml())}
+                          disabled={rectangles.length === 0} size="sm">
+                    <Copy className="w-4 h-4" />
                     复制代码
                   </Button>
                 </div>
@@ -721,8 +717,9 @@ ${areas}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-medium">生成的 BBCode 代码</h3>
-                  <Button onClick={copyToClipboard} disabled={rectangles.length === 0} size="sm">
-                    <Download className="w-4 h-4 mr-2" />
+                  <Button onClick={() => navigator.clipboard.writeText(generateImageMapBBCode())}
+                          disabled={rectangles.length === 0} size="sm">
+                    <Copy className="w-4 h-4" />
                     复制代码
                   </Button>
                 </div>
