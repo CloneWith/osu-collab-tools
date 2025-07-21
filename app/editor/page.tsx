@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Upload, Download, Trash2, MousePointer, Move, Square, Copy, Trash, X } from "lucide-react"
+import { Upload, Trash2, MousePointer, Move, Square, Copy, Trash, X, Hash, UserRound } from "lucide-react";
 import { clamp } from "@/lib/utils";
 
 interface Rectangle {
@@ -28,6 +28,9 @@ interface ContextMenuPosition {
 type EditorTool = "select" | "move" | "create" | "delete"
 
 export default function EditorPage() {
+  // TODO: Add support to customize server and API links
+  const server_link = "osu.ppy.sh"
+
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [imageName, setImageName] = useState<string | null>(null)
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
@@ -47,6 +50,7 @@ export default function EditorPage() {
     targetId: null,
   })
   const [currentTool, setCurrentTool] = useState<EditorTool>("select")
+  const [userInfo, setUserInfo] = useState<string>("")
 
   const imageRef = useRef<HTMLImageElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -120,6 +124,14 @@ export default function EditorPage() {
       x: (touch.clientX - rect.left) * scaleX,
       y: (touch.clientY - rect.top) * scaleY,
     }
+  }
+
+  const generateUserLinkFromId = (userId: number) => {
+    return `https://${server_link}/users/${userId}`
+  }
+
+  const generateUserLinkFromName = (username: string) => {
+    return `https://${server_link}/u/${username}`
   }
 
   // 处理右键菜单
@@ -657,6 +669,38 @@ ${areas}
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">用户信息</label>
+                          <input
+                              value={userInfo}
+                              onChange={(e) => setUserInfo(e.target.value.trim())}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 items-center">
+                          <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={userInfo.length == 0 || isNaN(Number(userInfo))}
+                              onClick={() => updateRectangle(selectedRect, "href",
+                                  generateUserLinkFromId(Number(userInfo)))}
+                              className="flex items-center gap-1"
+                          >
+                            <Hash className="w-4 h-4" />
+                            作为 ID 填入
+                          </Button>
+                          <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={userInfo.length == 0}
+                              onClick={() => updateRectangle(selectedRect, "href",
+                                  generateUserLinkFromName(userInfo))}
+                              className="flex items-center gap-1"
+                          >
+                            <UserRound className="w-4 h-4" />
+                            作为用户名填入
+                          </Button>
+                        </div>
                         <div>
                           <label className="block text-sm font-medium mb-1">X 坐标</label>
                           <input
