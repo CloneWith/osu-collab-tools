@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Upload, Trash2, MousePointer, Move, Square, Copy, Trash, X, Hash, UserRound } from "lucide-react";
 import { clamp } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 interface Rectangle {
   id: string
@@ -27,22 +28,35 @@ interface ContextMenuPosition {
 
 type EditorTool = "select" | "move" | "create" | "delete"
 
+// TODO: Add support to customize server and API links
+const server_link = "osu.ppy.sh"
+const tool_names = {
+  "select": "选择",
+  "move": "移动",
+  "create": "创建",
+  "delete": "删除",
+}
 export default function EditorPage() {
-  // TODO: Add support to customize server and API links
-  const server_link = "osu.ppy.sh"
-
+  // Image states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [imageName, setImageName] = useState<string | null>(null)
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
+
+  // Rectangle and drawing states
   const [rectangles, setRectangles] = useState<Rectangle[]>([])
   const [isDrawing, setIsDrawing] = useState(false)
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 })
   const [currentRect, setCurrentRect] = useState<Rectangle | null>(null)
-  const [selectedRect, setSelectedRect] = useState<string | null>(null)
+  const [selectedRect, setSelectedRectId] = useState<string | null>(null)
   const [movingRect, setMovingRect] = useState<string | null>(null)
   const [moveOffset, setMoveOffset] = useState({ x: 0, y: 0 })
+  const [lastPositionInput, setLastPositionInput] = useState({ x: "0", y: "0" })
+  const [lastSizeInput, setLastSizeInput] = useState({ width: "50", height: "50" })
+
   const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [touchStartTime, setTouchStartTime] = useState(0)
+
+  // UI states
   const [contextMenu, setContextMenu] = useState<ContextMenuPosition>({
     x: 0,
     y: 0,
@@ -132,6 +146,26 @@ export default function EditorPage() {
 
   const generateUserLinkFromName = (username: string) => {
     return `https://${server_link}/u/${username}`
+  }
+
+  const setSelectedRect = (id: string | null) => {
+    setSelectedRectId(id)
+
+    // Restore input values to a sane default
+    if (id === null) {
+      setLastPositionInput({ x: "0", y: "0" })
+      setLastSizeInput({ width: "50", height: "50" })
+      return
+    }
+
+    const target = rectangles.find(r => r.id === id)
+
+    if (target) {
+      setLastPositionInput({ x: target.x.toString(), y: target.y.toString() })
+      setLastSizeInput({ width: target.width.toString(), height: target.height.toString() })
+    } else {
+      console.warn(`Cannot find a rectangle with selected id ${id}. Got:`, rectangles)
+    }
   }
 
   // 处理右键菜单
@@ -305,7 +339,7 @@ export default function EditorPage() {
     }
   }
 
-  const handlePointerUp = (event: React.MouseEvent | React.TouchEvent) => {
+  const handlePointerUp = () => {
     // 处理绘制结束
     if (isDrawing && currentTool === "create") {
       if (!currentRect || currentRect.width < 20 || currentRect.height < 20) {
@@ -317,12 +351,19 @@ export default function EditorPage() {
       const newRect: Rectangle = {
         ...currentRect,
         id: Date.now().toString(),
-        width: Math.min(currentRect.width, imageSize.width - currentRect.x),
-        height: Math.min(currentRect.height, imageSize.height - currentRect.y),
+        width: Math.round(Math.min(currentRect.width, imageSize.width - currentRect.x)),
+        height: Math.round(Math.min(currentRect.height, imageSize.height - currentRect.y)),
       }
 
       setRectangles((prev) => [...prev, newRect])
-      setSelectedRect(newRect.id)
+
+      setSelectedRectId(newRect.id)
+      setLastPositionInput({ x: newRect.x.toString(), y: newRect.y.toString() })
+      setLastSizeInput({ width: newRect.width.toString(), height: newRect.height.toString() })
+
+      // Upon calling of this method, we cannot get the newly added rectangle. Why?
+      // setSelectedRect(newRect.id)
+
       setIsDrawing(false)
       setCurrentRect(null)
     }
@@ -335,6 +376,10 @@ export default function EditorPage() {
 
   const updateRectangle = (id: string, field: keyof Rectangle,
                            value: string, castToNumber: boolean = false) => {
+    // Don't update if user needs a number, and we cannot convert the source value to one.
+    if (castToNumber && isNaN(Number(value)))
+      return
+
     console.log("updateRectangle", id, field, value)
     setRectangles((prev) => prev.map((rect)=>
         (rect.id === id ? { ...rect, [field]: castToNumber ? Number(value) : value } : rect)))
@@ -458,14 +503,7 @@ ${areas}
                 </button>
                 <div className="border-l border-gray-200 mx-1"></div>
                 <div className="text-sm text-gray-500 flex items-center px-2">
-                  当前工具:{" "}
-                  {currentTool === "select"
-                    ? "选择"
-                    : currentTool === "move"
-                      ? "移动"
-                      : currentTool === "create"
-                        ? "创建"
-                        : "删除"}
+                  当前工具: {tool_names[currentTool]}
                 </div>
               </div>
             )}
@@ -705,8 +743,14 @@ ${areas}
                           <label className="block text-sm font-medium mb-1">X 坐标</label>
                           <input
                             type="number"
-                            value={Math.round(rectangles.find((r) => r.id === selectedRect)?.x || 0)}
-                            onChange={(e) => updateRectangle(selectedRect, "x", e.target.value, true)}
+                            value={lastPositionInput.x}
+                            onChange={(e) => {
+                              if (!e.target.value)
+                                return
+
+                              setLastPositionInput({ ...lastPositionInput, x: e.target.value })
+                              updateRectangle(selectedRect, "x", e.target.value, true)
+                            }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                           />
                         </div>
@@ -714,8 +758,14 @@ ${areas}
                           <label className="block text-sm font-medium mb-1">Y 坐标</label>
                           <input
                             type="number"
-                            value={Math.round(rectangles.find((r) => r.id === selectedRect)?.y || 0)}
-                            onChange={(e) => updateRectangle(selectedRect, "y", e.target.value, true)}
+                            value={lastPositionInput.y}
+                            onChange={(e) => {
+                              if (!e.target.value)
+                                return
+
+                              setLastPositionInput({ ...lastPositionInput, y: e.target.value })
+                              updateRectangle(selectedRect, "y", e.target.value, true)
+                            }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                           />
                         </div>
@@ -723,8 +773,14 @@ ${areas}
                           <label className="block text-sm font-medium mb-1">宽度</label>
                           <input
                             type="number"
-                            value={Math.round(rectangles.find((r) => r.id === selectedRect)?.width || 0)}
-                            onChange={(e) => updateRectangle(selectedRect, "width", e.target.value, true)}
+                            value={lastSizeInput.width}
+                            onChange={(e) => {
+                              if (!e.target.value)
+                                return
+
+                              setLastSizeInput({ ...lastSizeInput, width: e.target.value })
+                              updateRectangle(selectedRect, "width", e.target.value, true)
+                            }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                           />
                         </div>
@@ -732,8 +788,14 @@ ${areas}
                           <label className="block text-sm font-medium mb-1">高度</label>
                           <input
                             type="number"
-                            value={Math.round(rectangles.find((r) => r.id === selectedRect)?.height || 0)}
-                            onChange={(e) => updateRectangle(selectedRect, "height", e.target.value, true)}
+                            value={lastSizeInput.height}
+                            onChange={(e) => {
+                              if (!e.target.value)
+                                return
+
+                              setLastSizeInput({ ...lastSizeInput, height: e.target.value })
+                              updateRectangle(selectedRect, "height", e.target.value, true)
+                            }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                           />
                         </div>
@@ -748,7 +810,7 @@ ${areas}
             <Card className="flex-1">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium">生成的HTML代码</h3>
+                  <h3 className="font-medium">生成的 HTML 代码</h3>
                   <Button onClick={() => navigator.clipboard.writeText(generateImageMapHtml())}
                           disabled={rectangles.length === 0} size="sm">
                     <Copy className="w-4 h-4" />
@@ -756,7 +818,7 @@ ${areas}
                   </Button>
                 </div>
                 <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
-                  <pre>{generateImageMapHtml() || "// 上传图片并创建区域后，HTML代码将在这里显示"}</pre>
+                  <pre>{generateImageMapHtml() || "// 上传图片并创建区域后，HTML 代码将在这里显示"}</pre>
                 </div>
               </CardContent>
             </Card>
