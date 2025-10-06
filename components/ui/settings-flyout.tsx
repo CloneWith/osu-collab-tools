@@ -54,8 +54,8 @@ export function SettingsFlyout() {
                   className={
                     "relative flex items-center justify-center w-9 h-9 rounded-full transition-colors " +
                     (selected
-                      ? "bg-blue-600 text-white"
-                      : "text-muted-foreground hover:bg-blue-400/30 dark:hover:bg-blue-700/30")
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-primary/75 dark:hover:bg-primary/30")
                   }
                 >
                   {/* icon */}

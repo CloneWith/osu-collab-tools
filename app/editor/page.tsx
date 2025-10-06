@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Upload, Trash2, MousePointer, Move, Square, Copy, Trash, X, Hash, UserRound } from "lucide-react";
 import { clamp } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
 
 interface Rectangle {
   id: string
@@ -430,7 +429,7 @@ ${areas}
   // 获取工具按钮的样式
   const getToolButtonClass = (tool: EditorTool) => {
     return `p-2 rounded-md ${
-      currentTool === tool ? "bg-blue-600 text-white" : "bg-white text-gray-700 hover:bg-gray-100"
+  currentTool === tool ? "bg-primary text-primary-foreground" : "bg-white text-gray-700 hover:bg-gray-100"
     }`
   }
 
@@ -540,8 +539,8 @@ ${areas}
                       return (
                         <div
                           key={rect.id}
-                          className={`absolute border-2 bg-blue-500 bg-opacity-20 select-none touch-manipulation ${
-                            selectedRect === rect.id ? "border-blue-600 border-4" : "border-blue-400"
+                          className={`absolute border-2 bg-primary/20 select-none touch-manipulation ${
+                            selectedRect === rect.id ? "border-primary border-4" : "border-primary/40"
                           } ${isTouchDevice ? "min-w-[44px] min-h-[44px]" : ""}`}
                           style={{
                             left: rect.x / scaleX,
@@ -553,14 +552,14 @@ ${areas}
                           }}
                         >
                           <div
-                            className={`absolute -top-6 left-0 bg-blue-600 text-white text-xs px-1 rounded select-none ${
+                            className={`absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none ${
                               isTouchDevice ? "text-sm px-2 py-1" : ""
                             }`}
                           >
                             {rect.alt}
                           </div>
                           {selectedRect === rect.id && (
-                            <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-blue-600 rounded-full border-2 border-white"></div>
+                            <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-primary rounded-full border-2 border-white"></div>
                           )}
                         </div>
                       )

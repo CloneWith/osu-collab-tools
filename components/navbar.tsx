@@ -25,8 +25,8 @@ export function Navbar() {
                     {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                <Aperture className="w-5 h-5 text-white"/>
+                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                                <Aperture className="w-5 h-5 text-primary-foreground"/>
                             </div>
                             <span className="text-xl font-bold text-gray-900 dark:text-white">Collab Tools</span>
                         </Link>
@@ -42,8 +42,9 @@ export function Navbar() {
                                     key={item.name}
                                     href={item.href}
                                     className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                                        isActive ? "bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-blue-600/50 dark:hover:text-white"
+                                        isActive
+                                            ? "bg-primary/10 text-primary dark:bg-primary dark:text-primary-foreground"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-primary/50 dark:hover:text-primary-foreground"
                                     }`}
                                 >
                                     <Icon className="w-4 h-4"/>
@@ -76,7 +77,7 @@ export function Navbar() {
                                         key={item.name}
                                         href={item.href}
                                         className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                                            isActive ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                            isActive ? "bg-primary/10 text-primary dark:bg-primary dark:text-primary-foreground" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                                         }`}
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
