@@ -1,19 +1,51 @@
 "use client";
 
-import type React from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Map, Zap, Code, Smartphone, ArrowRight, Aperture } from "lucide-react";
+import { Map, Zap, Smartphone, ArrowRight } from "lucide-react";
+import { animate, createScope, createTimeline, cubicBezier, onScroll, Scope, splitText, stagger, utils } from "animejs";
 
 export default function MainPage() {
+    const root = useRef(null);
+    const scope = useRef<Scope>(null);
+
+    useEffect(() => {
+        scope.current = createScope({root}).add(self => {
+            const container = utils.$(".hero");
+
+            animate(".feature-card", {
+                y: [50, 0],
+                opacity: 1,
+                duration: 750,
+                ease: cubicBezier(0.7, 0.1, 0.5, 0.9),
+                autoplay: onScroll({container}),
+            });
+
+            const { words } = splitText('.hero-title', {
+                words: { wrap: 'clip' },
+            });
+
+            createTimeline({
+                defaults: { ease: 'inOut(3)', duration: 650 }
+            })
+                .add(words, {
+                    y: [$el => +$el.dataset.line % 2 ? '100%' : '-150%', '0%'],
+                }, stagger(125))
+                .init();
+        });
+
+        return () => scope.current!.revert();
+    }, []);
+
     return (
-        <div className="min-h-screen hero flex flex-col">
+        <div ref={root} className="min-h-screen hero flex flex-col">
             {/* Hero Section */}
             <section className="relative overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
                     <div className="text-center">
-                        <h1 className="text-4xl md:text-6xl font-bold text-card-foreground mb-6">
+                        <h1 className="hero-title text-4xl md:text-6xl font-bold text-card-foreground mb-6">
                             这是一个
                             <span className="text-primary"> Collab </span>
                             工具箱
@@ -48,7 +80,7 @@ export default function MainPage() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="feature-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[
                             {
                                 icon: Map,
@@ -68,7 +100,8 @@ export default function MainPage() {
                         ].map((feature, index) => {
                             const Icon = feature.icon;
                             return (
-                                <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                                <Card key={index}
+                                      className="feature-card text-center hover:shadow-lg transition-shadow opacity-0">
                                     <CardHeader>
                                         <div
                                             className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">

@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Map, Home, FileText, Settings, Menu, X, Aperture, UserRound } from "lucide-react";
+import { Map, Home, FileText, Menu, X, UserRound } from "lucide-react";
 import { useState } from "react";
 import { SettingsFlyout } from "@/components/ui/settings-flyout";
+import Logo from "@/components/logo";
 
 const navigation = [
     {name: "首页", href: "/", icon: Home},
@@ -25,9 +26,7 @@ export function Navbar() {
                     {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                                <Aperture className="w-5 h-5 text-primary-foreground"/>
-                            </div>
+                            <Logo />
                             <span className="text-xl font-bold text-gray-900 dark:text-white">Collab Tools</span>
                         </Link>
                     </div>
@@ -52,12 +51,12 @@ export function Navbar() {
                                 </Link>
                             );
                         })}
-                        <SettingsFlyout />
+                        <SettingsFlyout/>
                     </div>
 
                     {/* Mobile menu button & theme toggle */}
                     <div className="md:hidden flex items-center space-x-2">
-                        <SettingsFlyout />
+                        <SettingsFlyout/>
                         <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                                 className="p-2">
                             {mobileMenuOpen ? <X className="w-5 h-5"/> : <Menu className="w-5 h-5"/>}
