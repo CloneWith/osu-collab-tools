@@ -22,8 +22,19 @@ export default function DocsPage() {
                             </CardTitle>
                             <CardDescription>关于本网站/工具</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            这里有待补充的内容...
+                        <CardContent className="space-y-2">
+                            <p>Collab Tools 是一个专门为 osu! 好友面基 / Collab（实际上用途会更广泛）制作的工具集网站。</p>
+                            <p>其实在这之前，有很多相关的功能已有其他工具或项目实现了，但我依然选择去尝试做一下，原因如下：</p>
+                            <ul className="list-disc list-inside space-y-1 text-secondary-foreground">
+                                <li>灵活：作为 Next.js
+                                    构建的前端项目，各平台只需浏览器访问即可使用，同时也支持自部署，简单快速；
+                                </li>
+                                <li>安全：不想让除 Collab 成员以外的其他人知道？没问题！</li>
+                                <li>集成：是希望满足 Collab 图制作全过程的项目呢（虽然目前依然还差很远）；</li>
+                            </ul>
+                            <p>该项目的源代码可在 <a href="https://github.com/CloneWith/osu-collab-tools"
+                                                     className="doc-link">GitHub</a> 上查看，在此期待各位的反馈或贡献~
+                            </p>
                         </CardContent>
                     </Card>
 
