@@ -104,6 +104,14 @@ body {
     @apply border-border;
   }
 
+  .doc-link {
+    @apply text-primary ease-in-out duration-150;
+  }
+
+  .doc-link:hover {
+    @apply text-accent;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
