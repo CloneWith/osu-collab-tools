@@ -429,7 +429,7 @@ ${areas}
   // 获取工具按钮的样式
   const getToolButtonClass = (tool: EditorTool) => {
     return `p-2 rounded-md ${
-  currentTool === tool ? "bg-primary text-primary-foreground" : "bg-white text-gray-700 hover:bg-gray-100"
+      currentTool === tool ? "bg-primary text-primary-foreground" : "bg-background text-foreground hover:bg-foreground/10"
     }`
   }
 
@@ -448,11 +448,14 @@ ${areas}
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">ImageMap 编辑器</h1>
-          <p className="text-gray-600">划定可点击区域，以便在个人资料等中使用</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+              <span className="text-primary">ImageMap </span>
+              编辑器
+          </h1>
+          <p className="text-secondary-foreground">划定可点击区域，以便在个人资料等中使用</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
@@ -475,7 +478,7 @@ ${areas}
 
             {/* 工具栏 */}
             {uploadedImage && (
-              <div className="bg-white rounded-md shadow p-1 flex space-x-1 select-none">
+              <div className="bg-card rounded-md shadow p-1 flex space-x-1 select-none">
                 <button
                   className={getToolButtonClass("select")}
                   onClick={() => setCurrentTool("select")}
@@ -500,8 +503,8 @@ ${areas}
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
-                <div className="border-l border-gray-200 mx-1"></div>
-                <div className="text-sm text-gray-500 flex items-center px-2">
+                <div className="border-l border-muted-foreground mx-1"></div>
+                <div className="text-sm text-muted-foreground flex items-center px-2">
                   当前工具: {tool_names[currentTool]}
                 </div>
               </div>
@@ -512,7 +515,7 @@ ${areas}
                 {uploadedImage ? (
                   <div
                     ref={containerRef}
-                    className={`relative h-full border-2 border-dashed border-gray-300 rounded-lg overflow-hidden touch-none select-none ${getCursorStyle()}`}
+                    className={`relative h-full border-2 border-dashed border-muted-foreground rounded-lg overflow-hidden touch-none select-none ${getCursorStyle()}`}
                     onMouseDown={handlePointerDown}
                     onMouseMove={handlePointerMove}
                     onMouseUp={handlePointerUp}
@@ -586,7 +589,7 @@ ${areas}
                     {contextMenu.visible && (
                       <div
                         ref={contextMenuRef}
-                        className="fixed bg-white rounded-md shadow-lg py-1 z-50 min-w-[160px] select-none"
+                        className="fixed bg-card rounded-md shadow-lg py-1 z-50 min-w-[160px] select-none"
                         style={{
                           left: contextMenu.x,
                           top: contextMenu.y,
@@ -596,14 +599,14 @@ ${areas}
                         {contextMenu.targetId ? (
                           <>
                             <button
-                              className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 flex items-center gap-2"
                               onClick={() => duplicateRectangle(contextMenu.targetId!)}
                             >
                               <Copy className="w-4 h-4" />
                               创建副本
                             </button>
                             <button
-                              className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 text-destructive flex items-center gap-2"
                               onClick={() => deleteRectangle(contextMenu.targetId!)}
                             >
                               <Trash className="w-4 h-4" />
@@ -613,7 +616,7 @@ ${areas}
                         ) : (
                           <>
                             <button
-                              className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 flex items-center gap-2"
                               onClick={() => {
                                 setCurrentTool("create")
                                 setContextMenu((prev) => ({ ...prev, visible: false }))
@@ -623,7 +626,7 @@ ${areas}
                               创建新区域
                             </button>
                             <button
-                              className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
+                              className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 flex items-center gap-2"
                               onClick={() => {
                                 setContextMenu((prev) => ({ ...prev, visible: false }))
                               }}
@@ -637,10 +640,10 @@ ${areas}
                     )}
                   </div>
                 ) : (
-                  <div className="h-full flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+                  <div className="h-full flex items-center justify-center border-2 border-dashed hover:border-primary rounded-lg">
                     <div className="text-center">
-                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">先上传一张图片</p>
+                      <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">先上传一张图片</p>
                     </div>
                   </div>
                 )}
@@ -687,7 +690,7 @@ ${areas}
                           type="url"
                           value={rectangles.find((r) => r.id === selectedRect)?.href || ""}
                           onChange={(e) => updateRectangle(selectedRect, "href", e.target.value)}
-                          className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm ${
+                          className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
                             isTouchDevice ? "py-3 text-base" : ""
                           }`}
                           placeholder="https://example.com"
@@ -699,7 +702,7 @@ ${areas}
                           type="text"
                           value={rectangles.find((r) => r.id === selectedRect)?.alt || ""}
                           onChange={(e) => updateRectangle(selectedRect, "alt", e.target.value)}
-                          className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm ${
+                          className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
                             isTouchDevice ? "py-3 text-base" : ""
                           }`}
                           placeholder="描述文本"
@@ -711,7 +714,7 @@ ${areas}
                           <input
                               value={userInfo}
                               onChange={(e) => setUserInfo(e.target.value.trim())}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                              className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-3 items-center">
@@ -750,7 +753,7 @@ ${areas}
                               setLastPositionInput({ ...lastPositionInput, x: e.target.value })
                               updateRectangle(selectedRect, "x", e.target.value, true)
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
                           />
                         </div>
                         <div>
@@ -765,7 +768,7 @@ ${areas}
                               setLastPositionInput({ ...lastPositionInput, y: e.target.value })
                               updateRectangle(selectedRect, "y", e.target.value, true)
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
                           />
                         </div>
                         <div>
@@ -780,7 +783,7 @@ ${areas}
                               setLastSizeInput({ ...lastSizeInput, width: e.target.value })
                               updateRectangle(selectedRect, "width", e.target.value, true)
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
                           />
                         </div>
                         <div>
@@ -795,7 +798,7 @@ ${areas}
                               setLastSizeInput({ ...lastSizeInput, height: e.target.value })
                               updateRectangle(selectedRect, "height", e.target.value, true)
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
                           />
                         </div>
                       </div>
