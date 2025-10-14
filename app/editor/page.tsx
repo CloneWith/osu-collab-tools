@@ -30,6 +30,7 @@ import {
   OctagonAlert, Inbox, Ban,
 } from "lucide-react";
 import { clamp } from "@/lib/utils";
+import DragAndDropOverlay from "@/app/editor/dnd-overlay";
 
 interface Rectangle {
   id: string;
@@ -658,21 +659,9 @@ ${areas}
                       draggable={false}
                       style={{userSelect: "none"}}
                     />
-                    {/* Drag overlay */}
-                    {isDraggingOver && (
-                      <div
-                        className={`pointer-events-none absolute inset-0 z-40 grid place-items-center border-2 border-dashed backdrop-blur-md
-                        ${isDragAccept ? "bg-primary/20 border-primary" : "bg-destructive/20 border-destructive"}`}>
-                        <div className="text-center">
-                          {isDragAccept ? <Inbox className="w-10 h-10 mx-auto mb-3 text-primary"/>
-                            : <Ban className="w-10 h-10 mx-auto mb-3 text-destructive"/>}
 
-                          <p className="font-medium">
-                            {isDragAccept ? "释放以上传图片" : "不支持的格式"}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                    {/* 拖放状态显示 */}
+                    {isDraggingOver && <DragAndDropOverlay isDragAccepted={isDragAccept}/>}
 
                     {/* Existing rectangles */}
                     {/* 显示时将原图像坐标缩放到预览区 */}
@@ -792,17 +781,9 @@ ${areas}
                       <p className="text-muted-foreground">先上传一张图片</p>
                       <p className="text-muted-foreground">（支持拖放）</p>
                     </div>
-                    {isDraggingOver && (
-                      <div
-                        className="pointer-events-none absolute inset-0 z-10 bg-background/80 grid place-items-center border-2 border-dashed border-primary rounded-lg">
-                        <div className="text-center">
-                          <Upload className="w-10 h-10 mx-auto mb-3 text-primary"/>
-                          <p className="font-medium">
-                            {isDragAccept ? "释放以上传图片" : "只支持图片文件"}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+
+                    {/* 拖放状态显示 */}
+                    {isDraggingOver && <DragAndDropOverlay isDragAccepted={isDragAccept}/>}
                   </div>
                 )}
               </CardContent>
