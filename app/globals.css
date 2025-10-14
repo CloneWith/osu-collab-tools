@@ -112,6 +112,10 @@ body {
     @apply text-accent;
   }
 
+  .animate-simple {
+    @apply ease-out duration-150;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
