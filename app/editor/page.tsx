@@ -636,7 +636,8 @@ ${areas}
                 {uploadedImage ? (
                   <div
                     ref={containerRef}
-                    className={`relative h-full border-2 border-dashed border-muted-foreground rounded-lg overflow-hidden touch-none select-none ${getCursorStyle()}`}
+                    className={`relative h-full border-2 border-dashed border-muted-foreground rounded-lg overflow-hidden touch-none select-none
+                    ${getCursorStyle() == "cursor-crosshair" ? "cursor-crosshair" : ""}`}
                     onMouseDown={handlePointerDown}
                     onMouseMove={handlePointerMove}
                     onMouseUp={handlePointerUp}
@@ -668,12 +669,13 @@ ${areas}
                     {/* 显示时将原图像坐标缩放到预览区 */}
                     {rectangles.map((rect) => {
                       const {scaleX, scaleY} = getImageScale();
+                      // 十字光标较为特殊（画框），在此处先处理
                       return (
                         <div
                           key={rect.id}
                           className={`absolute border-2 bg-primary/20 select-none touch-manipulation ${
                             selectedRect === rect.id ? "border-primary border-4" : "border-primary/40"
-                          } ${isTouchDevice ? "min-w-[44px] min-h-[44px]" : ""}`}
+                          } ${isTouchDevice ? "min-w-[44px] min-h-[44px]" : ""} ${getCursorStyle()}`}
                           style={{
                             left: rect.x / scaleX,
                             top: rect.y / scaleY,
