@@ -19,8 +19,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Suppressing hydration warning due to dark mode class
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Navbar />
