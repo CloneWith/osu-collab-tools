@@ -1,8 +1,7 @@
 "use client";
 
 import type React from "react";
-
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,20 +16,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Upload,
-  Trash2,
+  Copy,
+  Hash,
   MousePointer,
   Move,
+  OctagonAlert,
   Square,
-  Copy,
   Trash,
-  X,
-  Hash,
+  Trash2,
+  Upload,
   UserRound,
-  OctagonAlert, Inbox, Ban,
+  X,
 } from "lucide-react";
 import { clamp } from "@/lib/utils";
-import DragAndDropOverlay from "@/app/editor/dnd-overlay";
+import DragAndDropOverlay, { DnDRejectReason } from "@/app/editor/dnd-overlay";
 
 interface Rectangle {
   id: string;
@@ -90,6 +89,7 @@ export default function EditorPage() {
   // Drag & drop states
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isDragAccept, setIsDragAccept] = useState(false);
+  const [rejectReason, setRejectReason] = useState<DnDRejectReason>(DnDRejectReason.Unknown);
   const [dragDepth, setDragDepth] = useState(0);
 
   // Overwrite dialog state
@@ -183,12 +183,12 @@ export default function EditorPage() {
     const items = event.dataTransfer?.items;
     let accept = false;
     if (items && items.length > 0) {
-      for (let i = 0; i < items.length; i++) {
-        const it = items[i];
-        if (it.kind === "file" && (it.type?.startsWith("image/") ?? false)) {
-          accept = true;
-          break;
-        }
+      if (items.length > 1) {
+        setRejectReason(DnDRejectReason.TooManyEntries);
+      } else if (items[0].kind === "file" && (items[0].type?.startsWith("image/") ?? false)) {
+        accept = true;
+      } else {
+        setRejectReason(DnDRejectReason.UnsupportedType);
       }
     }
     setIsDragAccept(accept);
@@ -661,7 +661,8 @@ ${areas}
                     />
 
                     {/* 拖放状态显示 */}
-                    {isDraggingOver && <DragAndDropOverlay isDragAccepted={isDragAccept}/>}
+                    {isDraggingOver && <DragAndDropOverlay isDragAccepted={isDragAccept}
+                                                           rejectReason={rejectReason}/>}
 
                     {/* Existing rectangles */}
                     {/* 显示时将原图像坐标缩放到预览区 */}
@@ -783,7 +784,8 @@ ${areas}
                     </div>
 
                     {/* 拖放状态显示 */}
-                    {isDraggingOver && <DragAndDropOverlay isDragAccepted={isDragAccept}/>}
+                    {isDraggingOver && <DragAndDropOverlay isDragAccepted={isDragAccept}
+                                                           rejectReason={rejectReason}/>}
                   </div>
                 )}
               </CardContent>
