@@ -1,0 +1,7 @@
+{
+    "name": "osu-collab-tools",
+    "compatibility_date": "2025-10-15",
+    "assets": {
+        "directory": "./out"
+    }
+}
