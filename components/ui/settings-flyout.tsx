@@ -10,9 +10,9 @@ import { useEffect } from "react";
 
 export function SettingsFlyout() {
   const endpointKey = "custom_endpoint";
-  const currentEndpointValue = typeof window !== 'undefined'
-      ? (localStorage.getItem("custom_endpoint") ?? common.defaultEndpoint)
-      : common.defaultEndpoint;
+  const [currentEndpoint, setCurrentEndpoint] = React.useState<string>(typeof window !== 'undefined'
+      ? (localStorage.getItem("custom_endpoint") ?? "")
+      : "");
 
   const { theme, setTheme } = useTheme()
   const [themeValue, setThemeValue] = React.useState<string>(theme ?? "system")
@@ -29,10 +29,21 @@ export function SettingsFlyout() {
   }
 
   function onEndpointChange(v: string) {
-    if (isValidURL(v))
-    {
+    // 设置输入框默认值，这样在页面重载前总会保留用户值，与 endpointValid 状态同步
+    // 重载后（隐式舍弃用户更改）使用存储值，保证显示出的值是有效的
+    setCurrentEndpoint(v);
+
+    // 先判断 v 空串的情况，此时删去自定义设置
+    // 注意不是留空值，会导致工具使用的值异常
+    if (v.length === 0) {
       setEndpointValid(true);
-      localStorage.setItem(endpointKey, v.trim());
+      localStorage.removeItem("custom_endpoint");
+      return;
+    }
+
+    if (isValidURL(v)) {
+      setEndpointValid(true);
+      localStorage.setItem(endpointKey, v);
     } else {
       setEndpointValid(false);
     }
@@ -41,7 +52,7 @@ export function SettingsFlyout() {
   function isValidURL(src: string): boolean {
     try {
       const url = new URL(src);
-      return url.protocol === "https:" || url.protocol === "http";
+      return url.protocol === "https:" || url.protocol === "http:";
     } catch {
       return false;
     }
@@ -70,7 +81,7 @@ export function SettingsFlyout() {
               { key: "light", icon: <Sun className="w-4 h-4" />, title: "浅色" },
               { key: "system", icon: <Monitor className="w-4 h-4" />, title: "系统" },
               { key: "dark", icon: <Moon className="w-4 h-4" />, title: "深色" },
-            ].map((opt, idx, arr) => {
+            ].map((opt, _, __) => {
               const selected = themeValue === (opt.key as string)
               return (
                 <Button
@@ -99,8 +110,8 @@ export function SettingsFlyout() {
           <input className={`w-full px-2 py-1 border font-mono text-sm ${endpointValid ? "" : "border-yellow-600"}`}
                  aria-label="服务器地址输入框"
                  placeholder={common.defaultEndpoint}
-                 defaultValue={currentEndpointValue}
-                 onChange={(v) => onEndpointChange(v.target.value)}
+                 defaultValue={currentEndpoint}
+                 onChange={(v) => onEndpointChange(v.target.value.trim())}
           />
         </div>
       </PopoverContent>
