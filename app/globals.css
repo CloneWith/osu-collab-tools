@@ -120,6 +120,10 @@ body {
     @apply bg-background text-foreground;
   }
 
+  input {
+    @apply hover:border-primary rounded-md ease-out duration-200;
+  }
+
   .hero {
     /* hero should inherit the semantic background token */
     @apply bg-background;
