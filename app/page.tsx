@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Map, Zap, Smartphone, ArrowRight } from "lucide-react";
 import { animate, createScope, createTimeline, cubicBezier, onScroll, Scope, splitText, stagger, utils } from "animejs";
+import { TrianglesBackground } from "@/components/triangles-background";
 
 export default function MainPage() {
     const root = useRef(null);
@@ -40,10 +41,21 @@ export default function MainPage() {
     }, []);
 
     return (
-        <div ref={root} className="min-h-screen hero flex flex-col">
+        <div ref={root} className="relative min-h-screen hero flex flex-col">
             {/* Hero Section */}
             <section className="relative overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+                    {/* 三角形背景 */}
+                    <div className="absolute inset-0 pointer-events-none">
+                        <TrianglesBackground
+                            color="#4a94e8"
+                            opacity={0.75}
+                            velocity={1.2 * 4 * 2}
+                            spawnRatio={0.8 / 2.5}
+                            thickness={0.015}
+                            className="w-full h-full text-accent"
+                        />
+                    </div>
                     <div className="text-center">
                         <h1 className="hero-title text-4xl md:text-6xl font-bold text-card-foreground mb-6">
                             这是一个
