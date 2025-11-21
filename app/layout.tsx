@@ -6,7 +6,7 @@ import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import Link from "next/link";
 import Logo from "@/components/logo";
-import { SiGithub } from "@icons-pack/react-simple-icons";
+import { SiGithub, SiNetlify } from "@icons-pack/react-simple-icons";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -55,6 +55,22 @@ export default function RootLayout({
                 <li>
                   <Link href="/docs" className="hover:text-white transition-colors">
                     使用文档
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">友情链接</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>
+                  <Link href="https://exsper.github.io/colorcode" className="hover:text-white transition-colors">
+                    Exsper 的渐变颜色生成器
+                  </Link>
+                </li>
+                <li>
+                  <Link href="https://netlify.com" className="hover:text-white transition-colors flex flex-row space-x-2">
+                    <SiNetlify />
+                    <span>使用 Netlify 托管</span>
                   </Link>
                 </li>
               </ul>
