@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { clamp } from "@/lib/utils";
 import DragAndDropOverlay, { DnDRejectReason } from "@/app/editor/dnd-overlay";
+import { common } from "@/app/common";
 
 interface Rectangle {
   id: string;
@@ -50,8 +51,6 @@ interface ContextMenuPosition {
 
 type EditorTool = "select" | "move" | "create" | "delete"
 
-// TODO: Add support to customize server and API links
-const server_link = "osu.ppy.sh";
 const tool_names = {
   "select": "选择",
   "move": "移动",
@@ -59,6 +58,11 @@ const tool_names = {
   "delete": "删除",
 };
 export default function EditorPage() {
+  // 在 SSR / 构建阶段没有 window / localStorage
+  const server_link = typeof window !== 'undefined'
+    ? (localStorage.getItem("custom_endpoint") ?? common.defaultEndpoint)
+    : common.defaultEndpoint;
+
   // Image states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageName, setImageName] = useState<string | null>(null);
@@ -260,11 +264,11 @@ export default function EditorPage() {
   };
 
   const generateUserLinkFromId = (userId: number) => {
-    return `https://${server_link}/users/${userId}`;
+    return `${server_link}/users/${userId}`;
   };
 
   const generateUserLinkFromName = (username: string) => {
-    return `https://${server_link}/u/${username}`;
+    return `${server_link}/u/${username}`;
   };
 
   const setSelectedRect = (id: string | null) => {

@@ -5,19 +5,46 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Button } from "@/components/ui/button"
 import { Moon, Sun, Monitor, Settings } from "lucide-react";
 import { useTheme } from "next-themes"
+import { common } from "@/app/common";
+import { useEffect } from "react";
 
 export function SettingsFlyout() {
-  const { theme, setTheme } = useTheme()
-  const [value, setValue] = React.useState<string>(theme ?? "system")
+  const endpointKey = "custom_endpoint";
+  const currentEndpointValue = typeof window !== 'undefined'
+      ? (localStorage.getItem("custom_endpoint") ?? common.defaultEndpoint)
+      : common.defaultEndpoint;
 
-  React.useEffect(() => {
+  const { theme, setTheme } = useTheme()
+  const [themeValue, setThemeValue] = React.useState<string>(theme ?? "system")
+  const [endpointValid, setEndpointValid] = React.useState<boolean>(true)
+
+  useEffect(() => {
     // keep local selection synced with next-themes
-    if (theme) setValue(theme)
+    if (theme) setThemeValue(theme)
   }, [theme])
 
-  function onChange(v: string) {
-    setValue(v)
+  function onThemeChange(v: string) {
+    setThemeValue(v)
     setTheme(v)
+  }
+
+  function onEndpointChange(v: string) {
+    if (isValidURL(v))
+    {
+      setEndpointValid(true);
+      localStorage.setItem(endpointKey, v.trim());
+    } else {
+      setEndpointValid(false);
+    }
+  }
+
+  function isValidURL(src: string): boolean {
+    try {
+      const url = new URL(src);
+      return url.protocol === "https:" || url.protocol === "http";
+    } catch {
+      return false;
+    }
   }
 
   return (
@@ -44,13 +71,13 @@ export function SettingsFlyout() {
               { key: "system", icon: <Monitor className="w-4 h-4" />, title: "系统" },
               { key: "dark", icon: <Moon className="w-4 h-4" />, title: "深色" },
             ].map((opt, idx, arr) => {
-              const selected = value === (opt.key as string)
+              const selected = themeValue === (opt.key as string)
               return (
                 <Button
                   key={opt.key}
                   variant="ghost"
                   title={opt.title}
-                  onClick={() => onChange(opt.key as string)}
+                  onClick={() => onThemeChange(opt.key as string)}
                   className={
                     "relative flex items-center justify-center w-9 h-9 rounded-full transition-colors " +
                     (selected
@@ -64,6 +91,17 @@ export function SettingsFlyout() {
               )
             })}
           </div>
+
+          <div>
+            <h4 className="text-sm font-medium">服务器地址</h4>
+            <span className="text-xs text-muted-foreground">用户资料等链接的前缀</span>
+          </div>
+          <input className={`w-full px-2 py-1 border font-mono text-sm ${endpointValid ? "" : "border-yellow-600"}`}
+                 aria-label="服务器地址输入框"
+                 placeholder={common.defaultEndpoint}
+                 defaultValue={currentEndpointValue}
+                 onChange={(v) => onEndpointChange(v.target.value)}
+          />
         </div>
       </PopoverContent>
     </Popover>
