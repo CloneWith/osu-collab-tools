@@ -21,7 +21,7 @@ import {
   Hash,
   MousePointer,
   Move,
-  OctagonAlert,
+  OctagonAlert, Settings,
   Square,
   Trash,
   Trash2,
@@ -109,6 +109,10 @@ export default function EditorPage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageName, setImageName] = useState<string | null>(null);
   const [imageSize, setImageSize] = useState({width: 0, height: 0});
+
+  // Custom image properties
+  const [imagePath, setImagePath] = useState<string | null>(null);
+  const [mapName, setMapName] = useState<string | null>(null);
 
   // Rectangle and drawing states
   const [rectangles, setRectangles] = useState<Rectangle[]>([]);
@@ -562,7 +566,7 @@ export default function EditorPage() {
   const generateImageMapHtml = () => {
     if (!uploadedImage || rectangles.length === 0) return "<!-- 上传图片并创建区域后，HTML 代码将在这里显示 -->";
 
-    const mapName = "imagemap";
+    const name = mapName ?? "imagemap";
     const areas = rectangles
       .map(
         (rect) =>
@@ -570,8 +574,8 @@ export default function EditorPage() {
       )
       .join("\n");
 
-    return `<img src="${imageName ?? "your-image.jpg"}" alt="Collab Image" usemap="#${mapName}">
-<map name="${mapName}">
+    return `<img src="${imagePath ?? imageName ?? "your-image.jpg"}" alt="Collab Image" usemap="#${name}">
+<map name="${name}">
 ${areas}
 </map>`;
   };
@@ -592,7 +596,7 @@ ${areas}
       )
       .join("\n");
 
-    return `[imagemap]\n图像链接\n${areas}\n[/imagemap]`;
+    return `[imagemap]\n${imagePath ?? imageName ?? "your-image.jpg"}\n${areas}\n[/imagemap]`;
   };
 
   // 获取工具按钮的样式
@@ -632,7 +636,7 @@ ${areas}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="flex flex-row items-center space-x-2 text-xl font-semibold">
-                <Eye />
+                <Eye/>
                 <span>预览区</span>
               </h2>
               <div className="flex items-center gap-2">
@@ -847,19 +851,57 @@ ${areas}
             </Card>
           </div>
 
-          {/* Code Area */}
+          {/* Setting Area */}
           <div className="space-y-4">
-            <h2 className="flex flex-row items-center space-x-2 text-xl font-semibold">
-              <Code />
-              <span>代码区</span>
+            <h2 className="text-xl font-semibold">
+              <Settings/>
+              <span>设置区</span>
             </h2>
+
+            {/* Image Properties */}
+            {uploadedImage && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="items-center space-y-3">
+                    <h3 className="font-medium">
+                      图像属性
+                    </h3>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">图片地址</label>
+                      <input
+                        type="url"
+                        defaultValue={imagePath ?? ""}
+                        onChange={(e) => setImagePath(e.target.value.trim() === "" ? null : e.target.value.trim())}
+                        className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
+                          isTouchDevice ? "py-3 text-base" : ""
+                        }`}
+                        placeholder="https://example.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">ImageMap 名称</label>
+                      <input
+                        defaultValue={mapName ?? ""}
+                        onChange={(e) => setMapName(e.target.value.trim() === "" ? null : e.target.value.trim())}
+                        className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
+                          isTouchDevice ? "py-3 text-base" : ""
+                        }`}
+                        placeholder="imagemap"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Rectangle Properties */}
             {selectedRect && (
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium">编辑区域属性</h3>
+                    <h3 className="font-medium">
+                      区域属性
+                    </h3>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
@@ -1012,6 +1054,14 @@ ${areas}
                 </CardContent>
               </Card>
             )}
+          </div>
+
+          {/* Code Area */}
+          <div className="space-y-4">
+            <h2 className="flex flex-row items-center space-x-2 text-xl font-semibold">
+              <Code/>
+              <span>代码区</span>
+            </h2>
 
             {/* Generated Code */}
             <Card className="flex-1">
