@@ -739,7 +739,7 @@ ${areas}
                           }}
                         >
                           <div
-                            className={`absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none ${
+                            className={`absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none max-w-full truncate ${
                               isTouchDevice ? "text-sm px-2 py-1" : ""
                             }`}
                           >
