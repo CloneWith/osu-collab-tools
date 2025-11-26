@@ -31,6 +31,8 @@ import {
 import { clamp } from "@/lib/utils";
 import DragAndDropOverlay, { DnDRejectReason } from "@/app/editor/dnd-overlay";
 import { common } from "@/app/common";
+import hljs from "highlight.js/lib/core";
+import html from "highlight.js/lib/languages/xml";
 
 interface Rectangle {
   id: string;
@@ -57,9 +59,48 @@ const tool_names = {
   "create": "创建",
   "delete": "删除",
 };
+
+/**
+ * 向 Highlight.js 注册 BBCode 解析库。
+ * @author Paul Reid (https://github.com/highlightjs/highlightjs-bbcode/blob/master/bbcode.js)
+ */
+function registerBBCodeHighlight() {
+  hljs.registerLanguage("bbcode", function (_) {
+    return {
+      case_insensitive: true,
+      contains: [
+        {
+          className: "name",
+          begin: /\[[^=\s\]]*/,
+        },
+        {
+          className: "name",
+          begin: "]",
+        },
+        {
+          className: "attribute",
+          begin: /(?<==)[^\]\s]*/,
+        },
+        {
+          className: "attr",
+          begin: /(?<=\[[^\]]* )[^\s=\]]*/,
+        },
+        {
+          className: "string",
+          begin: /[=;:8]'?\-?[\)\(3SPDO>@$|/]/,
+        },
+        {
+          className: "string",
+          begin: /:[\w]*:/,
+        },
+      ],
+    };
+  });
+}
+
 export default function EditorPage() {
   // 在 SSR / 构建阶段没有 window / localStorage
-  const server_link = typeof window !== 'undefined'
+  const server_link = typeof window !== "undefined"
     ? (localStorage.getItem("custom_endpoint") ?? common.defaultEndpoint)
     : common.defaultEndpoint;
 
@@ -105,6 +146,10 @@ export default function EditorPage() {
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
+
+  // 注册 hljs 语言
+  hljs.registerLanguage("html", html);
+  registerBBCodeHighlight();
 
   // 关闭右键菜单的事件处理
   useEffect(() => {
@@ -514,7 +559,7 @@ export default function EditorPage() {
   };
 
   const generateImageMapHtml = () => {
-    if (!uploadedImage || rectangles.length === 0) return "";
+    if (!uploadedImage || rectangles.length === 0) return "<!-- 上传图片并创建区域后，HTML 代码将在这里显示 -->";
 
     const mapName = "imagemap";
     const areas = rectangles
@@ -535,7 +580,7 @@ ${areas}
   };
 
   const generateImageMapBBCode = () => {
-    if (!uploadedImage || rectangles.length === 0) return "";
+    if (!uploadedImage || rectangles.length === 0) return "[i]上传图片并创建区域后，BBCode 代码将在这里显示[/i]";
 
     const areas = rectangles
       .map(
@@ -965,7 +1010,7 @@ ${areas}
             <Card className="flex-1">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium">生成的 HTML 代码</h3>
+                  <h3 className="font-medium">HTML 代码</h3>
                   <Button onClick={() => navigator.clipboard.writeText(generateImageMapHtml())}
                           disabled={rectangles.length === 0} size="sm">
                     <Copy className="w-4 h-4"/>
@@ -974,14 +1019,14 @@ ${areas}
                 </div>
                 <div
                   className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
-                  <pre>{generateImageMapHtml() || "// 上传图片并创建区域后，HTML 代码将在这里显示"}</pre>
+                  <pre><code dangerouslySetInnerHTML={{
+                    __html: hljs.highlight(generateImageMapHtml(), {language: "html"}).value,
+                  }}/></pre>
                 </div>
               </CardContent>
-            </Card>
-            <Card className="flex-1">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium">生成的 BBCode 代码</h3>
+                  <h3 className="font-medium">BBCode 代码</h3>
                   <Button onClick={() => navigator.clipboard.writeText(generateImageMapBBCode())}
                           disabled={rectangles.length === 0} size="sm">
                     <Copy className="w-4 h-4"/>
@@ -990,7 +1035,9 @@ ${areas}
                 </div>
                 <div
                   className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
-                  <pre>{generateImageMapBBCode() || "// 上传图片并创建区域后，BBCode 代码将在这里显示"}</pre>
+                  <pre><code dangerouslySetInnerHTML={{
+                    __html: hljs.highlight(generateImageMapBBCode(), {language: "bbcode"}).value,
+                  }}/></pre>
                 </div>
               </CardContent>
             </Card>
