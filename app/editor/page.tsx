@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Copy,
+  Code,
+  Copy, Eye,
   Hash,
   MousePointer,
   Move,
@@ -630,7 +631,10 @@ ${areas}
           {/* Preview Area */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">预览区</h2>
+              <h2 className="flex flex-row items-center space-x-2 text-xl font-semibold">
+                <Eye />
+                <span>预览区</span>
+              </h2>
               <div className="flex items-center gap-2">
                 <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden"
                        id="image-upload"/>
@@ -845,7 +849,10 @@ ${areas}
 
           {/* Code Area */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">代码区</h2>
+            <h2 className="flex flex-row items-center space-x-2 text-xl font-semibold">
+              <Code />
+              <span>代码区</span>
+            </h2>
 
             {/* Rectangle Properties */}
             {selectedRect && (
