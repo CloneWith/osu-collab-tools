@@ -130,7 +130,7 @@
   }
 
   /* 便于插入多个元素（如图标） */
-  h1, h2, h3, h4, h5, h6 {
+  .flex-title {
     @apply flex flex-row items-center space-x-2;
   }
 }

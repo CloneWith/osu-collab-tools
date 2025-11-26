@@ -635,7 +635,7 @@ ${areas}
           {/* Preview Area */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="flex flex-row items-center space-x-2 text-xl font-semibold">
+              <h2 className="flex-title text-xl font-semibold">
                 <Eye/>
                 <span>预览区</span>
               </h2>
@@ -853,7 +853,7 @@ ${areas}
 
           {/* Setting Area */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">
+            <h2 className="flex-title text-xl font-semibold">
               <Settings/>
               <span>设置区</span>
             </h2>
@@ -1058,7 +1058,7 @@ ${areas}
 
           {/* Code Area */}
           <div className="space-y-4">
-            <h2 className="flex flex-row items-center space-x-2 text-xl font-semibold">
+            <h2 className="flex-title text-xl font-semibold">
               <Code/>
               <span>代码区</span>
             </h2>
