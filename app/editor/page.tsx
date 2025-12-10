@@ -935,7 +935,9 @@ ${areas}
                             top: rect.y / scaleY,
                             width: Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX),
                             height: Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY),
-                            cursor: currentTool === "select" ? "move" : currentTool === "delete" ? "no-drop" : "pointer",
+                            cursor: currentTool === "select" ? "move"
+                              : currentTool === "delete" ? "no-drop"
+                                : currentTool === "create" ? "crosshair" : "pointer",
                             userSelect: "none",
                             zIndex: rectangles.length - index,
                           }}
