@@ -604,8 +604,8 @@ export default function EditorPage() {
           if (rect.id === movingRect) {
             return {
               ...rect,
-              x: clamp(coords.x - moveOffset.x, 0, imageSize.width - rect.width),
-              y: clamp(coords.y - moveOffset.y, 0, imageSize.height - rect.height),
+              x: Math.round(clamp(coords.x - moveOffset.x, 0, imageSize.width - rect.width)),
+              y: Math.round(clamp(coords.y - moveOffset.y, 0, imageSize.height - rect.height)),
             };
           }
           return rect;
