@@ -592,8 +592,8 @@ export default function EditorPage() {
         y: Math.min(startPoint.y, coords.y),
         width: Math.abs(width),
         height: Math.abs(height),
-        href: "#",
-        alt: `区域 ${rectangles.length + 1}`,
+        href: "",
+        alt: "",
       };
 
       setCurrentRect(rect);
@@ -783,7 +783,7 @@ ${areas}
         (rect) =>
           `${toPercent(rect.x, imageSize.width)} ${toPercent(rect.y, imageSize.height)}`
           + ` ${toPercent(rect.width, imageSize.width)} ${toPercent(rect.height, imageSize.height)}`
-          + ` ${rect.href} ${rect.alt}`,
+          + ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${rect.alt.trim() === "" ? "" : rect.alt.trim()}`,
       )
       .join("\n");
 
@@ -1089,7 +1089,7 @@ ${areas}
                         className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
                           isTouchDevice ? "py-3 text-base" : ""
                         }`}
-                        placeholder="https://example.com"
+                        placeholder={common.urlPlaceholder}
                       />
                     </div>
                     <div>
@@ -1251,7 +1251,7 @@ ${areas}
                           className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
                             isTouchDevice ? "py-3 text-base" : ""
                           }`}
-                          placeholder="https://example.com"
+                          placeholder={common.urlPlaceholder}
                         />
                       </div>
                       <div>
