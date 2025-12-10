@@ -53,6 +53,17 @@ interface Rectangle {
   alt: string;
 }
 
+// 大小调整的八个点
+type ResizeHandle =
+  | "top"
+  | "bottom"
+  | "left"
+  | "right"
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right";
+
 interface ContextMenuPosition {
   x: number;
   y: number;
@@ -130,6 +141,10 @@ export default function EditorPage() {
   const [selectedRect, setSelectedRectId] = useState<string | null>(null);
   const [movingRect, setMovingRect] = useState<string | null>(null);
   const [moveOffset, setMoveOffset] = useState({x: 0, y: 0});
+  const [resizingRect, setResizingRect] = useState<string | null>(null);
+  const [resizeHandle, setResizeHandle] = useState<ResizeHandle | null>(null);
+  const [resizeStartPoint, setResizeStartPoint] = useState({x: 0, y: 0});
+  const [resizeStartRect, setResizeStartRect] = useState<Rectangle | null>(null);
   const [draggingRectId, setDraggingRectId] = useState<string | null>(null);
   const [lastPositionInput, setLastPositionInput] = useState({x: "0", y: "0"});
   const [lastSizeInput, setLastSizeInput] = useState({width: "50", height: "50"});
@@ -350,6 +365,68 @@ export default function EditorPage() {
     }
   };
 
+  const MIN_RECT_SIZE = 20;
+
+  const calculateResizedRect = (rect: Rectangle, handle: ResizeHandle, deltaX: number, deltaY: number) => {
+    let {x, y, width, height} = rect;
+
+    const clampWidth = (w: number, left: number) => clamp(w, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.width - left));
+    const clampHeight = (h: number, top: number) => clamp(h, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.height - top));
+
+    switch (handle) {
+      case "right": {
+        width = clampWidth(rect.width + deltaX, rect.x);
+        break;
+      }
+      case "left": {
+        x = clamp(rect.x + deltaX, 0, rect.x + rect.width - MIN_RECT_SIZE);
+        width = clampWidth(rect.width - (x - rect.x), x);
+        break;
+      }
+      case "bottom": {
+        height = clampHeight(rect.height + deltaY, rect.y);
+        break;
+      }
+      case "top": {
+        y = clamp(rect.y + deltaY, 0, rect.y + rect.height - MIN_RECT_SIZE);
+        height = clampHeight(rect.height - (y - rect.y), y);
+        break;
+      }
+      case "top-left": {
+        x = clamp(rect.x + deltaX, 0, rect.x + rect.width - MIN_RECT_SIZE);
+        y = clamp(rect.y + deltaY, 0, rect.y + rect.height - MIN_RECT_SIZE);
+        width = clampWidth(rect.width - (x - rect.x), x);
+        height = clampHeight(rect.height - (y - rect.y), y);
+        break;
+      }
+      case "top-right": {
+        y = clamp(rect.y + deltaY, 0, rect.y + rect.height - MIN_RECT_SIZE);
+        width = clampWidth(rect.width + deltaX, rect.x);
+        height = clampHeight(rect.height - (y - rect.y), y);
+        break;
+      }
+      case "bottom-left": {
+        x = clamp(rect.x + deltaX, 0, rect.x + rect.width - MIN_RECT_SIZE);
+        width = clampWidth(rect.width - (x - rect.x), x);
+        height = clampHeight(rect.height + deltaY, rect.y);
+        break;
+      }
+      case "bottom-right": {
+        width = clampWidth(rect.width + deltaX, rect.x);
+        height = clampHeight(rect.height + deltaY, rect.y);
+        break;
+      }
+    }
+
+    return {
+      ...rect,
+      x: Math.round(x),
+      y: Math.round(y),
+      width: Math.round(width),
+      height: Math.round(height),
+    };
+  };
+
   // 处理右键菜单
   const handleContextMenu = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -394,6 +471,25 @@ export default function EditorPage() {
       setSelectedRect(newRect.id);
     }
     setContextMenu((prev) => ({...prev, visible: false}));
+  };
+
+  const handleResizeStart = (event: React.MouseEvent | React.TouchEvent, rectId: string, handle: ResizeHandle) => {
+    if (!uploadedImage || (currentTool === "create" || currentTool === "delete")) return;
+
+    event.stopPropagation();
+    if ("preventDefault" in event) {
+      event.preventDefault();
+    }
+
+    const coords = "touches" in event ? getTouchCoordinates(event) : getRelativeCoordinates(event as React.MouseEvent);
+    const targetRect = rectangles.find((r) => r.id === rectId);
+    if (!targetRect) return;
+
+    setSelectedRect(rectId);
+    setResizingRect(rectId);
+    setResizeHandle(handle);
+    setResizeStartPoint(coords);
+    setResizeStartRect(targetRect);
   };
 
   const handlePointerDown = (event: React.MouseEvent | React.TouchEvent) => {
@@ -481,6 +577,25 @@ export default function EditorPage() {
 
     const coords = "touches" in event ? getTouchCoordinates(event) : getRelativeCoordinates(event as React.MouseEvent);
 
+    if (resizingRect && resizeHandle && resizeStartRect) {
+      const deltaX = coords.x - resizeStartPoint.x;
+      const deltaY = coords.y - resizeStartPoint.y;
+
+      const resized = calculateResizedRect(resizeStartRect, resizeHandle, deltaX, deltaY);
+
+      setRectangles((prev) => prev.map((rect) =>
+        rect.id === resizingRect ? {...rect, x: resized.x, y: resized.y, width: resized.width, height: resized.height} : rect,
+      ));
+
+      setLastPositionInput({x: resized.x.toString(), y: resized.y.toString()});
+      setLastSizeInput({width: resized.width.toString(), height: resized.height.toString()});
+
+      if ("touches" in event) {
+        event.preventDefault();
+      }
+      return;
+    }
+
     // 根据当前工具执行不同操作
     if (isDrawing && currentTool === "create") {
       // 创建新矩形
@@ -553,6 +668,13 @@ export default function EditorPage() {
     if (movingRect) {
       setMovingRect(null);
     }
+
+    // 处理缩放结束
+    if (resizingRect) {
+      setResizingRect(null);
+      setResizeHandle(null);
+      setResizeStartRect(null);
+    }
   };
 
   const updateRectangle = (id: string, field: keyof Rectangle,
@@ -588,7 +710,7 @@ export default function EditorPage() {
     });
   };
 
-  const handleDragStartRow = (event: React.DragEvent<HTMLButtonElement>, id: string) => {
+  const handleDragStartRow = (event: React.DragEvent<HTMLDivElement>, id: string) => {
     setDraggingRectId(id);
     event.dataTransfer.effectAllowed = "move";
 
@@ -811,6 +933,18 @@ ${areas}
                     {/* 显示时将原图像坐标缩放到预览区 */}
                     {rectangles.map((rect, index) => {
                       const {scaleX, scaleY} = getImageScale();
+                      const handleSize = isTouchDevice ? 16 : 10;
+                      const handleOffset = handleSize / 2;
+                      const handleConfigs: Array<{handle: ResizeHandle; style: React.CSSProperties; cursor: string}> = [
+                        {handle: "top-left", style: {top: -handleOffset, left: -handleOffset}, cursor: "nwse-resize"},
+                        {handle: "top", style: {top: -handleOffset, left: "50%", transform: "translateX(-50%)"}, cursor: "ns-resize"},
+                        {handle: "top-right", style: {top: -handleOffset, right: -handleOffset}, cursor: "nesw-resize"},
+                        {handle: "right", style: {top: "50%", right: -handleOffset, transform: "translateY(-50%)"}, cursor: "ew-resize"},
+                        {handle: "bottom-right", style: {bottom: -handleOffset, right: -handleOffset}, cursor: "nwse-resize"},
+                        {handle: "bottom", style: {bottom: -handleOffset, left: "50%", transform: "translateX(-50%)"}, cursor: "ns-resize"},
+                        {handle: "bottom-left", style: {bottom: -handleOffset, left: -handleOffset}, cursor: "nesw-resize"},
+                        {handle: "left", style: {top: "50%", left: -handleOffset, transform: "translateY(-50%)"}, cursor: "ew-resize"},
+                      ];
                       // 十字光标较为特殊（画框），在此处先处理
                       return (
                         <div
@@ -836,8 +970,22 @@ ${areas}
                             {rect.alt}
                           </div>
                           {selectedRect === rect.id && (
-                            <div
-                              className="absolute -bottom-2 -right-2 w-4 h-4 bg-primary rounded-full border-2 border-white"></div>
+                            <>
+                              {handleConfigs.map((item) => (
+                                <div
+                                  key={item.handle}
+                                  className="absolute bg-primary border border-white shadow-sm"
+                                  style={{
+                                    ...item.style,
+                                    width: handleSize,
+                                    height: handleSize,
+                                    cursor: item.cursor,
+                                  }}
+                                  onMouseDown={(e) => handleResizeStart(e, rect.id, item.handle)}
+                                  onTouchStart={(e) => handleResizeStart(e, rect.id, item.handle)}
+                                />
+                              ))}
+                            </>
                           )}
                         </div>
                       );
