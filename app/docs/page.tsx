@@ -150,7 +150,7 @@ export default function DocsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Keyboard className="w-5 h-5"/>
-                键盘快捷方式
+                快捷键
               </CardTitle>
               <CardDescription>ImageMap 编辑器支持使用键盘按键快速进行一些操作。</CardDescription>
             </CardHeader>
