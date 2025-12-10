@@ -694,7 +694,7 @@ export default function EditorPage() {
     });
   };
 
-  const handleDragStartRow = (event: React.DragEvent<HTMLDivElement>, id: string) => {
+  const handleDragStartRow = (event: React.DragEvent<HTMLElement>, id: string) => {
     setDraggingRectId(id);
     event.dataTransfer.effectAllowed = "move";
 
@@ -708,18 +708,18 @@ export default function EditorPage() {
     }
   };
 
-  const handleDragOverRow = (event: React.DragEvent<HTMLButtonElement>, targetId: string) => {
+  const handleDragOverRow = (event: React.DragEvent<HTMLElement>, targetId: string) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
-    if (draggingRectId && draggingRectId !== targetId) {
+    if (draggingRectId && draggingRectId !== targetId) { 
       reorderRectangles(draggingRectId, targetId);
     }
   };
 
-  const handleDropOnRow = (event: React.DragEvent<HTMLButtonElement>, targetId: string) => {
+  const handleDropOnRow = (event: React.DragEvent<HTMLElement>, targetId: string) => {
     event.preventDefault();
     if (draggingRectId) {
-      reorderRectangles(draggingRectId, targetId);
+      reorderRectangles(draggingRectId, targetId); 
     }
     setDraggingRectId(null);
   };
@@ -1118,12 +1118,20 @@ ${areas}
                   ) : (
                     <div className="space-y-2">
                       {rectangles.map((rect, index) => (
-                        <button
+                        <div
                           key={rect.id}
                           className={`flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2 transition-colors min-w-0 ${
                             selectedRect === rect.id ? "border-primary bg-primary/15" : "border-border bg-card"
                           } ${draggingRectId === rect.id ? "opacity-70" : "hover:bg-primary/5"}`}
+                          role="button"
+                          tabIndex={0}
                           onClick={() => setSelectedRect(rect.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setSelectedRect(rect.id);
+                            }
+                          }}
                           onDragOver={(e) => handleDragOverRow(e, rect.id)}
                           onDrop={(e) => handleDropOnRow(e, rect.id)}
                           data-rect-row="true"
@@ -1193,7 +1201,7 @@ ${areas}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        </button>
+                        </div>
                       ))}
                     </div>
                   )}
