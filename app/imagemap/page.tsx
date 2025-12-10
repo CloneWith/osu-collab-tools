@@ -926,9 +926,9 @@ ${areas}
                       return (
                         <div
                           key={rect.id}
-                          className={`absolute border-2 bg-primary/20 select-none touch-manipulation ${
+                          className={`absolute border-2 bg-primary/20 select-none touch-manipulation transition-colors ease-out duration-200 ${
                             selectedRect === rect.id ? "border-primary border-4" : "border-primary/40"
-                          } ${isTouchDevice ? "min-w-[44px] min-h-[44px]" : ""} ${getCursorStyle()}`}
+                          } ${isTouchDevice ? "min-w-[44px] min-h-[44px]" : ""} ${getCursorStyle()} ${currentTool === "delete" ? "hover:border-red-400" : ""}`}
                           style={{
                             left: rect.x / scaleX,
                             top: rect.y / scaleY,
