@@ -71,11 +71,10 @@ interface ContextMenuPosition {
   targetId: string | null;
 }
 
-type EditorTool = "select" | "move" | "create" | "delete"
+type EditorTool = "select" | "create" | "delete"
 
 const tool_names = {
   "select": "选择",
-  "move": "移动",
   "create": "创建",
   "delete": "删除",
 };
@@ -515,29 +514,14 @@ export default function EditorPage() {
         );
 
         if (clickedRect) {
+          setMovingRect(clickedRect.id);
+          setMoveOffset({
+            x: coords.x - clickedRect.x,
+            y: coords.y - clickedRect.y,
+          });
           setSelectedRect(clickedRect.id);
         } else {
           setSelectedRect(null);
-        }
-        break;
-
-      case "move":
-        // 检查是否点击在矩形上以开始移动
-        const rectToMove = rectangles.find(
-          (rect) =>
-            coords.x >= rect.x &&
-            coords.x <= rect.x + rect.width &&
-            coords.y >= rect.y &&
-            coords.y <= rect.y + rect.height,
-        );
-
-        if (rectToMove) {
-          setMovingRect(rectToMove.id);
-          setMoveOffset({
-            x: coords.x - rectToMove.x,
-            y: coords.y - rectToMove.y,
-          });
-          setSelectedRect(rectToMove.id);
         }
         break;
 
@@ -613,7 +597,7 @@ export default function EditorPage() {
       };
 
       setCurrentRect(rect);
-    } else if (movingRect && currentTool === "move") {
+    } else if (movingRect && currentTool === "select") {
       // 移动现有矩形
       setRectangles((prev) =>
         prev.map((rect) => {
@@ -816,8 +800,6 @@ ${areas}
   // 获取鼠标样式
   const getCursorStyle = () => {
     switch (currentTool) {
-      case "move":
-        return "cursor-move";
       case "create":
         return "cursor-crosshair";
       case "delete":
@@ -869,13 +851,6 @@ ${areas}
                   title="选择工具"
                 >
                   <MousePointer className="w-5 h-5"/>
-                </button>
-                <button
-                  className={getToolButtonClass("move")}
-                  onClick={() => setCurrentTool("move")}
-                  title="移动工具"
-                >
-                  <Move className="w-5 h-5"/>
                 </button>
                 <button
                   className={getToolButtonClass("create")}
@@ -960,7 +935,7 @@ ${areas}
                             top: rect.y / scaleY,
                             width: Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX),
                             height: Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY),
-                            cursor: currentTool === "move" ? "move" : currentTool === "delete" ? "no-drop" : "pointer",
+                            cursor: currentTool === "select" ? "move" : currentTool === "delete" ? "no-drop" : "pointer",
                             userSelect: "none",
                             zIndex: rectangles.length - index,
                           }}
