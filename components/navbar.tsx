@@ -11,7 +11,7 @@ import Logo from "@/components/logo";
 const navigation = [
     {name: "首页", href: "/", icon: Home},
     {name: "资料图", href: "/avatar", icon: UserRound},
-    {name: "ImageMap 编辑", href: "/editor", icon: Map},
+    {name: "ImageMap 编辑", href: "/imagemap", icon: Map},
     {name: "文档", href: "/docs", icon: FileText},
 ];
 

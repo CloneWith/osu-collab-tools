@@ -66,7 +66,7 @@ export default function MainPage() {
                             助力你做出还不错的 osu! 赛博合影
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link href="/editor">
+                            <Link href="/imagemap">
                                 <Button size="lg" className="text-lg px-8 py-3">
                                     开始使用
                                     <ArrowRight className="ml-2 w-5 h-5"/>
@@ -139,7 +139,7 @@ export default function MainPage() {
                     <p className="text-xl text-primary-foreground/85 mb-8 max-w-2xl mx-auto">
                         点击下面的按钮，试试感兴趣的功能吧╰(*°▽°*)╯
                     </p>
-                    <Link href="/editor">
+                    <Link href="/imagemap">
                         <Button size="lg" variant="secondary" className="text-lg px-8 py-3">
                             立即开始
                             <ArrowRight className="ml-2 w-5 h-5"/>

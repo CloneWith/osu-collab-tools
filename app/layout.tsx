@@ -48,7 +48,7 @@ export default function RootLayout({
               <h3 className="text-lg font-semibold mb-4">工具</h3>
               <ul className="space-y-2 text-gray-400">
                 <li>
-                  <Link href="/editor" className="hover:text-white transition-colors">
+                  <Link href="/imagemap" className="hover:text-white transition-colors">
                     ImageMap 编辑器
                   </Link>
                 </li>

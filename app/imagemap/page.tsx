@@ -37,7 +37,7 @@ import {
   X,
 } from "lucide-react";
 import { clamp } from "@/lib/utils";
-import DragAndDropOverlay, { DnDRejectReason } from "@/app/editor/dnd-overlay";
+import DragAndDropOverlay, { DnDRejectReason } from "@/app/imagemap/dnd-overlay";
 import { common } from "@/app/common";
 import hljs from "highlight.js/lib/core";
 import html from "highlight.js/lib/languages/xml";
