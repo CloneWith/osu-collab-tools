@@ -467,7 +467,7 @@ export default function EditorPage() {
 
       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
         // 层级调节
-        if (event.key === "-" || "=") {
+        if (event.key === "-" || event.key === "=") {
           moveRectangleLayer(selectedId, event.key === "-" ? 1 : -1);
           event.preventDefault();
           return;
