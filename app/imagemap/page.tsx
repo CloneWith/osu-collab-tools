@@ -173,10 +173,21 @@ export default function EditorPage() {
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
+  const rectListRef = useRef<HTMLDivElement>(null);
+  const rectanglesRef = useRef<Rectangle[]>([]);
+  const selectedRectRef = useRef<string | null>(null);
 
   // 注册 hljs 语言
   hljs.registerLanguage("html", html);
   registerBBCodeHighlight();
+
+  useEffect(() => {
+    rectanglesRef.current = rectangles;
+  }, [rectangles]);
+
+  useEffect(() => {
+    selectedRectRef.current = selectedRect;
+  }, [selectedRect]);
 
   // 关闭右键菜单的事件处理
   useEffect(() => {
@@ -367,6 +378,8 @@ export default function EditorPage() {
 
   const selectedRectData = selectedRect ? rectangles.find((r) => r.id === selectedRect) ?? null : null;
 
+  const toolOrder: EditorTool[] = ["select", "create", "delete"];
+
   const positionBounds = selectedRectData
     ? {
       maxX: Math.max(0, imageSize.width - selectedRectData.width),
@@ -420,6 +433,95 @@ export default function EditorPage() {
     selectedRectData?.width,
     selectedRectData?.height,
   ]);
+
+  // 使用键盘移动区域与切换模式
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      const active = document.activeElement as HTMLElement | null;
+      const withinPreview = containerRef.current?.contains(active) ?? false;
+      const withinList = rectListRef.current?.contains(active) ?? false;
+
+      // 模式切换
+      if (event.altKey && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+        const index = Number(event.key) - 1;
+        if (index >= 0 && index < toolOrder.length) {
+          setCurrentTool(toolOrder[index]);
+          event.preventDefault();
+        }
+        return;
+      }
+
+      // 位于预览区 / 区域列表且有选中的区域
+      if (!selectedRectRef.current) return;
+      if (!(withinPreview || withinList)) return;
+
+      const selectedId = selectedRectRef.current;
+
+      // 创建副本
+      if (event.ctrlKey && !event.altKey && !event.metaKey && event.key.toLowerCase() === "d") {
+        duplicateRectangle(selectedId);
+        event.preventDefault();
+        return;
+      }
+
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) {
+        // 层级调节
+        if (event.key === "-" || "=") {
+          moveRectangleLayer(selectedId, event.key === "-" ? 1 : -1);
+          event.preventDefault();
+          return;
+        }
+      }
+
+      // 删除
+      if (event.key === "Delete") {
+        deleteRectangle(selectedId);
+        event.preventDefault();
+        return;
+      }
+
+      // Shift - 精细调节，Ctrl - 快速调节
+      const step = event.shiftKey ? 1 : event.ctrlKey ? 20 : 10;
+      let dx = 0;
+      let dy = 0;
+
+      switch (event.key) {
+        case "ArrowUp":
+          dy = -step;
+          break;
+        case "ArrowDown":
+          dy = step;
+          break;
+        case "ArrowLeft":
+          dx = -step;
+          break;
+        case "ArrowRight":
+          dx = step;
+          break;
+        default:
+          return;
+      }
+
+      const target = rectanglesRef.current.find((r) => r.id === selectedId);
+      if (!target) return;
+
+      const newX = clamp(target.x + dx, 0, Math.max(0, imageSize.width - target.width));
+      const newY = clamp(target.y + dy, 0, Math.max(0, imageSize.height - target.height));
+
+      if (newX === target.x && newY === target.y) {
+        event.preventDefault();
+        return;
+      }
+
+      setRectangles((prev) => prev.map((r) => (r.id === selectedId ? {...r, x: newX, y: newY} : r)));
+      setLastPositionInput({x: newX.toString(), y: newY.toString()});
+
+      event.preventDefault();
+    };
+
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [imageSize.height, imageSize.width, toolOrder]);
 
   const calculateResizedRect = (rect: Rectangle, handle: ResizeHandle, deltaX: number, deltaY: number) => {
     let {x, y, width, height} = rect;
@@ -525,6 +627,21 @@ export default function EditorPage() {
       setSelectedRect(newRect.id);
     }
     setContextMenu((prev) => ({...prev, visible: false}));
+  };
+
+  const moveRectangleLayer = (id: string, delta: number) => {
+    setRectangles((prev) => {
+      const next = [...prev];
+      const fromIndex = next.findIndex((rect) => rect.id === id);
+      if (fromIndex === -1) return prev;
+
+      const toIndex = fromIndex + delta;
+      if (toIndex < 0 || toIndex >= next.length) return prev;
+
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
   };
 
   const handleResizeStart = (event: React.MouseEvent | React.TouchEvent, rectId: string, handle: ResizeHandle) => {
@@ -953,6 +1070,7 @@ ${areas}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
+                    tabIndex={0}
                     style={{touchAction: "none", userSelect: "none"}}
                   >
                     <img
@@ -1209,7 +1327,7 @@ ${areas}
                   {rectangles.length === 0 ? (
                     <p className="text-sm text-muted-foreground">还没有区域，先在预览区创建。</p>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-2" ref={rectListRef}>
                       {rectangles.map((rect, index) => (
                         <div
                           key={rect.id}
