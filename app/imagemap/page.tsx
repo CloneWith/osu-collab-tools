@@ -41,6 +41,7 @@ import DragAndDropOverlay, { DnDRejectReason } from "@/app/imagemap/dnd-overlay"
 import { common } from "@/app/common";
 import hljs from "highlight.js/lib/core";
 import html from "highlight.js/lib/languages/xml";
+import { HelpIconButton } from "@/components/help-icon-button";
 
 interface Rectangle {
   id: string;
@@ -991,9 +992,10 @@ ${areas}
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+          <h1 className="flex-title text-3xl font-bold text-foreground mb-2">
             <span className="text-primary">ImageMap </span>
-            编辑器
+            <span>编辑器</span>
+            <HelpIconButton section="imagemap" />
           </h1>
           <p className="text-secondary-foreground">划定可点击区域，以便在个人资料等中使用</p>
         </div>

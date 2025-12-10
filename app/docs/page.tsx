@@ -14,7 +14,7 @@ export default function DocsPage() {
 
         <div className="space-y-8">
           {/* Section - 站点简介 */}
-          <Card>
+          <Card id="info">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5"/>
@@ -39,7 +39,7 @@ export default function DocsPage() {
           </Card>
 
           {/* Section - ImageMap Editor */}
-          <Card>
+          <Card id="imagemap">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Map className="w-5 h-5"/>
