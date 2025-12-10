@@ -567,7 +567,13 @@ export default function EditorPage() {
       const resized = calculateResizedRect(resizeStartRect, resizeHandle, deltaX, deltaY);
 
       setRectangles((prev) => prev.map((rect) =>
-        rect.id === resizingRect ? {...rect, x: resized.x, y: resized.y, width: resized.width, height: resized.height} : rect,
+        rect.id === resizingRect ? {
+          ...rect,
+          x: resized.x,
+          y: resized.y,
+          width: resized.width,
+          height: resized.height,
+        } : rect,
       ));
 
       setLastPositionInput({x: resized.x.toString(), y: resized.y.toString()});
@@ -710,7 +716,7 @@ export default function EditorPage() {
   const handleDragOverRow = (event: React.DragEvent<HTMLElement>, targetId: string) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
-    if (draggingRectId && draggingRectId !== targetId) { 
+    if (draggingRectId && draggingRectId !== targetId) {
       reorderRectangles(draggingRectId, targetId);
     }
   };
@@ -718,7 +724,7 @@ export default function EditorPage() {
   const handleDropOnRow = (event: React.DragEvent<HTMLElement>, targetId: string) => {
     event.preventDefault();
     if (draggingRectId) {
-      reorderRectangles(draggingRectId, targetId); 
+      reorderRectangles(draggingRectId, targetId);
     }
     setDraggingRectId(null);
   };
@@ -912,15 +918,43 @@ ${areas}
                       const {scaleX, scaleY} = getImageScale();
                       const handleSize = isTouchDevice ? 16 : 10;
                       const handleOffset = handleSize / 2;
-                      const handleConfigs: Array<{handle: ResizeHandle; style: React.CSSProperties; cursor: string}> = [
+                      const handleConfigs: Array<{
+                        handle: ResizeHandle;
+                        style: React.CSSProperties;
+                        cursor: string
+                      }> = [
                         {handle: "top-left", style: {top: -handleOffset, left: -handleOffset}, cursor: "nwse-resize"},
-                        {handle: "top", style: {top: -handleOffset, left: "50%", transform: "translateX(-50%)"}, cursor: "ns-resize"},
+                        {
+                          handle: "top",
+                          style: {top: -handleOffset, left: "50%", transform: "translateX(-50%)"},
+                          cursor: "ns-resize",
+                        },
                         {handle: "top-right", style: {top: -handleOffset, right: -handleOffset}, cursor: "nesw-resize"},
-                        {handle: "right", style: {top: "50%", right: -handleOffset, transform: "translateY(-50%)"}, cursor: "ew-resize"},
-                        {handle: "bottom-right", style: {bottom: -handleOffset, right: -handleOffset}, cursor: "nwse-resize"},
-                        {handle: "bottom", style: {bottom: -handleOffset, left: "50%", transform: "translateX(-50%)"}, cursor: "ns-resize"},
-                        {handle: "bottom-left", style: {bottom: -handleOffset, left: -handleOffset}, cursor: "nesw-resize"},
-                        {handle: "left", style: {top: "50%", left: -handleOffset, transform: "translateY(-50%)"}, cursor: "ew-resize"},
+                        {
+                          handle: "right",
+                          style: {top: "50%", right: -handleOffset, transform: "translateY(-50%)"},
+                          cursor: "ew-resize",
+                        },
+                        {
+                          handle: "bottom-right",
+                          style: {bottom: -handleOffset, right: -handleOffset},
+                          cursor: "nwse-resize",
+                        },
+                        {
+                          handle: "bottom",
+                          style: {bottom: -handleOffset, left: "50%", transform: "translateX(-50%)"},
+                          cursor: "ns-resize",
+                        },
+                        {
+                          handle: "bottom-left",
+                          style: {bottom: -handleOffset, left: -handleOffset},
+                          cursor: "nesw-resize",
+                        },
+                        {
+                          handle: "left",
+                          style: {top: "50%", left: -handleOffset, transform: "translateY(-50%)"},
+                          cursor: "ew-resize",
+                        },
                       ];
                       // 十字光标较为特殊（画框），在此处先处理
                       return (
@@ -941,13 +975,15 @@ ${areas}
                             zIndex: rectangles.length - index,
                           }}
                         >
-                          <div
-                            className={`absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none max-w-full truncate ${
-                              isTouchDevice ? "text-sm px-2 py-1" : ""
-                            }`}
-                          >
-                            {rect.alt}
-                          </div>
+                          {rect.alt.trim() &&
+                            <div
+                              className={`absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none max-w-full truncate ${
+                                isTouchDevice ? "text-sm px-2 py-1" : ""
+                              }`}
+                            >
+                              {rect.alt.trim()}
+                            </div>}
+
                           {selectedRect === rect.id && (
                             <>
                               {handleConfigs.map((item) => (
@@ -1164,8 +1200,10 @@ ${areas}
                               <GripVertical className="w-4 h-4"/>
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">
-                              <span className={`text-sm font-medium text-left truncate ${rect.alt ? "" : "italic"}`}>{rect.alt || `区域 ${index + 1}`}</span>
-                              <span className={`text-xs text-muted-foreground text-left truncate ${rect.href ? "" : "italic"}`}>{rect.href || "未设置链接"}</span>
+                              <span
+                                className={`text-sm font-medium text-left truncate ${rect.alt ? "" : "italic"}`}>{rect.alt || `区域 ${index + 1}`}</span>
+                              <span
+                                className={`text-xs text-muted-foreground text-left truncate ${rect.href ? "" : "italic"}`}>{rect.href || "未设置链接"}</span>
                             </div>
                           </div>
 
