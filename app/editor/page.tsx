@@ -870,8 +870,11 @@ ${areas}
                 >
                   <MousePointer className="w-5 h-5"/>
                 </button>
-                <button className={getToolButtonClass("move")} onClick={() => setCurrentTool("move")}
-                        title="移动工具">
+                <button
+                  className={getToolButtonClass("move")}
+                  onClick={() => setCurrentTool("move")}
+                  title="移动工具"
+                >
                   <Move className="w-5 h-5"/>
                 </button>
                 <button
@@ -1152,8 +1155,8 @@ ${areas}
                           data-rect-id={rect.id}
                         >
                           <div className="flex w-full items-center gap-3 min-w-0">
-                            <button
-                              className="text-muted-foreground hover:text-foreground cursor-grab flex-shrink-0"
+                            <div
+                              className="h-full text-muted-foreground hover:text-foreground cursor-grab flex-shrink-0 -ml-3 pl-3 pr-2 py-2 rounded-md"
                               onDragStart={(e) => handleDragStartRow(e, rect.id)}
                               onDragEnd={handleDragEndRow}
                               draggable
@@ -1175,7 +1178,7 @@ ${areas}
                               style={{touchAction: "none"}}
                             >
                               <GripVertical className="w-4 h-4"/>
-                            </button>
+                            </div>
                             <div className="flex flex-col min-w-0 flex-1">
                               <span className={`text-sm font-medium text-left truncate ${rect.alt ? "" : "italic"}`}>{rect.alt || `区域 ${index + 1}`}</span>
                               <span className={`text-xs text-muted-foreground text-left truncate ${rect.href ? "" : "italic"}`}>{rect.href || "未设置链接"}</span>
