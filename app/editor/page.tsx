@@ -27,7 +27,6 @@ import {
   Hash,
   GripVertical,
   MousePointer,
-  Move,
   MoreVertical,
   OctagonAlert, Settings,
   Square,

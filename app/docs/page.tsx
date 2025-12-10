@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Code, MousePointer, Move, Map, Square, Trash2 } from "lucide-react";
+import { FileText, Code, MousePointer, Map, Square, Trash2 } from "lucide-react";
 
 export default function DocsPage() {
     return (
@@ -30,7 +30,7 @@ export default function DocsPage() {
                                     构建的前端项目，各平台只需浏览器访问即可使用，同时也支持自部署，简单快速；
                                 </li>
                                 <li>安全：不想让除 Collab 成员以外的其他人知道？没问题！</li>
-                                <li>集成：是希望满足 Collab 图制作全过程的项目呢（虽然目前依然还差很远）；</li>
+                                <li>集成：从小功能开始，逐步实现覆盖 Collab 流程的各步骤；</li>
                             </ul>
                             <p>该项目的源代码可在 <a href="https://github.com/CloneWith/osu-collab-tools"
                                                      className="doc-link">GitHub</a> 上查看，在此期待各位的反馈或贡献~
@@ -69,7 +69,7 @@ export default function DocsPage() {
                             <div className="space-y-2">
                                 <h3 className="font-semibold">2. 管理区域</h3>
                                 <p className="text-secondary-foreground inline-flex items-center">
-                                    使用以下工具在图片上创建、移动或删除矩形区域：
+                                    使用以下工具在图片上创建、更改或删除矩形区域：
                                 </p>
 
                                 {/* Part - 工具用法说明 */}
@@ -79,14 +79,7 @@ export default function DocsPage() {
                                             <MousePointer className="w-4 h-4"/>
                                             选择工具
                                         </h3>
-                                        <p className="text-secondary-foreground">点击选中现有区域，查看并编辑其对应属性。</p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <h3 className="font-semibold flex items-center gap-2 text-primary">
-                                            <Move className="w-4 h-4"/>
-                                            移动工具
-                                        </h3>
-                                        <p className="text-secondary-foreground">将已创建的区域拖动到新位置。</p>
+                                        <p className="text-secondary-foreground">点击选中现有区域，查看并编辑其对应属性，并进行移动、大小调整。</p>
                                     </div>
                                     <div className="space-y-2">
                                         <h3 className="font-semibold flex items-center gap-2 text-primary">
@@ -107,6 +100,9 @@ export default function DocsPage() {
                             <div className="space-y-2">
                                 <h3 className="font-semibold">3. 设置属性</h3>
                                 <p className="text-secondary-foreground">为每个区域设置链接地址和描述文本，也可继续调整位置与大小。</p>
+                                <p className="text-secondary-foreground">所有区域在<b>区域列表</b>中统一显示，可以拖动左侧的控制柄调整所在层级。</p>
+                                <p className="text-secondary-foreground">与此同时，你可以在<b>图像属性</b>中修改要使用的图像地址与
+                                  ImageMap 名称（这个名称只会在 HTML 代码中用到），以便生成的代码直接使用这些属性。</p>
                             </div>
                             <div className="space-y-2">
                                 <h3 className="font-semibold">4. 复制代码</h3>
