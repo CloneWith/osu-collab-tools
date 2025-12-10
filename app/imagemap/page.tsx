@@ -365,6 +365,62 @@ export default function EditorPage() {
 
   const MIN_RECT_SIZE = 20;
 
+  const selectedRectData = selectedRect ? rectangles.find((r) => r.id === selectedRect) ?? null : null;
+
+  const positionBounds = selectedRectData
+    ? {
+      maxX: Math.max(0, imageSize.width - selectedRectData.width),
+      maxY: Math.max(0, imageSize.height - selectedRectData.height),
+    }
+    : {maxX: imageSize.width, maxY: imageSize.height};
+
+  const sizeBounds = selectedRectData
+    ? {
+      maxWidth: Math.max(MIN_RECT_SIZE, imageSize.width - selectedRectData.x),
+      maxHeight: Math.max(MIN_RECT_SIZE, imageSize.height - selectedRectData.y),
+    }
+    : {maxWidth: imageSize.width, maxHeight: imageSize.height};
+
+  const clampPositionInput = (field: "x" | "y", value: string) => {
+    if (!selectedRectData || value.trim() === "") return null;
+
+    const numeric = Number(value);
+    if (isNaN(numeric)) return null;
+
+    const max = field === "x" ? positionBounds.maxX : positionBounds.maxY;
+    return clamp(Math.round(numeric), 0, max);
+  };
+
+  const clampSizeInput = (field: "width" | "height", value: string) => {
+    if (!selectedRectData || value.trim() === "") return null;
+
+    const numeric = Number(value);
+    if (isNaN(numeric)) return null;
+
+    const max = field === "width" ? sizeBounds.maxWidth : sizeBounds.maxHeight;
+    return clamp(Math.round(numeric), MIN_RECT_SIZE, max);
+  };
+
+  // Keep manual input fields in sync with the latest rectangle data to avoid a one-step lag.
+  useEffect(() => {
+    if (!selectedRectData) return;
+
+    setLastPositionInput({
+      x: selectedRectData.x.toString(),
+      y: selectedRectData.y.toString(),
+    });
+    setLastSizeInput({
+      width: selectedRectData.width.toString(),
+      height: selectedRectData.height.toString(),
+    });
+  }, [
+    selectedRectData?.id,
+    selectedRectData?.x,
+    selectedRectData?.y,
+    selectedRectData?.width,
+    selectedRectData?.height,
+  ]);
+
   const calculateResizedRect = (rect: Rectangle, handle: ResizeHandle, deltaX: number, deltaY: number) => {
     let {x, y, width, height} = rect;
 
@@ -529,7 +585,7 @@ export default function EditorPage() {
 
         if (coords.x <= imageSize.width && coords.y <= imageSize.height) {
           setIsDrawing(true);
-          setStartPoint(coords);
+          setStartPoint({ x: Math.round(coords.x), y: Math.round(coords.y) });
         }
         break;
 
@@ -588,13 +644,13 @@ export default function EditorPage() {
     // 根据当前工具执行不同操作
     if (isDrawing && currentTool === "create") {
       // 创建新矩形
-      const width = coords.x - startPoint.x;
-      const height = coords.y - startPoint.y;
+      const width = Math.round(coords.x - startPoint.x);
+      const height = Math.round(coords.y - startPoint.y);
 
       const rect: Rectangle = {
         id: "temp",
-        x: Math.min(startPoint.x, coords.x),
-        y: Math.min(startPoint.y, coords.y),
+        x: Math.round(Math.min(startPoint.x, coords.x)),
+        y: Math.round(Math.min(startPoint.y, coords.y)),
         width: Math.abs(width),
         height: Math.abs(height),
         href: "",
@@ -1249,7 +1305,7 @@ ${areas}
             )}
 
             {/* Rectangle Properties */}
-            {selectedRect && (
+            {selectedRect && selectedRectData && (
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-4">
@@ -1277,13 +1333,13 @@ ${areas}
                       </Button>
                     </div>
                   </div>
-                  {rectangles.find((r) => r.id === selectedRect) && (
+                  {selectedRectData && (
                     <div className="space-y-3">
                       <div>
                         <label className="block text-sm font-medium mb-1">链接地址</label>
                         <input
                           type="url"
-                          value={rectangles.find((r) => r.id === selectedRect)?.href || ""}
+                          value={selectedRectData.href || ""}
                           onChange={(e) => updateRectangle(selectedRect, "href", e.target.value)}
                           className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
                             isTouchDevice ? "py-3 text-base" : ""
@@ -1295,7 +1351,7 @@ ${areas}
                         <label className="block text-sm font-medium mb-1">替代文本</label>
                         <input
                           type="text"
-                          value={rectangles.find((r) => r.id === selectedRect)?.alt || ""}
+                          value={selectedRectData.alt || ""}
                           onChange={(e) => updateRectangle(selectedRect, "alt", e.target.value)}
                           className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
                             isTouchDevice ? "py-3 text-base" : ""
@@ -1341,15 +1397,17 @@ ${areas}
                           <input
                             type="number"
                             value={lastPositionInput.x}
+                            min={0}
+                            max={positionBounds.maxX}
                             onChange={(e) => {
-                              if (!e.target.value)
-                                return;
+                              const clamped = clampPositionInput("x", e.target.value);
+                              if (clamped === null) return;
 
                               setLastPositionInput({
                                 ...lastPositionInput,
-                                x: e.target.value,
+                                x: clamped.toString(),
                               });
-                              updateRectangle(selectedRect, "x", e.target.value, true);
+                              updateRectangle(selectedRect, "x", clamped.toString(), true);
                             }}
                             className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
                           />
@@ -1359,15 +1417,17 @@ ${areas}
                           <input
                             type="number"
                             value={lastPositionInput.y}
+                            min={0}
+                            max={positionBounds.maxY}
                             onChange={(e) => {
-                              if (!e.target.value)
-                                return;
+                              const clamped = clampPositionInput("y", e.target.value);
+                              if (clamped === null) return;
 
                               setLastPositionInput({
                                 ...lastPositionInput,
-                                y: e.target.value,
+                                y: clamped.toString(),
                               });
-                              updateRectangle(selectedRect, "y", e.target.value, true);
+                              updateRectangle(selectedRect, "y", clamped.toString(), true);
                             }}
                             className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
                           />
@@ -1377,12 +1437,14 @@ ${areas}
                           <input
                             type="number"
                             value={lastSizeInput.width}
+                            min={MIN_RECT_SIZE}
+                            max={sizeBounds.maxWidth}
                             onChange={(e) => {
-                              if (!e.target.value)
-                                return;
+                              const clamped = clampSizeInput("width", e.target.value);
+                              if (clamped === null) return;
 
-                              setLastSizeInput({...lastSizeInput, width: e.target.value});
-                              updateRectangle(selectedRect, "width", e.target.value, true);
+                              setLastSizeInput({...lastSizeInput, width: clamped.toString()});
+                              updateRectangle(selectedRect, "width", clamped.toString(), true);
                             }}
                             className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
                           />
@@ -1392,12 +1454,14 @@ ${areas}
                           <input
                             type="number"
                             value={lastSizeInput.height}
+                            min={MIN_RECT_SIZE}
+                            max={sizeBounds.maxHeight}
                             onChange={(e) => {
-                              if (!e.target.value)
-                                return;
+                              const clamped = clampSizeInput("height", e.target.value);
+                              if (clamped === null) return;
 
-                              setLastSizeInput({...lastSizeInput, height: e.target.value});
-                              updateRectangle(selectedRect, "height", e.target.value, true);
+                              setLastSizeInput({...lastSizeInput, height: clamped.toString()});
+                              updateRectangle(selectedRect, "height", clamped.toString(), true);
                             }}
                             className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
                           />
