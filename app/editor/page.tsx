@@ -602,7 +602,7 @@ export default function EditorPage() {
     }
   };
 
-  const handleDragOverRow = (event: React.DragEvent<HTMLDivElement>, targetId: string) => {
+  const handleDragOverRow = (event: React.DragEvent<HTMLButtonElement>, targetId: string) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
     if (draggingRectId && draggingRectId !== targetId) {
@@ -610,7 +610,7 @@ export default function EditorPage() {
     }
   };
 
-  const handleDropOnRow = (event: React.DragEvent<HTMLDivElement>, targetId: string) => {
+  const handleDropOnRow = (event: React.DragEvent<HTMLButtonElement>, targetId: string) => {
     event.preventDefault();
     if (draggingRectId) {
       reorderRectangles(draggingRectId, targetId);
@@ -980,6 +980,101 @@ ${areas}
               </Card>
             )}
 
+            {uploadedImage && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium">区域列表</h3>
+                  </div>
+
+                  {rectangles.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">还没有区域，先在预览区创建。</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {rectangles.map((rect, index) => (
+                        <button
+                          key={rect.id}
+                          className={`flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2 transition-colors min-w-0 ${
+                            selectedRect === rect.id ? "border-primary bg-primary/15" : "border-border bg-card"
+                          } ${draggingRectId === rect.id ? "opacity-70" : "hover:bg-primary/5"}`}
+                          onClick={() => setSelectedRect(rect.id)}
+                          onDragOver={(e) => handleDragOverRow(e, rect.id)}
+                          onDrop={(e) => handleDropOnRow(e, rect.id)}
+                          data-rect-row="true"
+                          data-rect-id={rect.id}
+                        >
+                          <div className="flex w-full items-center gap-3 min-w-0">
+                            <button
+                              className="text-muted-foreground hover:text-foreground cursor-grab flex-shrink-0"
+                              onDragStart={(e) => handleDragStartRow(e, rect.id)}
+                              onDragEnd={handleDragEndRow}
+                              draggable
+                              aria-label="拖动以调整顺序"
+                              tabIndex={-1}
+                              onTouchStart={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleTouchStartRow(rect.id);
+                              }}
+                              onTouchMove={(e) => {
+                                e.preventDefault();
+                                handleTouchMoveRow(e);
+                              }}
+                              onTouchEnd={(e) => {
+                                e.preventDefault();
+                                handleTouchEndRow();
+                              }}
+                              style={{touchAction: "none"}}
+                            >
+                              <GripVertical className="w-4 h-4"/>
+                            </button>
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <span className={`text-sm font-medium text-left truncate ${rect.alt ? "" : "italic"}`}>{rect.alt || `区域 ${index + 1}`}</span>
+                              <span className={`text-xs text-muted-foreground text-left truncate ${rect.href ? "" : "italic"}`}>{rect.href || "未设置链接"}</span>
+                            </div>
+                          </div>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 flex-shrink-0"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MoreVertical className="w-4 h-4"/>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  duplicateRectangle(rect.id);
+                                }}
+                              >
+                                <Copy className="w-4 h-4 flex-shrink-0"/>
+                                <span className="truncate">创建副本</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  deleteRectangle(rect.id);
+                                }}
+                              >
+                                <Trash className="w-4 h-4 flex-shrink-0"/>
+                                <span className="truncate">删除</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Rectangle Properties */}
             {selectedRect && (
               <Card>
@@ -1054,7 +1149,7 @@ ${areas}
                             className="flex items-center gap-1"
                           >
                             <Hash className="w-4 h-4"/>
-                            作为 ID 填入
+                            <span className="truncate">作为 ID 填入</span>
                           </Button>
                           <Button
                             variant="outline"
@@ -1065,7 +1160,7 @@ ${areas}
                             className="flex items-center gap-1"
                           >
                             <UserRound className="w-4 h-4"/>
-                            作为用户名填入
+                            <span className="truncate">作为用户名填入</span>
                           </Button>
                         </div>
                         <div>
@@ -1135,95 +1230,6 @@ ${areas}
                           />
                         </div>
                       </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {uploadedImage && (
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">区域列表</h3>
-                  </div>
-
-                  {rectangles.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">还没有区域，先在预览区创建。</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {rectangles.map((rect, index) => (
-                        <div
-                          key={rect.id}
-                          className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 transition-colors ${
-                            selectedRect === rect.id ? "border-primary bg-primary/15" : "border-border bg-card"
-                          } ${draggingRectId === rect.id ? "opacity-70" : "hover:bg-primary/5"}`}
-                          onClick={() => setSelectedRect(rect.id)}
-                          onDragOver={(e) => handleDragOverRow(e, rect.id)}
-                          onDrop={(e) => handleDropOnRow(e, rect.id)}
-                          data-rect-row="true"
-                          data-rect-id={rect.id}
-                        >
-                          <div className="flex items-center gap-3">
-                            <button
-                              className="text-muted-foreground hover:text-foreground cursor-grab"
-                              onDragStart={(e) => handleDragStartRow(e, rect.id)}
-                              onDragEnd={handleDragEndRow}
-                              draggable
-                              aria-label="拖动以调整顺序"
-                              onTouchStart={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleTouchStartRow(rect.id);
-                              }}
-                              onTouchMove={(e) => {
-                                e.preventDefault();
-                                handleTouchMoveRow(e);
-                              }}
-                              onTouchEnd={(e) => {
-                                e.preventDefault();
-                                handleTouchEndRow();
-                              }}
-                              style={{touchAction: "none"}}
-                            >
-                              <GripVertical className="w-4 h-4"/>
-                            </button>
-                            <div className="flex flex-col">
-                              <span className={`text-sm font-medium truncate ${rect.alt ? "" : "italic"}`}>{rect.alt || `区域 ${index + 1}`}</span>
-                              <span className={`text-xs text-muted-foreground truncate ${rect.href ? "" : "italic"}`}>{rect.href || "未设置链接"}</span>
-                            </div>
-                          </div>
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                                <MoreVertical className="w-4 h-4"/>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onSelect={(e) => {
-                                  e.preventDefault();
-                                  duplicateRectangle(rect.id);
-                                }}
-                              >
-                                <Copy className="w-4 h-4"/>
-                                创建副本
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onSelect={(e) => {
-                                  e.preventDefault();
-                                  deleteRectangle(rect.id);
-                                }}
-                              >
-                                <Trash className="w-4 h-4"/>
-                                删除
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      ))}
                     </div>
                   )}
                 </CardContent>
