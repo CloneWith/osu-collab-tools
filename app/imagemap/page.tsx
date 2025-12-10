@@ -782,7 +782,7 @@ ${areas}
         (rect) =>
           `${toPercent(rect.x, imageSize.width)} ${toPercent(rect.y, imageSize.height)}`
           + ` ${toPercent(rect.width, imageSize.width)} ${toPercent(rect.height, imageSize.height)}`
-          + ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${rect.alt.trim() === "" ? "" : rect.alt.trim()}`,
+          + ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${rect.alt.trim() === "" ? "" : ` ${rect.alt.trim()}`}`,
       )
       .join("\n");
 
