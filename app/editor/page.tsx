@@ -5,6 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -19,8 +25,10 @@ import {
   Code,
   Copy, Eye,
   Hash,
+  GripVertical,
   MousePointer,
   Move,
+  MoreVertical,
   OctagonAlert, Settings,
   Square,
   Trash,
@@ -122,6 +130,7 @@ export default function EditorPage() {
   const [selectedRect, setSelectedRectId] = useState<string | null>(null);
   const [movingRect, setMovingRect] = useState<string | null>(null);
   const [moveOffset, setMoveOffset] = useState({x: 0, y: 0});
+  const [draggingRectId, setDraggingRectId] = useState<string | null>(null);
   const [lastPositionInput, setLastPositionInput] = useState({x: "0", y: "0"});
   const [lastSizeInput, setLastSizeInput] = useState({width: "50", height: "50"});
 
@@ -563,6 +572,82 @@ export default function EditorPage() {
     setContextMenu((prev) => ({...prev, visible: false}));
   };
 
+  const reorderRectangles = (sourceId: string, targetId: string) => {
+    if (sourceId === targetId) return;
+
+    setRectangles((prev) => {
+      const next = [...prev];
+      const fromIndex = next.findIndex((rect) => rect.id === sourceId);
+      const toIndex = next.findIndex((rect) => rect.id === targetId);
+
+      if (fromIndex === -1 || toIndex === -1) return prev;
+
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+  };
+
+  const handleDragStartRow = (event: React.DragEvent<HTMLButtonElement>, id: string) => {
+    setDraggingRectId(id);
+    event.dataTransfer.effectAllowed = "move";
+
+    // 如有可能，将光标下拖拽提示显示列表项
+    const row = (event.currentTarget as HTMLElement).closest("[data-rect-row='true']") as HTMLElement | null;
+    if (row && event.clientX !== undefined && event.clientY !== undefined) {
+      const rect = row.getBoundingClientRect();
+      const offsetX = event.clientX - rect.left;
+      const offsetY = event.clientY - rect.top;
+      event.dataTransfer.setDragImage(row, offsetX, offsetY);
+    }
+  };
+
+  const handleDragOverRow = (event: React.DragEvent<HTMLDivElement>, targetId: string) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    if (draggingRectId && draggingRectId !== targetId) {
+      reorderRectangles(draggingRectId, targetId);
+    }
+  };
+
+  const handleDropOnRow = (event: React.DragEvent<HTMLDivElement>, targetId: string) => {
+    event.preventDefault();
+    if (draggingRectId) {
+      reorderRectangles(draggingRectId, targetId);
+    }
+    setDraggingRectId(null);
+  };
+
+  const handleDragEndRow = () => {
+    setDraggingRectId(null);
+  };
+
+  const handleTouchStartRow = (id: string) => {
+    setDraggingRectId(id);
+    setSelectedRect(id);
+  };
+
+  const handleTouchMoveRow = (event: React.TouchEvent) => {
+    if (!draggingRectId) return;
+    const touch = event.touches[0];
+    if (!touch) return;
+
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetRow = target?.closest("[data-rect-row='true']") as HTMLElement | null;
+    const targetId = targetRow?.dataset.rectId;
+
+    if (targetId && targetId !== draggingRectId) {
+      reorderRectangles(draggingRectId, targetId);
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleTouchEndRow = () => {
+    setDraggingRectId(null);
+  };
+
   const generateImageMapHtml = () => {
     if (!uploadedImage || rectangles.length === 0) return "<!-- 上传图片并创建区域后，HTML 代码将在这里显示 -->";
 
@@ -724,7 +809,7 @@ ${areas}
 
                     {/* Existing rectangles */}
                     {/* 显示时将原图像坐标缩放到预览区 */}
-                    {rectangles.map((rect) => {
+                    {rectangles.map((rect, index) => {
                       const {scaleX, scaleY} = getImageScale();
                       // 十字光标较为特殊（画框），在此处先处理
                       return (
@@ -740,6 +825,7 @@ ${areas}
                             height: Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY),
                             cursor: currentTool === "move" ? "move" : currentTool === "delete" ? "no-drop" : "pointer",
                             userSelect: "none",
+                            zIndex: rectangles.length - index,
                           }}
                         >
                           <div
@@ -1049,6 +1135,95 @@ ${areas}
                           />
                         </div>
                       </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {uploadedImage && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium">区域列表</h3>
+                  </div>
+
+                  {rectangles.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">还没有区域，先在预览区创建。</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {rectangles.map((rect, index) => (
+                        <div
+                          key={rect.id}
+                          className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 transition-colors ${
+                            selectedRect === rect.id ? "border-primary bg-primary/15" : "border-border bg-card"
+                          } ${draggingRectId === rect.id ? "opacity-70" : "hover:bg-primary/5"}`}
+                          onClick={() => setSelectedRect(rect.id)}
+                          onDragOver={(e) => handleDragOverRow(e, rect.id)}
+                          onDrop={(e) => handleDropOnRow(e, rect.id)}
+                          data-rect-row="true"
+                          data-rect-id={rect.id}
+                        >
+                          <div className="flex items-center gap-3">
+                            <button
+                              className="text-muted-foreground hover:text-foreground cursor-grab"
+                              onDragStart={(e) => handleDragStartRow(e, rect.id)}
+                              onDragEnd={handleDragEndRow}
+                              draggable
+                              aria-label="拖动以调整顺序"
+                              onTouchStart={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleTouchStartRow(rect.id);
+                              }}
+                              onTouchMove={(e) => {
+                                e.preventDefault();
+                                handleTouchMoveRow(e);
+                              }}
+                              onTouchEnd={(e) => {
+                                e.preventDefault();
+                                handleTouchEndRow();
+                              }}
+                              style={{touchAction: "none"}}
+                            >
+                              <GripVertical className="w-4 h-4"/>
+                            </button>
+                            <div className="flex flex-col">
+                              <span className={`text-sm font-medium truncate ${rect.alt ? "" : "italic"}`}>{rect.alt || `区域 ${index + 1}`}</span>
+                              <span className={`text-xs text-muted-foreground truncate ${rect.href ? "" : "italic"}`}>{rect.href || "未设置链接"}</span>
+                            </div>
+                          </div>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                                <MoreVertical className="w-4 h-4"/>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  duplicateRectangle(rect.id);
+                                }}
+                              >
+                                <Copy className="w-4 h-4"/>
+                                创建副本
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  deleteRectangle(rect.id);
+                                }}
+                              >
+                                <Trash className="w-4 h-4"/>
+                                删除
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </CardContent>
