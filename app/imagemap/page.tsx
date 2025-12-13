@@ -1120,7 +1120,7 @@ ${areas}
                 {uploadedImage ? (
                   <div
                     ref={containerRef}
-                    className={`relative w-full border-2 border-dashed border-muted-foreground rounded-lg touch-none select-none flex items-center justify-center
+                    className={`relative w-full touch-none select-none flex items-center justify-center
                     ${getCursorStyle() == "cursor-crosshair" ? "cursor-crosshair" : ""}`}
                     onMouseDown={handlePointerDown}
                     onMouseMove={handlePointerMove}
@@ -1147,7 +1147,7 @@ ${areas}
                     />
 
                     {/* 拖放状态显示 */}
-                    {isDraggingOver && <DragAndDropOverlay isDragAccepted={isDragAccept}
+                    {isDraggingOver && <DragAndDropOverlay isRounded={!uploadedImage} isDragAccepted={isDragAccept}
                                                            rejectReason={rejectReason}/>}
 
                     {/* Existing rectangles */}
@@ -1330,7 +1330,7 @@ ${areas}
                     </div>
 
                     {/* 拖放状态显示 */}
-                    {isDraggingOver && <DragAndDropOverlay isDragAccepted={isDragAccept}
+                    {isDraggingOver && <DragAndDropOverlay isRounded={!uploadedImage} isDragAccepted={isDragAccept}
                                                            rejectReason={rejectReason}/>}
                   </div>
                 )}
