@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 import Link from "next/link";
 import Logo from "@/components/logo";
 import { SiGithub, SiNetlify } from "@icons-pack/react-simple-icons";
@@ -28,6 +29,7 @@ export default function RootLayout({
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <Navbar/>
       <main>{children}</main>
+      <Toaster />
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
