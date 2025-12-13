@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -393,7 +393,10 @@ export default function EditorPage() {
 
   const MIN_RECT_SIZE = 20;
 
-  const selectedRectData = selectedRect ? rectangles.find((r) => r.id === selectedRect) ?? null : null;
+  const selectedRectData = useMemo(
+    () => selectedRect ? rectangles.find((r) => r.id === selectedRect) ?? null : null,
+    [selectedRect, rectangles]
+  );
 
   const toolOrder: EditorTool[] = ["select", "create", "delete"];
 
@@ -431,25 +434,8 @@ export default function EditorPage() {
     return clamp(Math.round(numeric), MIN_RECT_SIZE, max);
   };
 
-  // Keep manual input fields in sync with the latest rectangle data to avoid a one-step lag.
-  useEffect(() => {
-    if (!selectedRectData) return;
-
-    setLastPositionInput({
-      x: selectedRectData.x.toString(),
-      y: selectedRectData.y.toString(),
-    });
-    setLastSizeInput({
-      width: selectedRectData.width.toString(),
-      height: selectedRectData.height.toString(),
-    });
-  }, [
-    selectedRectData?.id,
-    selectedRectData?.x,
-    selectedRectData?.y,
-    selectedRectData?.width,
-    selectedRectData?.height,
-  ]);
+  // Update input fields only after operations complete (no auto-sync during drag/resize)
+  // This prevents performance issues from constant updates during interactions
 
   // 使用键盘移动区域与切换模式
   useEffect(() => {
@@ -531,14 +517,27 @@ export default function EditorPage() {
       }
 
       setRectangles((prev) => prev.map((r) => (r.id === selectedId ? {...r, x: newX, y: newY} : r)));
-      setLastPositionInput({x: newX.toString(), y: newY.toString()});
+      // Input fields will be updated automatically via useEffect when rectangles change
 
       event.preventDefault();
     };
 
+    const handleKeyUp = (event: KeyboardEvent) => {
+      // Update input fields after arrow key release
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+        if (selectedRectData && selectedRectRef.current === selectedRectData.id) {
+          setLastPositionInput({x: selectedRectData.x.toString(), y: selectedRectData.y.toString()});
+        }
+      }
+    };
+
     window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [imageSize.height, imageSize.width, toolOrder]);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handler);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [imageSize.height, imageSize.width, toolOrder, selectedRectData]);
 
   const calculateResizedRect = (rect: Rectangle, handle: ResizeHandle, deltaX: number, deltaY: number) => {
     let {x, y, width, height} = rect;
@@ -766,8 +765,7 @@ export default function EditorPage() {
         } : rect,
       ));
 
-      setLastPositionInput({x: resized.x.toString(), y: resized.y.toString()});
-      setLastSizeInput({width: resized.width.toString(), height: resized.height.toString()});
+      // Don't update input fields during drag - only update when drag ends in handlePointerUp
 
       if ("touches" in event) {
         event.preventDefault();
@@ -846,13 +844,23 @@ export default function EditorPage() {
     // 处理移动结束
     if (movingRect) {
       setMovingRect(null);
+      // Update input fields after movement is complete
+      const movedRect = rectangles.find(r => r.id === movingRect);
+      if (movedRect && selectedRect === movingRect) {
+        setLastPositionInput({x: movedRect.x.toString(), y: movedRect.y.toString()});
+      }
     }
 
-    // 处理缩放结束
+    // 处理缩放结束 - 更新输入字段
     if (resizingRect) {
       setResizingRect(null);
       setResizeHandle(null);
       setResizeStartRect(null);
+      // Update input fields after resize completes
+      if (selectedRectData) {
+        setLastPositionInput({x: selectedRectData.x.toString(), y: selectedRectData.y.toString()});
+        setLastSizeInput({width: selectedRectData.width.toString(), height: selectedRectData.height.toString()});
+      }
     }
   };
 
