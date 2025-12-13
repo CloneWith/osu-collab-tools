@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Code, MousePointer, Map, Square, Trash2, Keyboard } from "lucide-react";
+import { common } from "@/app/common";
 
 export default function DocsPage() {
   return (
@@ -32,7 +33,7 @@ export default function DocsPage() {
                 <li>安全：不想让除 Collab 成员以外的其他人知道？没问题！</li>
                 <li>集成：从小功能开始，逐步实现覆盖 Collab 流程的各步骤；</li>
               </ul>
-              <p>该项目的源代码可在 <a href="https://github.com/CloneWith/osu-collab-tools"
+              <p>该项目的源代码可在 <a href={common.repoUrl}
                                        className="doc-link">GitHub</a> 上查看，在此期待各位的反馈或贡献~
               </p>
             </CardContent>

@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Link from "next/link";
 import Logo from "@/components/logo";
 import { SiGithub, SiNetlify } from "@icons-pack/react-simple-icons";
+import { common } from "@/app/common";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -37,7 +38,7 @@ export default function RootLayout({
               </div>
               <p className="text-gray-400 mb-4">助力你做出还不错的 osu! 赛博合影</p>
               <div className="flex flex-row items-center space-x-2 mb-4">
-                <Link href="https://github.com/CloneWith/osu-collab-tools"
+                <Link href={common.repoUrl}
                       className="hover:text-white transition-colors text-gray-400 flex flex-row items-center space-x-2">
                   <SiGithub/>
                   <span>在 GitHub 查看</span>
