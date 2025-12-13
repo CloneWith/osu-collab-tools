@@ -1033,7 +1033,7 @@ ${areas}
 
   // 获取工具按钮的样式
   const getToolButtonClass = (tool: EditorTool) => {
-    return `p-2 rounded-md ${
+    return `p-2 rounded-md transition-all ease-out duration-200 ${
       currentTool === tool ? "bg-primary text-primary-foreground" : "bg-background text-foreground hover:bg-foreground/10"
     }`;
   };
@@ -1090,28 +1090,24 @@ ${areas}
                 <button
                   className={getToolButtonClass("select")}
                   onClick={() => setCurrentTool("select")}
-                  title="选择工具"
+                  title="选择"
                 >
                   <MousePointer className="w-5 h-5"/>
                 </button>
                 <button
                   className={getToolButtonClass("create")}
                   onClick={() => setCurrentTool("create")}
-                  title="创建工具"
+                  title="创建"
                 >
                   <Square className="w-5 h-5"/>
                 </button>
                 <button
                   className={getToolButtonClass("delete")}
                   onClick={() => setCurrentTool("delete")}
-                  title="删除工具"
+                  title="删除"
                 >
                   <Trash2 className="w-5 h-5"/>
                 </button>
-                <div className="border-l border-muted-foreground mx-1"></div>
-                <div className="text-sm text-muted-foreground flex items-center px-2">
-                  当前工具: {tool_names[currentTool]}
-                </div>
               </div>
             )}
 
