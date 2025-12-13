@@ -6,8 +6,9 @@ A simple online toolbox that makes it easier to create collab images.
 
 Currently only part of them are available:
 
-- [x] ImageMap Editor
-- [ ] Avatar Image Generator
+- [x] ImageMap Editor (Mostly stable, new features on the way)
+- [ ] Avatar Image Generator (Planning)
+- [ ] External tools collection
 - [ ] *More ideas to come up with*
 
 You can request more features by submitting an issue.
@@ -17,7 +18,9 @@ You can request more features by submitting an issue.
 ![Build Status on Netlify](https://api.netlify.com/api/v1/badges/e9267089-3b2b-4cd8-b9e9-6bddf234fb43/deploy-status)
 
 There is a live deployment by GitHub Pages [here](
-https://clonewith.github.io/osu-collab-tools/). If network conditions don't allow for access, you can try the following sites:
+https://clonewith.github.io/osu-collab-tools/), where You can always use the **latest** features!
+
+If network conditions don't allow for access, you can try the following sites:
 
 - [Cloudflare](https://osu-collab-tools.clonewith.workers.dev)
 - [Netlify](https://amaz1ng-c0llab-cw.netlify.app/) (Will not always be up to date with latest changes)
