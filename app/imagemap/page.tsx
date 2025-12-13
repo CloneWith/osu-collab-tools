@@ -42,6 +42,7 @@ import { common } from "@/app/common";
 import hljs from "highlight.js/lib/core";
 import html from "highlight.js/lib/languages/xml";
 import { HelpIconButton } from "@/components/help-icon-button";
+import { registerBBCodeHighlight } from "@/lib/hljs-support";
 
 interface Rectangle {
   id: string;
@@ -79,43 +80,6 @@ const tool_names = {
   "delete": "删除",
 };
 
-/**
- * 向 Highlight.js 注册 BBCode 解析库。
- * @author Paul Reid (https://github.com/highlightjs/highlightjs-bbcode/blob/master/bbcode.js)
- */
-function registerBBCodeHighlight() {
-  hljs.registerLanguage("bbcode", function (_) {
-    return {
-      case_insensitive: true,
-      contains: [
-        {
-          className: "name",
-          begin: /\[[^=\s\]]*/,
-        },
-        {
-          className: "name",
-          begin: "]",
-        },
-        {
-          className: "attribute",
-          begin: /(?<==)[^\]\s]*/,
-        },
-        {
-          className: "attr",
-          begin: /(?<=\[[^\]]* )[^\s=\]]*/,
-        },
-        {
-          className: "string",
-          begin: /[=;:8]'?\-?[\)\(3SPDO>@$|/]/,
-        },
-        {
-          className: "string",
-          begin: /:[\w]*:/,
-        },
-      ],
-    };
-  });
-}
 
 export default function EditorPage() {
   // 在 SSR / 构建阶段没有 window / localStorage
@@ -149,7 +113,7 @@ export default function EditorPage() {
   const [lastSizeInput, setLastSizeInput] = useState({width: "50", height: "50"});
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [windowResizeCounter, setWindowResizeCounter] = useState(0);
+  const [_, setWindowResizeCounter] = useState(0);
 
   // UI states
   const [contextMenu, setContextMenu] = useState<ContextMenuPosition>({
@@ -164,7 +128,6 @@ export default function EditorPage() {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isDragAccept, setIsDragAccept] = useState(false);
   const [rejectReason, setRejectReason] = useState<DnDRejectReason>(DnDRejectReason.Unknown);
-  const [dragDepth, setDragDepth] = useState(0);
 
   // Overwrite dialog state
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
@@ -301,22 +264,12 @@ export default function EditorPage() {
   const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    setDragDepth((d) => d + 1);
     setIsDraggingOver(true);
   };
 
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    setDragDepth((d) => {
-      const next = d - 1;
-      if (next <= 0) {
-        setIsDraggingOver(false);
-        setIsDragAccept(false);
-        return 0;
-      }
-      return next;
-    });
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -344,7 +297,6 @@ export default function EditorPage() {
     event.stopPropagation();
     setIsDraggingOver(false);
     setIsDragAccept(false);
-    setDragDepth(0);
 
     const files = event.dataTransfer?.files;
     if (!files || files.length === 0) return;
