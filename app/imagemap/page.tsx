@@ -220,6 +220,44 @@ export default function EditorPage() {
     };
   }, []);
 
+  // 监听图像元素尺寸变化与浏览器缩放（visualViewport），以在缩放时正确刷新坐标映射
+  useEffect(() => {
+    const imgEl = imageRef.current;
+
+    // 当图片渲染尺寸变化（例如 zoom 导致布局变化）时，触发刷新
+    const imgObserver = new ResizeObserver(() => {
+      setWindowResizeCounter((prev) => prev + 1);
+    });
+    if (imgEl) {
+      imgObserver.observe(imgEl);
+    }
+
+    // 部分浏览器支持 visualViewport，可用于捕获缩放事件
+    const vv = (window as any).visualViewport as VisualViewport | undefined;
+    const handleVVResize = () => setWindowResizeCounter((prev) => prev + 1);
+    if (vv) {
+      vv.addEventListener("resize", handleVVResize);
+      vv.addEventListener("scroll", handleVVResize); // 移动端缩放下视口偏移也会影响坐标
+    } else {
+      // 使用 window resize（多数浏览器缩放时也会触发）
+      const handleWindowResize = () => setWindowResizeCounter((prev) => prev + 1);
+      window.addEventListener("resize", handleWindowResize);
+      // 清理时移除该监听
+      return () => {
+        imgObserver.disconnect();
+        window.removeEventListener("resize", handleWindowResize);
+      };
+    }
+
+    return () => {
+      imgObserver.disconnect();
+      if (vv) {
+        vv.removeEventListener("resize", handleVVResize);
+        vv.removeEventListener("scroll", handleVVResize);
+      }
+    };
+  }, [uploadedImage]);
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
