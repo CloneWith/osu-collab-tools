@@ -149,6 +149,7 @@ export default function EditorPage() {
   const [lastSizeInput, setLastSizeInput] = useState({width: "50", height: "50"});
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [windowResizeCounter, setWindowResizeCounter] = useState(0);
 
   // UI states
   const [contextMenu, setContextMenu] = useState<ContextMenuPosition>({
@@ -201,6 +202,21 @@ export default function EditorPage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // 监听容器大小变化，重新计算图像显示位置和大小
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      // 触发重新渲染以更新区域位置和大小
+      setWindowResizeCounter((prev) => prev + 1);
+    });
+
+    resizeObserver.observe(containerRef.current);
+    return () => {
+      resizeObserver.disconnect();
     };
   }, []);
 
@@ -1053,12 +1069,12 @@ ${areas}
               </div>
             )}
 
-            <Card className="h-96 lg:h-[500px]">
-              <CardContent className="p-4 h-full">
+            <Card className={`${uploadedImage ? "h-auto" : "h-96"} lg:min-h-[500px]`}>
+              <CardContent className={`p-4 ${uploadedImage ? "h-auto" : "h-full"}`}>
                 {uploadedImage ? (
                   <div
                     ref={containerRef}
-                    className={`relative w-full border-2 border-dashed border-muted-foreground rounded-lg overflow-hidden touch-none select-none flex items-center justify-center
+                    className={`relative w-full border-2 border-dashed border-muted-foreground rounded-lg touch-none select-none flex items-center justify-center
                     ${getCursorStyle() == "cursor-crosshair" ? "cursor-crosshair" : ""}`}
                     onMouseDown={handlePointerDown}
                     onMouseMove={handlePointerMove}
