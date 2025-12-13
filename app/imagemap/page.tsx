@@ -1024,7 +1024,7 @@ ${areas}
         (rect) =>
           `${toPercent(rect.x, imageSize.width)} ${toPercent(rect.y, imageSize.height)}`
           + ` ${toPercent(rect.width, imageSize.width)} ${toPercent(rect.height, imageSize.height)}`
-          + ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${rect.alt.trim() === "" ? "" : ` ${rect.alt.trim()}`}`,
+          + ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${rect.alt.trim() === "" || ` ${rect.alt.trim()}`}`,
       )
       .join("\n");
 
@@ -1196,7 +1196,7 @@ ${areas}
                           key={rect.id}
                           className={`absolute border-2 bg-primary/20 select-none touch-manipulation transition-colors ease-out duration-200 ${
                             selectedRect === rect.id ? "border-primary border-4" : "border-primary/40"
-                          } ${isTouchDevice ? "min-w-[44px] min-h-[44px]" : ""} ${getCursorStyle()} ${currentTool === "delete" ? "hover:border-red-400" : ""}`}
+                          } ${isTouchDevice && "min-w-[44px] min-h-[44px]"} ${getCursorStyle()} ${currentTool === "delete" && "hover:border-red-400"}`}
                           style={{
                             left: rect.x / scaleX,
                             top: rect.y / scaleY,
@@ -1435,9 +1435,9 @@ ${areas}
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">
                               <span
-                                className={`text-sm font-medium text-left truncate ${rect.alt ? "" : "italic"}`}>{rect.alt || `区域 ${index + 1}`}</span>
+                                className={`text-sm font-medium text-left truncate ${rect.alt || "italic"}`}>{rect.alt || `区域 ${index + 1}`}</span>
                               <span
-                                className={`text-xs text-muted-foreground text-left truncate ${rect.href ? "" : "italic"}`}>{rect.href || "未设置链接"}</span>
+                                className={`text-xs text-muted-foreground text-left truncate ${rect.href || "italic"}`}>{rect.href || "未设置链接"}</span>
                             </div>
                           </div>
 
