@@ -1058,7 +1058,7 @@ ${areas}
                 {uploadedImage ? (
                   <div
                     ref={containerRef}
-                    className={`relative h-full border-2 border-dashed border-muted-foreground rounded-lg overflow-hidden touch-none select-none
+                    className={`relative w-full border-2 border-dashed border-muted-foreground rounded-lg overflow-hidden touch-none select-none flex items-center justify-center
                     ${getCursorStyle() == "cursor-crosshair" ? "cursor-crosshair" : ""}`}
                     onMouseDown={handlePointerDown}
                     onMouseMove={handlePointerMove}
@@ -1073,13 +1073,13 @@ ${areas}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     tabIndex={0}
-                    style={{touchAction: "none", userSelect: "none"}}
+                    style={{touchAction: "none", userSelect: "none", minHeight: "100%"}}
                   >
                     <img
                       ref={imageRef}
                       src={uploadedImage || "/placeholder.svg"}
                       alt="Uploaded"
-                      className="max-w-full max-h-full object-contain select-none"
+                      className="w-full object-contain select-none"
                       draggable={false}
                       style={{userSelect: "none"}}
                     />
