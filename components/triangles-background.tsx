@@ -41,6 +41,7 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
   const trianglesRef = useRef<Triangle[]>([]);
   const animationFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
+  const isPageVisibleRef = useRef<boolean>(true);
 
   // 生成符合正态分布的速度倍数
   const createSpeedMultiplier = useCallback((): number => {
@@ -147,7 +148,16 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const deltaTime = lastTimeRef.current === 0 ? 0 : currentTime - lastTimeRef.current;
+    // 计算时间差
+    let deltaTime = lastTimeRef.current === 0 ? 0 : currentTime - lastTimeRef.current;
+    
+    // 限制最大deltaTime，防止页面从后台返回时时间跳跃过大
+    // 限制为最多3帧的时间（假设60fps，即约50ms）
+    const maxDeltaTime = 50;
+    if (deltaTime > maxDeltaTime) {
+      deltaTime = maxDeltaTime;
+    }
+    
     lastTimeRef.current = currentTime;
 
     updateTriangles(canvas, deltaTime);
@@ -189,6 +199,26 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     reset();
   }, [reset]);
 
+  // 处理页面可见性变化
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // 页面进入后台
+        isPageVisibleRef.current = false;
+      } else {
+        // 页面返回前台，重置时间戳以避免时间跳跃
+        isPageVisibleRef.current = true;
+        lastTimeRef.current = 0;
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   // 初始化
   useEffect(() => {
     handleResize();
@@ -214,7 +244,11 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     <canvas
       ref={canvasRef}
       className={`pointer-events-none ${className}`}
-      style={{ display: 'block', width: '100%', height: '100%' }}
+      style={{ 
+        display: 'block', 
+        width: '100%', 
+        height: '100%'
+      }}
     />
   );
 };
