@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useCallback } from "react";
 import { EditorView, basicSetup } from "codemirror";
 import { EditorState } from "@codemirror/state";
 import { json } from "@codemirror/lang-json";
-import { keymap } from "@codemirror/view";
+import { keymap, EditorView as ViewExt } from "@codemirror/view";
 import { defaultKeymap, indentWithTab } from "@codemirror/commands";
 import { githubDark } from "@fsegurai/codemirror-theme-github-dark";
 
@@ -52,6 +52,8 @@ export function CodeMirrorEditor({
         basicSetup,
         json(),
         githubDark,
+        // 自动换行，避免横向溢出
+        ViewExt.lineWrapping,
         keymap.of([...defaultKeymap, indentWithTab]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
@@ -121,7 +123,7 @@ export function CodeMirrorEditor({
   return (
     <div
       ref={containerRef}
-      className={`w-full border border-gray-700 rounded-md overflow-y-scroll bg-gray-900 dark:bg-gray-950 ${className}`}
+      className={`w-full border border-gray-700 rounded-md overflow-y-auto overflow-x-hidden bg-gray-900 dark:bg-gray-950 ${className}`}
       style={{ height }}
     />
   );
