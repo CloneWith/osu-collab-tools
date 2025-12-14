@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Code, Keyboard, Map, MousePointer, Square, Trash2 } from "lucide-react";
+import { Code, Hash, Info, Keyboard, Map, MousePointer, Square, Trash2, TriangleAlert, UserRound } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ImagemapDocCard() {
   return (
@@ -65,6 +66,19 @@ export default function ImagemapDocCard() {
         <div className="space-y-2">
           <h3 className="font-semibold">3. 设置属性</h3>
           <p className="text-secondary-foreground">为每个区域设置链接地址和描述文本，也可继续调整位置与大小。</p>
+          <Alert>
+            <AlertTitle className="flex-title">
+              <Info />
+              <span>小提示</span>
+            </AlertTitle>
+            <AlertDescription>
+              你可以利用<b>用户信息</b>字段快速填入链接。在填入用户的 ID 或用户名后：
+              <ul className="list-disc list-inside space-y-1">
+                <li>使用 <Hash className="inline-block w-4 h-4"/> <b>作为 ID 填入</b> 填入对应 UID 的资料链接；</li>
+                <li>使用 <UserRound className="inline-block w-4 h-4"/> <b>作为用户名填入</b> 填入对应用户名的资料链接。</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
           <p className="text-secondary-foreground">所有区域在<b>区域列表</b>中统一显示，可以拖动左侧的控制柄调整所在层级。
           </p>
           <p className="text-secondary-foreground">与此同时，你可以在<b>图像属性</b>中修改要使用的图像地址与
@@ -109,6 +123,30 @@ export default function ImagemapDocCard() {
             </li>
             <li>预览页面并进行测试——大功告成！</li>
           </ol>
+        </div>
+      </CardContent>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Code className="w-5 h-5"/>
+          导入与导出配置
+        </CardTitle>
+        <CardDescription>保存或恢复工作</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Alert variant="warning">
+          <AlertTitle className="flex-title">
+            <TriangleAlert />
+            <span>注意</span>
+          </AlertTitle>
+          <AlertDescription>
+            <ul className="list-disc list-inside space-y-1">
+              <li>导出编辑器配置时，编辑的图像<b>不会</b>随之导出，导入时也是如此。因此在导入配置前，请确保加载了适合的图像。</li>
+              <li>从配置导入更改时，已有区域<b>会被覆盖</b>，配置文件中已有的设置会<b>覆盖</b>现有值。</li>
+            </ul>
+          </AlertDescription>
+        </Alert>
+        <div className="space-y-2">
+          支持将当前的编辑器配置导出为 JSON，或从 JSON 导入。导出的 JSON 含有 Imagemap 的所有基本信息，以及已定义的区域信息。
         </div>
       </CardContent>
       <CardHeader>
