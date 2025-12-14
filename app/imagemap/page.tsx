@@ -354,11 +354,12 @@ export default function EditorPage() {
   };
 
   const generateUserLinkFromId = (userId: number) => {
-    return `${server_link}/users/${userId}`;
+    return encodeURI(`${server_link}/users/${userId}`.toWellFormed());
   };
 
   const generateUserLinkFromName = (username: string) => {
-    return `${server_link}/u/${username}`;
+    // 注意替换空格 避免 BBCode 误识别
+    return encodeURI(`${server_link}/u/${username}`.toWellFormed());
   };
 
   const setSelectedRect = (id: string | null) => {
@@ -976,7 +977,7 @@ ${areas}
         (rect) =>
           `${toPercent(rect.x, imageSize.width)} ${toPercent(rect.y, imageSize.height)}`
           + ` ${toPercent(rect.width, imageSize.width)} ${toPercent(rect.height, imageSize.height)}`
-          + ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${rect.alt.trim() === "" || ` ${rect.alt.trim()}`}`,
+          + ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${rect.alt.trim() === "" ? "" : ` ${rect.alt.trim()}`}`,
       )
       .join("\n");
 
@@ -1305,8 +1306,12 @@ ${areas}
                       <label className="block text-sm font-medium mb-1">图片地址</label>
                       <input
                         type="url"
-                        defaultValue={imagePath ?? ""}
-                        onChange={(e) => setImagePath(e.target.value.trim() === "" ? null : e.target.value.trim())}
+                        value={imagePath ?? ""}
+                        onChange={(e) => setImagePath(e.target.value)}
+                        onBlur={(e) => {
+                          const value = e.target.value.trim();
+                          setImagePath(value === "" ? null : value);
+                        }}
                         className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
                           isTouchDevice ? "py-3 text-base" : ""
                         }`}
@@ -1316,8 +1321,12 @@ ${areas}
                     <div>
                       <label className="block text-sm font-medium mb-1">ImageMap 名称</label>
                       <input
-                        defaultValue={mapName ?? ""}
-                        onChange={(e) => setMapName(e.target.value.trim() === "" ? null : e.target.value.trim())}
+                        value={mapName ?? ""}
+                        onChange={(e) => setMapName(e.target.value)}
+                        onBlur={(e) => {
+                          const value = e.target.value.trim();
+                          setMapName(value === "" ? null : value);
+                        }}
                         className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
                           isTouchDevice ? "py-3 text-base" : ""
                         }`}
@@ -1494,7 +1503,8 @@ ${areas}
                           <label className="block text-sm font-medium mb-1">用户信息</label>
                           <input
                             value={userInfo}
-                            onChange={(e) => setUserInfo(e.target.value.trim())}
+                            onChange={(e) => setUserInfo(e.target.value)}
+                            onBlur={(e) => setUserInfo(e.target.value.trim())}
                             className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
                           />
                         </div>
@@ -1502,7 +1512,7 @@ ${areas}
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={userInfo.length == 0 || isNaN(Number(userInfo))}
+                            disabled={userInfo.trim().length == 0 || isNaN(Number(userInfo))}
                             onClick={() => updateRectangle(selectedRect, "href",
                               generateUserLinkFromId(Number(userInfo)))}
                             className="flex items-center gap-1"
@@ -1513,7 +1523,7 @@ ${areas}
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={userInfo.length == 0}
+                            disabled={userInfo.trim().length == 0}
                             onClick={() => updateRectangle(selectedRect, "href",
                               generateUserLinkFromName(userInfo))}
                             className="flex items-center gap-1"
