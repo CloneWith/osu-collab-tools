@@ -9,10 +9,14 @@
     "start": "next start"
   },
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/state": "^6.5.2",
+    "@fsegurai/codemirror-theme-github-dark": "^6.2.3",
     "@icons-pack/react-simple-icons": "^13.8.0",
     "animejs": "^4.2.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "codemirror": "^6.0.2",
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.525.0",
     "next": "^16.0.8",
