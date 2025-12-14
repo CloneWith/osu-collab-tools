@@ -23,12 +23,15 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   Code,
-  Copy, Eye,
+  Copy,
+  Download,
+  Eye,
   Hash,
   GripVertical,
   MousePointer,
   MoreVertical,
-  OctagonAlert, Settings,
+  OctagonAlert,
+  Settings,
   Square,
   Trash,
   Trash2,
@@ -43,16 +46,10 @@ import hljs from "highlight.js/lib/core";
 import html from "highlight.js/lib/languages/xml";
 import { HelpIconButton } from "@/components/help-icon-button";
 import { registerBBCodeHighlight } from "@/lib/hljs-support";
+import { ExportDialog } from "@/components/imagemap/export-dialog";
+import { ImportDialog } from "@/components/imagemap/import-dialog";
+import { Rectangle as RectangleType, ImageMapConfig } from "@/app/imagemap/types";
 
-interface Rectangle {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  href: string;
-  alt: string;
-}
 
 // 大小调整的八个点
 type ResizeHandle =
@@ -97,17 +94,17 @@ export default function EditorPage() {
   const [mapName, setMapName] = useState<string | null>(null);
 
   // Rectangle and drawing states
-  const [rectangles, setRectangles] = useState<Rectangle[]>([]);
+  const [rectangles, setRectangles] = useState<RectangleType[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({x: 0, y: 0});
-  const [currentRect, setCurrentRect] = useState<Rectangle | null>(null);
+  const [currentRect, setCurrentRect] = useState<RectangleType | null>(null);
   const [selectedRect, setSelectedRectId] = useState<string | null>(null);
   const [movingRect, setMovingRect] = useState<string | null>(null);
   const [moveOffset, setMoveOffset] = useState({x: 0, y: 0});
   const [resizingRect, setResizingRect] = useState<string | null>(null);
   const [resizeHandle, setResizeHandle] = useState<ResizeHandle | null>(null);
   const [resizeStartPoint, setResizeStartPoint] = useState({x: 0, y: 0});
-  const [resizeStartRect, setResizeStartRect] = useState<Rectangle | null>(null);
+  const [resizeStartRect, setResizeStartRect] = useState<RectangleType | null>(null);
   const [draggingRectId, setDraggingRectId] = useState<string | null>(null);
   const [lastPositionInput, setLastPositionInput] = useState({x: "0", y: "0"});
   const [lastSizeInput, setLastSizeInput] = useState({width: "50", height: "50"});
@@ -133,13 +130,17 @@ export default function EditorPage() {
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 
+  // Export & Import dialog states
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+
   const {toast} = useToast();
 
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const rectListRef = useRef<HTMLDivElement>(null);
-  const rectanglesRef = useRef<Rectangle[]>([]);
+  const rectanglesRef = useRef<RectangleType[]>([]);
   const selectedRectRef = useRef<string | null>(null);
 
   // 注册 hljs 语言
@@ -386,7 +387,7 @@ export default function EditorPage() {
 
   const selectedRectData = useMemo(
     () => selectedRect ? rectangles.find((r) => r.id === selectedRect) ?? null : null,
-    [selectedRect, rectangles]
+    [selectedRect, rectangles],
   );
 
   const toolOrder: EditorTool[] = ["select", "create", "delete"];
@@ -530,7 +531,7 @@ export default function EditorPage() {
     };
   }, [imageSize.height, imageSize.width, toolOrder, selectedRectData]);
 
-  const calculateResizedRect = (rect: Rectangle, handle: ResizeHandle, deltaX: number, deltaY: number) => {
+  const calculateResizedRect = (rect: RectangleType, handle: ResizeHandle, deltaX: number, deltaY: number) => {
     let {x, y, width, height} = rect;
 
     const clampWidth = (w: number, left: number) => clamp(w, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.width - left));
@@ -623,7 +624,7 @@ export default function EditorPage() {
   const duplicateRectangle = (id: string) => {
     const rectToDuplicate = rectangles.find((rect) => rect.id === id);
     if (rectToDuplicate) {
-      const newRect: Rectangle = {
+      const newRect: RectangleType = {
         ...rectToDuplicate,
         id: Date.now().toString(),
         x: rectToDuplicate.x + 20,
@@ -709,7 +710,7 @@ export default function EditorPage() {
 
         if (coords.x <= imageSize.width && coords.y <= imageSize.height) {
           setIsDrawing(true);
-          setStartPoint({ x: Math.round(coords.x), y: Math.round(coords.y) });
+          setStartPoint({x: Math.round(coords.x), y: Math.round(coords.y)});
         }
         break;
 
@@ -770,7 +771,7 @@ export default function EditorPage() {
       const width = Math.round(coords.x - startPoint.x);
       const height = Math.round(coords.y - startPoint.y);
 
-      const rect: Rectangle = {
+      const rect: RectangleType = {
         id: "temp",
         x: Math.round(Math.min(startPoint.x, coords.x)),
         y: Math.round(Math.min(startPoint.y, coords.y)),
@@ -812,7 +813,7 @@ export default function EditorPage() {
         return;
       }
 
-      const newRect: Rectangle = {
+      const newRect: RectangleType = {
         ...currentRect,
         id: Date.now().toString(),
         width: Math.round(Math.min(currentRect.width, imageSize.width - currentRect.x)),
@@ -855,7 +856,7 @@ export default function EditorPage() {
     }
   };
 
-  const updateRectangle = (id: string, field: keyof Rectangle,
+  const updateRectangle = (id: string, field: keyof RectangleType,
                            value: string, castToNumber: boolean = false) => {
     // Don't update if user needs a number, and we cannot convert the source value to one.
     if (castToNumber && isNaN(Number(value)))
@@ -984,6 +985,32 @@ ${areas}
     return `[imagemap]\n${imagePath ?? imageName ?? "your-image.jpg"}\n${areas}\n[/imagemap]`;
   };
 
+  // 生成导出数据
+  const generateExportData = (): ImageMapConfig => {
+    return {
+      imagePath: imagePath ?? undefined,
+      imageName: imageName ?? undefined,
+      mapName: mapName ?? undefined,
+      rectangles: rectangles,
+    };
+  };
+
+  // 处理导入数据
+  const handleImportData = (data: ImageMapConfig) => {
+    if (data.imagePath)
+      setImagePath(data.imagePath);
+
+    if (data.imageName)
+      setImageName(data.imageName);
+
+    if (data.mapName)
+      setMapName(data.mapName);
+
+    // 清空选中状态
+    setSelectedRect(null);
+    setRectangles(data.rectangles);
+  };
+
   // 获取工具按钮的样式
   const getToolButtonClass = (tool: EditorTool) => {
     return `p-2 rounded-md transition-all ease-out duration-200 ${
@@ -1010,7 +1037,7 @@ ${areas}
           <h1 className="flex-title text-3xl font-bold text-foreground mb-2">
             <span className="text-primary">ImageMap </span>
             <span>编辑器</span>
-            <HelpIconButton section="imagemap" />
+            <HelpIconButton section="imagemap"/>
           </h1>
           <p className="text-secondary-foreground">划定可点击区域，以便在个人资料等中使用</p>
         </div>
@@ -1289,10 +1316,37 @@ ${areas}
 
           {/* Setting Area */}
           <div className="space-y-4">
-            <h2 className="flex-title text-xl font-semibold">
-              <Settings/>
-              <span>设置区</span>
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="flex-title text-xl font-semibold">
+                <Settings/>
+                <span>设置区</span>
+              </h2>
+
+              {/* Import and export */}
+              <div className="flex items-end gap-2">
+                <Button
+                  onClick={() => setExportDialogOpen(true)}
+                  disabled={!uploadedImage}
+                  size="sm"
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Upload className="w-4 h-4"/>
+                  导出
+                </Button>
+                <Button
+                  onClick={() => setImportDialogOpen(true)}
+                  disabled={!uploadedImage}
+                  size="sm"
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4"/>
+                  导入
+                </Button>
+              </div>
+            </div>
+
 
             {/* Image Properties */}
             {uploadedImage && (
@@ -1616,17 +1670,25 @@ ${areas}
 
           {/* Code Area */}
           <div className="space-y-4">
-            <h2 className="flex-title text-xl font-semibold">
-              <Code/>
-              <span>代码区</span>
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="flex-title text-xl font-semibold">
+                <Code/>
+                <span>代码区</span>
+              </h2>
+            </div>
 
             {/* Generated Code */}
             <Card className="flex-1">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-medium">HTML 代码</h3>
-                  <Button onClick={() => navigator.clipboard.writeText(generateImageMapHtml())}
+                  <Button onClick={() => {
+                    navigator.clipboard.writeText(generateImageMapHtml())
+                      .then(() => toast({
+                        title: "已复制",
+                        description: "HTML 代码已复制到剪贴板",
+                      }));
+                  }}
                           disabled={rectangles.length === 0} size="sm">
                     <Copy className="w-4 h-4"/>
                     复制代码
@@ -1642,7 +1704,13 @@ ${areas}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-medium">BBCode 代码</h3>
-                  <Button onClick={() => navigator.clipboard.writeText(generateImageMapBBCode())}
+                  <Button onClick={() => {
+                    navigator.clipboard.writeText(generateImageMapBBCode())
+                      .then(() => toast({
+                        title: "已复制",
+                        description: "BBCode 代码已复制到剪贴板",
+                      }));
+                  }}
                           disabled={rectangles.length === 0} size="sm">
                     <Copy className="w-4 h-4"/>
                     复制代码
@@ -1685,6 +1753,20 @@ ${areas}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 导出对话框 */}
+      <ExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+        data={generateExportData()}
+      />
+
+      {/* 导入对话框 */}
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleImportData}
+      />
     </div>
   );
 }
