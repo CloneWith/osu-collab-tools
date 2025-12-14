@@ -44,18 +44,18 @@ export default function MainPage() {
         <div ref={root} className="relative min-h-screen hero flex flex-col">
             {/* Hero Section */}
             <section className="relative overflow-hidden">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-                    {/* 三角形背景 */}
-                    <div className="absolute inset-0 pointer-events-none">
-                        <TrianglesBackground
-                            color="#4a94e8"
-                            opacity={0.75}
-                            velocity={1.2 * 4 * 2}
-                            spawnRatio={0.8 / 2.5}
-                            thickness={0.015}
-                            className="w-full h-full text-accent"
-                        />
-                    </div>
+                {/* 三角形背景 */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <TrianglesBackground
+                        color="#4a94e8"
+                        opacity={0.75}
+                        velocity={1.2 * 4 * 2}
+                        spawnRatio={1.1 / 2.5}
+                        thickness={0.025}
+                        className="w-full h-full text-accent"
+                    />
+                </div>
+                <div className="w-full px-4 sm:px-6 lg:px-8 py-24 relative z-10 bg-muted/50">
                     <div className="text-center">
                         <h1 className="hero-title text-4xl md:text-6xl font-bold text-card-foreground mb-6">
                             这是一个
