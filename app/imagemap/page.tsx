@@ -39,7 +39,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { clamp } from "@/lib/utils";
+import { clamp, generateUserLinkFromId, generateUserLinkFromName } from "@/lib/utils";
 import DragAndDropOverlay, { DnDRejectReason } from "@/app/imagemap/dnd-overlay";
 import { common } from "@/app/common";
 import hljs from "highlight.js/lib/core";
@@ -79,11 +79,6 @@ const tool_names = {
 
 
 export default function EditorPage() {
-  // 在 SSR / 构建阶段没有 window / localStorage
-  const server_link = typeof window !== "undefined"
-    ? (localStorage.getItem("custom_endpoint") ?? common.defaultEndpoint)
-    : common.defaultEndpoint;
-
   // Image states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageName, setImageName] = useState<string | null>(null);
@@ -352,15 +347,6 @@ export default function EditorPage() {
       x: (touch.clientX - rect.left) * scaleX,
       y: (touch.clientY - rect.top) * scaleY,
     };
-  };
-
-  const generateUserLinkFromId = (userId: number) => {
-    return encodeURI(`${server_link}/users/${userId}`.toWellFormed());
-  };
-
-  const generateUserLinkFromName = (username: string) => {
-    // 注意替换空格 避免 BBCode 误识别
-    return encodeURI(`${server_link}/u/${username}`.toWellFormed());
   };
 
   const setSelectedRect = (id: string | null) => {
