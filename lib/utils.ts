@@ -26,3 +26,17 @@ export function generateUserLinkFromName(username: string) {
     // 注意替换空格 避免 BBCode 误识别
     return encodeURI(`${getServerLink()}/u/${username}`.toWellFormed());
 }
+
+/**
+ * Get a country flag image URL from ISO country code.
+ * Uses flagcdn.com SVG assets.
+ * - Normalizes to lowercase
+ * - Maps UK -> GB
+ */
+export function getCountryFlagUrl(code?: string): string | undefined {
+    if (!code) return undefined;
+    let normalized = code.trim().toLowerCase();
+    if (normalized === "uk") normalized = "gb";
+    // Some environments prefer PNG; using SVG keeps it crisp.
+    return `https://flagcdn.com/${normalized}.svg`;
+}
