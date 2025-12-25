@@ -7,7 +7,8 @@ A simple online toolbox that makes it easier to create collab images.
 Currently only part of them are available:
 
 - [x] ImageMap Editor (Mostly stable, new features on the way)
-- [ ] Avatar Image Generator (Planning)
+- [x] Avatar Image Generator (Beta, new features on the way)
+- [ ] Simple Collab Generator (Planning)
 - [ ] External tools collection
 - [ ] *More ideas to come up with*
 
