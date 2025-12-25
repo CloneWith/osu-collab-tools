@@ -87,6 +87,8 @@ export default function AvatarGeneratorPage() {
         description: err instanceof Error ? err.message : "未知错误",
         variant: "destructive",
       });
+
+      console.error("Error while generating card image.", err);
     }
   };
 
@@ -119,9 +121,9 @@ export default function AvatarGeneratorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="username">用户名</Label>
+                <Label htmlFor="user">用户名</Label>
                 <Input
-                  id="username"
+                  id="user"
                   placeholder="peppy"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
