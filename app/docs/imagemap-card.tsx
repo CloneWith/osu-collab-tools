@@ -105,7 +105,7 @@ export default function ImagemapDocCard() {
           <ol className="list-decimal list-inside space-y-1 text-secondary-foreground">
             <li>粘贴代码到资料编辑区；</li>
             <li>将生成代码中的 <code
-              className="bg-primary/50 px-1 rounded">图像链接</code> 替换为实际上传图像的链接；
+              className="inline-code">图像链接</code> 替换为实际上传图像的链接；
             </li>
             <li>预览资料，测试 ImageMap 是否正常显示，各区域是否对应正确——大功告成！</li>
           </ol>
@@ -113,13 +113,11 @@ export default function ImagemapDocCard() {
         <div className="space-y-2">
           <h3 className="font-semibold">使用 HTML</h3>
           <ol className="list-decimal list-inside space-y-1 text-secondary-foreground">
-            <li>粘贴 HTML 代码，其应包含 <code
-              className="bg-primary/50 px-1 rounded">&lt;img&gt;</code> 与{" "}
-              <code className="bg-primary/50 px-1 rounded">&lt;map&gt;</code> 两个标签；
+            <li>粘贴 HTML 代码，其应包含 <code className="inline-code">&lt;img&gt;</code> 与{" "}
+              <code className="inline-code">&lt;map&gt;</code> 两个标签；
             </li>
-            <li>按需修改 <code
-              className="bg-primary/50 px-1 rounded">src</code>（图像链接）与 <code
-              className="bg-primary/50 px-1 rounded">alt</code>（图像备注）属性；
+            <li>按需修改 <code className="inline-code">src</code>（图像链接）与 <code
+              className="inline-code">alt</code>（图像备注）属性；
             </li>
             <li>预览页面并进行测试——大功告成！</li>
           </ol>

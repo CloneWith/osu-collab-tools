@@ -1,5 +1,6 @@
 import InfoDocCard from "@/app/docs/info-card";
 import ImagemapDocCard from "@/app/docs/imagemap-card";
+import AvatarDocCard from "@/app/docs/avatar-card";
 
 export default function DocsPage() {
   return (
@@ -15,6 +16,9 @@ export default function DocsPage() {
         <div className="space-y-8">
           {/* Section - 站点简介 */}
           <InfoDocCard/>
+
+          {/* Section - Avatar Generator */}
+          <AvatarDocCard/>
 
           {/* Section - ImageMap Editor */}
           <ImagemapDocCard/>

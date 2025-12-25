@@ -134,6 +134,10 @@
     @apply flex flex-row items-center space-x-2;
   }
 
+  .inline-code {
+    @apply bg-primary/50 px-1 rounded;
+  }
+
   kbd {
     @apply bg-muted text-foreground;
     display: inline-block;
@@ -150,5 +154,13 @@
     @apply bg-gray-800;
     border-color: hsl(var(--border));
     box-shadow: inset 0 -1px 0 hsl(var(--muted-foreground) / 0.45);
+  }
+
+  /**
+   * Change the display style of images to prevent mispositioning of them in canvas caused by preflight.
+   * Details: https://stackoverflow.com/questions/74980740/html2canvas-shifting-text-downwards
+   */
+  img {
+    @apply inline-block;
   }
 }
