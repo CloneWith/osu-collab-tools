@@ -16,7 +16,7 @@ import type { IAvatarStyle, AvatarInputs } from "./styles/IAvatarStyle";
 import { ClassicAvatarStyle } from "./styles/ClassicAvatarStyle";
 import { Eye, Settings, Download } from "lucide-react";
 import { HelpIconButton } from "@/components/help-icon-button";
-import html2canvas from "html2canvas";
+import html2canvas from "@/lib/html2canvas";
 import { useToast } from "@/hooks/use-toast";
 
 // 注册所有可用样式
