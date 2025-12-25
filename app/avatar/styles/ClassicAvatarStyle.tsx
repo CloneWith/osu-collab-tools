@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { IAvatarStyle, AvatarInputs } from "./IAvatarStyle";
-import { getCountryFlagUrl } from "@/lib/utils";
+import { getCountryFlagUrl, getProxiedImageUrl } from "@/lib/utils";
 
 export class ClassicAvatarStyle implements IAvatarStyle {
   name = "经典";
@@ -20,9 +20,10 @@ export class ClassicAvatarStyle implements IAvatarStyle {
         }}
         className="flex flex-col items-center"
       >
-        <img
-          src={inputs.imageUrl}
+          <img
+            src={getProxiedImageUrl(inputs.imageUrl)}
           alt={inputs.username}
+          crossOrigin="anonymous"
           style={{width, height}}
           className="mt-8 border-white border-8 shadow-md object-cover"
         />
@@ -40,9 +41,10 @@ export class ClassicAvatarStyle implements IAvatarStyle {
 
         {inputs.countryCode ? (
           <img
-            src={getCountryFlagUrl(inputs.countryCode)}
+            src={getProxiedImageUrl(getCountryFlagUrl(inputs.countryCode))}
             alt={inputs.countryCode}
-            style={{height: 26}}
+            crossOrigin="anonymous"
+            style={{ height: 26 }}
             className="mt-2 mb-5 object-cover rounded-md"
           />
         ) : null}

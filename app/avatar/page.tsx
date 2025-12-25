@@ -11,9 +11,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import type { IAvatarStyle, AvatarInputs } from "./styles/IAvatarStyle";
 import { ClassicAvatarStyle } from "./styles/ClassicAvatarStyle";
-import { Eye, Settings } from "lucide-react";
+import { Eye, Settings, Download } from "lucide-react";
+import { HelpIconButton } from "@/components/help-icon-button";
+import html2canvas from "html2canvas";
+import { useToast } from "@/hooks/use-toast";
 
 // 注册所有可用样式
 const STYLE_REGISTRY = [
@@ -23,6 +27,8 @@ const STYLE_REGISTRY = [
 type StyleKey = typeof STYLE_REGISTRY[number]["key"];
 
 export default function AvatarGeneratorPage() {
+  const {toast} = useToast();
+
   const [styleKey, setStyleKey] = useState<StyleKey>(STYLE_REGISTRY[0].key);
   const selectedStyle = STYLE_REGISTRY.find(s => s.key === styleKey)!.style;
 
@@ -61,15 +67,38 @@ export default function AvatarGeneratorPage() {
     requestAnimationFrame(measure);
   }, [previewEl]);
 
+  const handleDownload = async () => {
+    if (!previewRef.current?.firstElementChild) return;
+    try {
+      const canvas = await html2canvas(previewRef.current.firstElementChild as HTMLElement, {
+        backgroundColor: null,
+        imageTimeout: 3000,
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+      });
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = `avatar-${username}-${new Date().getTime()}.png`;
+      link.click();
+    } catch (err) {
+      toast({
+        title: "下载失败",
+        description: err instanceof Error ? err.message : "未知错误",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            <span className="text-primary">资料图</span>
-            生成
+          <h1 className="flex-title text-3xl font-bold text-foreground mb-2">
+            <span><span className="text-primary">头像卡片</span>生成</span>
+            <HelpIconButton section="avatar"/>
           </h1>
-          <p className="text-secondary-foreground">生成各种样式的资料图</p>
+          <p className="text-secondary-foreground">生成各种样式的用户头像卡片</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -83,7 +112,7 @@ export default function AvatarGeneratorPage() {
                 <Label htmlFor="imageUrl">头像图片链接</Label>
                 <Input
                   id="imageUrl"
-                  placeholder="https://example.com/avatar.jpg"
+                  placeholder="https://a.ppy.sh/<用户 ID>"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                 />
@@ -128,12 +157,27 @@ export default function AvatarGeneratorPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex-title gap-2"><Eye/>预览</CardTitle>
-              <CardDescription>
-                {previewEl
-                  ? `大小：${previewSize?.width ?? selectedStyle.size.width} × ${previewSize?.height ?? selectedStyle.size.height}`
-                  : "在这里查看生成的头像"}
-              </CardDescription>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="flex-title gap-2"><Eye/>预览</CardTitle>
+                  <CardDescription>
+                    {previewEl
+                      ? `大小：${previewSize?.width ?? selectedStyle.size.width} × ${previewSize?.height ?? selectedStyle.size.height}`
+                      : "在这里查看生成的头像"}
+                  </CardDescription>
+                </div>
+                {previewEl && (
+                  <Button
+                    onClick={handleDownload}
+                    size="sm"
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    下载
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <div ref={previewRef} className="flex items-center justify-center select-none">

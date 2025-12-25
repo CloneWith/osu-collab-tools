@@ -40,3 +40,20 @@ export function getCountryFlagUrl(code?: string): string | undefined {
     // Some environments prefer PNG; using SVG keeps it crisp.
     return `https://flagcdn.com/${normalized}.svg`;
 }
+
+/**
+ * Build a proxied URL for images to avoid CORS issues
+ * when rendering them to canvas.
+ */
+export function getProxiedImageUrl(url?: string): string | undefined {
+    if (!url) return undefined;
+    try {
+        // External image proxy compatible with static export
+        // wsrv.nl provides CORS-enabled image responses
+        const encoded = encodeURIComponent(url);
+        // keep original dimensions; no transformation params
+        return `https://wsrv.nl/?url=${encoded}`;
+    } catch {
+        return undefined;
+    }
+}
