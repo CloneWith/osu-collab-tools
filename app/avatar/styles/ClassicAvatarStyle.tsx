@@ -20,12 +20,16 @@ export class ClassicAvatarStyle implements IAvatarStyle {
         }}
         className="flex flex-col items-center"
       >
-          <img
-            src={getProxiedImageUrl(inputs.imageUrl)}
+        <img
+          src={getProxiedImageUrl(inputs.imageUrl)}
           alt={inputs.username}
           crossOrigin="anonymous"
-          style={{width, height}}
-          className="mt-8 border-white border-8 shadow-md object-cover"
+          style={{
+            width,
+            height,
+            boxShadow: "0 0 4px 2px rgba(0, 0, 0, 0.2)"
+          }}
+          className="mt-8 border-white border-8 object-cover"
         />
 
         <div
@@ -44,7 +48,7 @@ export class ClassicAvatarStyle implements IAvatarStyle {
             src={getProxiedImageUrl(getCountryFlagUrl(inputs.countryCode))}
             alt={inputs.countryCode}
             crossOrigin="anonymous"
-            style={{ height: 26 }}
+            style={{height: 26}}
             className="mt-2 mb-5 object-cover rounded-md"
           />
         ) : null}
