@@ -16,7 +16,7 @@ ij_smart_tabs = false
 ij_visual_guides = 
 ij_wrap_on_typing = false
 
-[{*.jsx,*.tsx,*.css}]
+[{*.jsx,*.tsx,*.css,package.json,package-lock.json}]
 indent_size = 2
 ij_continuation_indent_size = 2
 

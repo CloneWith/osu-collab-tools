@@ -16,12 +16,12 @@ import type { IAvatarStyle, AvatarInputs } from "./styles/IAvatarStyle";
 import { ClassicAvatarStyle } from "./styles/ClassicAvatarStyle";
 import { Eye, Settings, Download } from "lucide-react";
 import { HelpIconButton } from "@/components/help-icon-button";
-import html2canvas from "@/lib/html2canvas";
 import { useToast } from "@/hooks/use-toast";
+import { snapdom } from "@zumer/snapdom";
 
 // 注册所有可用样式
 const STYLE_REGISTRY = [
-  { key: "classic", style: new ClassicAvatarStyle() as IAvatarStyle },
+  {key: "classic", style: new ClassicAvatarStyle() as IAvatarStyle},
 ] as const;
 
 type StyleKey = typeof STYLE_REGISTRY[number]["key"];
@@ -63,32 +63,26 @@ export default function AvatarGeneratorPage() {
       setPreviewSize(null);
       return;
     }
-    const measure = () => setPreviewSize({ width: child.offsetWidth, height: child.offsetHeight });
+    const measure = () => setPreviewSize({width: child.offsetWidth, height: child.offsetHeight});
     requestAnimationFrame(measure);
   }, [previewEl]);
 
   const handleDownload = async () => {
     if (!previewRef.current?.firstElementChild) return;
+
     try {
-      const canvas = await html2canvas(previewRef.current.firstElementChild as HTMLElement, {
-        backgroundColor: null,
-        imageTimeout: 3000,
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
+      const result = await snapdom(previewRef.current?.firstElementChild as HTMLElement);
+      await result.download({
+        filename: `avatar-${username}-${new Date().getTime()}.png`,
       });
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = `avatar-${username}-${new Date().getTime()}.png`;
-      link.click();
-    } catch (err) {
+    } catch (e) {
       toast({
         title: "下载失败",
-        description: err instanceof Error ? err.message : "未知错误",
+        description: e instanceof Error ? e.message : "未知错误",
         variant: "destructive",
       });
 
-      console.error("Error while generating card image.", err);
+      console.error("Error while generating card image.", e);
     }
   };
 
@@ -144,10 +138,10 @@ export default function AvatarGeneratorPage() {
                 <Label>头像样式</Label>
                 <Select value={styleKey} onValueChange={(v) => setStyleKey(v as StyleKey)}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="选择一种样式" />
+                    <SelectValue placeholder="选择一种样式"/>
                   </SelectTrigger>
                   <SelectContent>
-                    {STYLE_REGISTRY.map(({ key, style }) => (
+                    {STYLE_REGISTRY.map(({key, style}) => (
                       <SelectItem key={key} value={key}>{style.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -175,7 +169,7 @@ export default function AvatarGeneratorPage() {
                     variant="outline"
                     className="gap-2"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4"/>
                     下载
                   </Button>
                 )}
