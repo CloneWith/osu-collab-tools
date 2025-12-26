@@ -36,6 +36,10 @@ export default function AvatarGeneratorPage() {
   const [username, setUsername] = useState<string>("");
   const [countryCode, setCountryCode] = useState<string>("");
 
+  // 缓冲输入
+  const [inputImageUrl, setInputImageUrl] = useState<string>("");
+  const [inputCountryCode, setInputCountryCode] = useState<string>("");
+  const reloadTimerRef = useRef<NodeJS.Timeout>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [previewSize, setPreviewSize] = useState<{ width: number; height: number } | null>(null);
 
@@ -66,6 +70,17 @@ export default function AvatarGeneratorPage() {
     const measure = () => setPreviewSize({width: child.offsetWidth, height: child.offsetHeight});
     requestAnimationFrame(measure);
   }, [previewEl]);
+
+  // 头像与旗子的延时更新
+  useEffect(() => {
+    if (reloadTimerRef.current !== null)
+      clearTimeout(reloadTimerRef.current);
+
+    reloadTimerRef.current = setTimeout(() => {
+      setImageUrl(inputImageUrl);
+      setCountryCode(inputCountryCode);
+    }, 300);
+  }, [inputImageUrl, inputCountryCode]);
 
   const handleDownload = async () => {
     if (!previewRef.current?.firstElementChild) return;
@@ -109,8 +124,9 @@ export default function AvatarGeneratorPage() {
                 <Input
                   id="imageUrl"
                   placeholder="https://a.ppy.sh/<用户 ID>"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
+                  value={inputImageUrl}
+                  onChange={(e) => setInputImageUrl(e.target.value)}
+                  onBlur={_ => setImageUrl(inputImageUrl)}
                 />
               </div>
 
@@ -129,8 +145,9 @@ export default function AvatarGeneratorPage() {
                 <Input
                   id="countryCode"
                   placeholder="两位地区码"
-                  value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value)}
+                  value={inputCountryCode}
+                  onChange={(e) => setInputCountryCode(e.target.value)}
+                  onBlur={_ => setCountryCode(inputCountryCode)}
                 />
               </div>
 
