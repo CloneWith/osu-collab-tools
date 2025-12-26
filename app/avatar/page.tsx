@@ -18,10 +18,12 @@ import { Eye, Settings, Download } from "lucide-react";
 import { HelpIconButton } from "@/components/help-icon-button";
 import { useToast } from "@/hooks/use-toast";
 import { snapdom } from "@zumer/snapdom";
+import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
 
 // 注册所有可用样式
 const STYLE_REGISTRY = [
   {key: "classic", style: new ClassicAvatarStyle() as IAvatarStyle},
+  {key: "simple", style: new SimpleAvatarStyle() as IAvatarStyle},
 ] as const;
 
 type StyleKey = typeof STYLE_REGISTRY[number]["key"];
