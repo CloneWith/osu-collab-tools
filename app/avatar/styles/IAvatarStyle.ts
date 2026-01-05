@@ -1,7 +1,7 @@
 /**
  * Represents a specific style of avatar.
  */
-import type { ReactElement } from "react";
+import React from "react";
 
 /**
  * Inputs required to generate an avatar preview/component.
@@ -46,8 +46,8 @@ export interface IAvatarStyle {
     }
 
     /**
-     * Generate a React element representing the avatar preview
+     * Generate a React component representing the avatar preview
      * for the given inputs, honoring this style's size and defaults.
      */
-    generateAvatar(inputs: AvatarInputs): ReactElement
+    generateAvatar: (inputs: AvatarInputs) => React.FC;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -32,7 +32,7 @@ export default function AvatarGeneratorPage() {
   const {toast} = useToast();
 
   const [styleKey, setStyleKey] = useState<StyleKey>(STYLE_REGISTRY[0].key);
-  const selectedStyle = STYLE_REGISTRY.find(s => s.key === styleKey)!.style;
+  const selectedStyle = STYLE_REGISTRY.find(s => s.key === styleKey)?.style;
 
   const [imageUrl, setImageUrl] = useState<string>("");
   const [username, setUsername] = useState<string>("");
@@ -54,8 +54,11 @@ export default function AvatarGeneratorPage() {
   const previewEl = useMemo(() => {
     try {
       if (!imageUrl || !username) return null;
-      return selectedStyle.generateAvatar(inputs);
+      const AvatarComponent = selectedStyle?.generateAvatar(inputs);
+      return AvatarComponent ? <AvatarComponent /> : null;
     } catch (e) {
+      console.error("Error in preview generation.", e);
+
       return (
         <div className="text-destructive text-sm">生成预览时出现问题。</div>
       );
@@ -90,7 +93,7 @@ export default function AvatarGeneratorPage() {
     try {
       const result = await snapdom(previewRef.current?.firstElementChild as HTMLElement);
       await result.download({
-        filename: `avatar-${username}-${new Date().getTime()}.png`,
+        filename: `avatar-${username}-${Date.now()}.png`,
       });
     } catch (e) {
       toast({
@@ -165,7 +168,7 @@ export default function AvatarGeneratorPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <div className="text-sm text-muted-foreground">{selectedStyle.description}</div>
+                <div className="text-sm text-muted-foreground">{selectedStyle?.description ?? "<无描述>"}</div>
               </div>
             </CardContent>
           </Card>
@@ -176,8 +179,8 @@ export default function AvatarGeneratorPage() {
                 <div>
                   <CardTitle className="flex-title gap-2"><Eye/>预览</CardTitle>
                   <CardDescription>
-                    {previewEl
-                      ? `大小：${previewSize?.width ?? selectedStyle.size.width} × ${previewSize?.height ?? selectedStyle.size.height}`
+                    {previewEl && previewSize
+                      ? `大小：${previewSize?.width} × ${previewSize?.height}`
                       : "在这里查看生成的头像"}
                   </CardDescription>
                 </div>
