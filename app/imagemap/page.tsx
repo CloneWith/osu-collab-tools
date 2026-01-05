@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import type { ReactElement } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,10 +27,10 @@ import {
   Copy,
   Download,
   Eye,
-  Hash,
   GripVertical,
-  MousePointer,
+  Hash,
   MoreVertical,
+  MousePointer,
   OctagonAlert,
   Settings,
   Square,
@@ -48,8 +49,7 @@ import { HelpIconButton } from "@/components/help-icon-button";
 import { registerBBCodeHighlight } from "@/lib/hljs-support";
 import { ExportDialog } from "@/components/imagemap/export-dialog";
 import { ImportDialog } from "@/components/imagemap/import-dialog";
-import { Rectangle as RectangleType, ImageMapConfig } from "@/app/imagemap/types";
-
+import type { ImageMapConfig, Rectangle as RectangleType } from "@/app/imagemap/types";
 
 // 大小调整的八个点
 type ResizeHandle =
@@ -69,13 +69,19 @@ interface ContextMenuPosition {
   targetId: string | null;
 }
 
-type EditorTool = "select" | "create" | "delete"
+interface Tool {
+  key: string;
+  name: string;
+  icon: ReactElement;
+}
 
-const tool_names = {
-  "select": "选择",
-  "create": "创建",
-  "delete": "删除",
-};
+const tools: Tool[] = [
+  {key: "select", name: "选择", icon: <MousePointer className="w-5 h-5"/>},
+  {key: "create", name: "创建", icon: <Square className="w-5 h-5"/>},
+  {key: "delete", name: "删除", icon: <Trash2 className="w-5 h-5"/>},
+];
+
+type EditorTool = Tool["key"];
 
 
 export default function EditorPage() {
@@ -241,7 +247,7 @@ export default function EditorPage() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const source = e.target?.result as string;
-      const img = new Image();
+      const img = document.createElement('img');
 
       img.onload = () => {
         const {naturalWidth, naturalHeight} = img;
@@ -376,8 +382,6 @@ export default function EditorPage() {
     [selectedRect, rectangles],
   );
 
-  const toolOrder: EditorTool[] = ["select", "create", "delete"];
-
   const positionBounds = selectedRectData
     ? {
       maxX: Math.max(0, imageSize.width - selectedRectData.width),
@@ -396,7 +400,7 @@ export default function EditorPage() {
     if (!selectedRectData || value.trim() === "") return null;
 
     const numeric = Number(value);
-    if (isNaN(numeric)) return null;
+    if (Number.isNaN(numeric)) return null;
 
     const max = field === "x" ? positionBounds.maxX : positionBounds.maxY;
     return clamp(Math.round(numeric), 0, max);
@@ -406,7 +410,7 @@ export default function EditorPage() {
     if (!selectedRectData || value.trim() === "") return null;
 
     const numeric = Number(value);
-    if (isNaN(numeric)) return null;
+    if (Number.isNaN(numeric)) return null;
 
     const max = field === "width" ? sizeBounds.maxWidth : sizeBounds.maxHeight;
     return clamp(Math.round(numeric), MIN_RECT_SIZE, max);
@@ -425,8 +429,8 @@ export default function EditorPage() {
       // 模式切换
       if (event.altKey && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
         const index = Number(event.key) - 1;
-        if (index >= 0 && index < toolOrder.length) {
-          setCurrentTool(toolOrder[index]);
+        if (index >= 0 && index < tools.length) {
+          setCurrentTool(tools[index].key);
           event.preventDefault();
         }
         return;
@@ -515,7 +519,7 @@ export default function EditorPage() {
       window.removeEventListener("keydown", handler);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [imageSize.height, imageSize.width, toolOrder, selectedRectData]);
+  }, [imageSize.height, imageSize.width, selectedRectData]);
 
   const calculateResizedRect = (rect: RectangleType, handle: ResizeHandle, deltaX: number, deltaY: number) => {
     let {x, y, width, height} = rect;
@@ -667,18 +671,18 @@ export default function EditorPage() {
 
     const coords = "touches" in event ? getTouchCoordinates(event) : getRelativeCoordinates(event as React.MouseEvent);
 
+    // 检查是否点击在矩形上
+    const clickedRect = rectangles.find(
+      (rect) =>
+        coords.x >= rect.x &&
+        coords.x <= rect.x + rect.width &&
+        coords.y >= rect.y &&
+        coords.y <= rect.y + rect.height,
+    );
+
     // 根据当前工具执行不同操作
     switch (currentTool) {
       case "select":
-        // 检查是否点击在矩形上
-        const clickedRect = rectangles.find(
-          (rect) =>
-            coords.x >= rect.x &&
-            coords.x <= rect.x + rect.width &&
-            coords.y >= rect.y &&
-            coords.y <= rect.y + rect.height,
-        );
-
         if (clickedRect) {
           setMovingRect(clickedRect.id);
           setMoveOffset({
@@ -701,17 +705,8 @@ export default function EditorPage() {
         break;
 
       case "delete":
-        // 检查是否点击在矩形上以删除
-        const rectToDelete = rectangles.find(
-          (rect) =>
-            coords.x >= rect.x &&
-            coords.x <= rect.x + rect.width &&
-            coords.y >= rect.y &&
-            coords.y <= rect.y + rect.height,
-        );
-
-        if (rectToDelete) {
-          deleteRectangle(rectToDelete.id);
+        if (clickedRect) {
+          deleteRectangle(clickedRect.id);
         }
         break;
     }
@@ -1053,27 +1048,18 @@ ${areas}
             {/* 工具栏 */}
             {uploadedImage && (
               <div className="bg-card rounded-md shadow p-1 flex space-x-1 select-none">
-                <button
-                  className={getToolButtonClass("select")}
-                  onClick={() => setCurrentTool("select")}
-                  title="选择"
-                >
-                  <MousePointer className="w-5 h-5"/>
-                </button>
-                <button
-                  className={getToolButtonClass("create")}
-                  onClick={() => setCurrentTool("create")}
-                  title="创建"
-                >
-                  <Square className="w-5 h-5"/>
-                </button>
-                <button
-                  className={getToolButtonClass("delete")}
-                  onClick={() => setCurrentTool("delete")}
-                  title="删除"
-                >
-                  <Trash2 className="w-5 h-5"/>
-                </button>
+                {
+                  tools.map((tool) => (
+                    <button
+                      key={tool.key}
+                      className={getToolButtonClass(tool.key)}
+                      onClick={() => setCurrentTool(tool.key)}
+                      title={tool.name}
+                    >
+                      {tool.icon}
+                    </button>
+                  ))
+                }
               </div>
             )}
 
@@ -1083,7 +1069,7 @@ ${areas}
                   <div
                     ref={containerRef}
                     className={`relative w-full touch-none select-none flex items-center justify-center
-                    ${getCursorStyle() == "cursor-crosshair" ? "cursor-crosshair" : ""}`}
+                    ${getCursorStyle() === "cursor-crosshair" ? "cursor-crosshair" : ""}`}
                     onMouseDown={handlePointerDown}
                     onMouseMove={handlePointerMove}
                     onMouseUp={handlePointerUp}
@@ -1185,22 +1171,20 @@ ${areas}
                             </div>}
 
                           {selectedRect === rect.id && (
-                            <>
-                              {handleConfigs.map((item) => (
-                                <div
-                                  key={item.handle}
-                                  className="absolute bg-primary border border-white shadow-sm"
-                                  style={{
-                                    ...item.style,
-                                    width: handleSize,
-                                    height: handleSize,
-                                    cursor: item.cursor,
-                                  }}
-                                  onMouseDown={(e) => handleResizeStart(e, rect.id, item.handle)}
-                                  onTouchStart={(e) => handleResizeStart(e, rect.id, item.handle)}
-                                />
-                              ))}
-                            </>
+                            handleConfigs.map((item) => (
+                              <div
+                                key={item.handle}
+                                className="absolute bg-primary border border-white shadow-sm"
+                                style={{
+                                  ...item.style,
+                                  width: handleSize,
+                                  height: handleSize,
+                                  cursor: item.cursor,
+                                }}
+                                onMouseDown={(e) => handleResizeStart(e, rect.id, item.handle)}
+                                onTouchStart={(e) => handleResizeStart(e, rect.id, item.handle)}
+                              />
+                            ))
                           )}
                         </div>
                       );
@@ -1552,7 +1536,7 @@ ${areas}
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={userInfo.trim().length == 0 || isNaN(Number(userInfo))}
+                            disabled={userInfo.trim().length === 0 || Number.isNaN(Number(userInfo))}
                             onClick={() => updateRectangle(selectedRect, "href",
                               generateUserLinkFromId(Number(userInfo)))}
                             className="flex items-center gap-1"
@@ -1563,7 +1547,7 @@ ${areas}
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={userInfo.trim().length == 0}
+                            disabled={userInfo.trim().length === 0}
                             onClick={() => updateRectangle(selectedRect, "href",
                               generateUserLinkFromName(userInfo))}
                             className="flex items-center gap-1"
