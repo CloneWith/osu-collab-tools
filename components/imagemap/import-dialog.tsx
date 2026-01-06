@@ -39,10 +39,11 @@ export function ImportDialog({open, onOpenChange, onImport}: ImportDialogProps) 
     // 验证 JSON 语法和数据结构
     try {
       const parsed = JSON.parse(jsonInput);
+      const result = validateImageMapConfig(parsed);
 
       // 验证数据结构
-      if (!validateImageMapConfig(parsed)) {
-        setValidationError("数据结构不符合要求");
+      if (!result.success) {
+        setValidationError(result.message ?? "配置文件无效");
         return;
       }
 
@@ -60,11 +61,12 @@ export function ImportDialog({open, onOpenChange, onImport}: ImportDialogProps) 
   const handleImport = () => {
     try {
       const parsed = JSON.parse(jsonInput);
+      const result = validateImageMapConfig(parsed);
 
-      if (!validateImageMapConfig(parsed)) {
+      if (!result.success) {
         toast({
           title: "导入失败",
-          description: "数据结构不符合要求",
+          description: result.message,
           variant: "destructive",
         });
         return;

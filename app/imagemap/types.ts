@@ -2,12 +2,16 @@
  * ImageMap Editor 共用数据结构定义
  */
 
+import { ValidationResult } from "@/lib/validation";
+
 /**
  * 一个矩形区域。
  */
 export interface Rectangle {
     /** 区分区域的唯一 ID */
     id: string;
+    /** 该区域的类型 */
+    type: RectangleType;
     /** 区域左上角的 X 坐标 */
     x: number;
     /** 区域左上角的 Y 坐标 */
@@ -20,6 +24,14 @@ export interface Rectangle {
     href: string;
     /** 区域显示的备选文本 */
     alt: string;
+}
+
+export enum RectangleType {
+    /** 一般矩形区域 */
+    MapArea = "map-area",
+
+    /** 头像映射区 */
+    Avatar = "avatar"
 }
 
 /**
@@ -42,16 +54,16 @@ export interface ImageMapConfig {
  * @param data 待验证的数据
  * @returns `true` 为有效，否则为 `false`
  */
-export function validateImageMapConfig(data: unknown): data is ImageMapConfig {
-    if (!data || typeof data !== "object") return false;
+export function validateImageMapConfig(data: unknown): ValidationResult {
+    if (!data || typeof data !== "object") return { success: false };
 
     const obj = data as Record<string, unknown>;
 
     // 验证 rectangles 数组
-    if (!Array.isArray(obj.rectangles)) return false;
+    if (!Array.isArray(obj.rectangles)) return { success: false, message: "区域列表必须是数组" };
 
     for (const rect of obj.rectangles) {
-        if (!rect || typeof rect !== "object") return false;
+        if (!rect || typeof rect !== "object") return { success: false, message: "什么东西混进去了" };
 
         const r = rect as Record<string, unknown>;
 
@@ -65,19 +77,24 @@ export function validateImageMapConfig(data: unknown): data is ImageMapConfig {
             typeof r.href !== "string" ||
             typeof r.alt !== "string"
         ) {
-            return false;
+            return { success: false, message: `矩形类型不正确：${r.id}` };
         }
 
         // 基本数值范围
         // TODO: 依然可能导入超图像范围的数据
         if (r.x < 0 || r.y < 0 || r.width < 0 || r.height < 0) {
-            return false;
+            return { success: false, message: `区域位置信息不合理：${r.id}` };
         }
     }
 
     // 验证可选字段
     // TODO: 其他需要的规则？
-    if (obj.imagePath !== undefined && typeof obj.imagePath !== "string") return false;
-    if (obj.imageName !== undefined && typeof obj.imageName !== "string") return false;
-    return !(obj.mapName !== undefined && typeof obj.mapName !== "string");
+    if (obj.type !== "map-area" && obj.type !== "avatar") return { success: false, message: `区域类型 "${obj.type}" 不正确` };
+    if ((obj.imagePath !== undefined && typeof obj.imagePath !== "string")
+        || (obj.imageName !== undefined && typeof obj.imageName !== "string")
+        || (obj.mapName !== undefined && typeof obj.mapName !== "string")) {
+        return { success: false, message: "缺少 ImageMap 属性数据，或类型不正确" };
+    }
+
+    return { success: true };
 }
