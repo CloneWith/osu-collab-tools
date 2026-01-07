@@ -107,20 +107,20 @@ export function AvatarBox({
 }) {
   const resolved = resolveAvatar(rect, styleRegistry, cacheRef);
   if (!resolved) return null;
-  const { AvatarComponent, styleObj } = resolved;
-  const naturalW = measured?.width ?? styleObj.size.width;
-  const naturalH = measured?.height ?? styleObj.size.height;
+  const { AvatarComponent } = resolved;
+  const naturalW = measured?.width ?? displayW;
+  const naturalH = measured?.height ?? displayH;
   const uniformScale = computeUniformScale(naturalW, naturalH, displayW, displayH);
   const contentW = Math.max(0, naturalW * uniformScale);
   const contentH = Math.max(0, naturalH * uniformScale);
-  const offsetX = Math.max(0, Math.round((displayW - contentW) / 2));
-  const offsetY = Math.max(0, Math.round((displayH - contentH) / 2));
+  const offsetX = Math.max(0, (displayW - contentW) / 2);
+  const offsetY = Math.max(0, (displayH - contentH) / 2);
 
   return (
     <div
       style={{
-        width: Math.round(displayW),
-        height: Math.round(displayH),
+        width: displayW,
+        height: displayH,
         overflow: "hidden",
         position: "relative",
       }}
