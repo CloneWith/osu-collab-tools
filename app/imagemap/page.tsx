@@ -41,7 +41,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { clamp, generateUserLinkFromId, generateUserLinkFromName } from "@/lib/utils";
+import { clamp, generateUserLinkFromId, generateUserLinkFromName, isNullOrWhitespace } from "@/lib/utils";
 import DragAndDropOverlay, { DnDRejectReason } from "@/app/imagemap/dnd-overlay";
 import { common } from "@/app/common";
 import hljs from "highlight.js/lib/core";
@@ -1332,7 +1332,7 @@ ${areas}
                             // 使用内容盒尺寸，令边框在元素外部，不影响内部组件布局
                             boxSizing: "border-box",
                             // 允许选中区域的八个点在边界外正常显示
-                            overflow: selectedRect === rect.id ? "visible" : "hidden",
+                            overflow: "visible",
                           }}
                         >
                           {/* Avatar 区域渲染：在矩形中显示头像卡片 */}
@@ -1350,6 +1350,8 @@ ${areas}
                                   ? rect.avatar!.countryCode!.trim().toUpperCase()
                                   : undefined,
                               };
+                              if (isNullOrWhitespace(inputs.imageUrl) || isNullOrWhitespace(inputs.username)) return null;
+
                               const signature = `${rect.avatar!.styleKey}|${inputs.imageUrl}|${inputs.username}|${
                                 inputs.countryCode ?? ""
                               }`;
@@ -1762,36 +1764,6 @@ ${areas}
                           <option value={RectangleType.Avatar}>头像区域</option>
                         </select>
                       </div>
-
-                      {/* MapArea 类型的常规属性 */}
-                      {selectedRectData.type === RectangleType.MapArea && (
-                        <>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">链接地址</label>
-                            <input
-                              type="url"
-                              value={selectedRectData.href || ""}
-                              onChange={(e) => updateRectangle(selectedRect, "href", e.target.value)}
-                              className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
-                                isTouchDevice ? "py-3 text-base" : ""
-                              }`}
-                              placeholder={common.urlPlaceholder}
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-1">替代文本</label>
-                            <input
-                              type="text"
-                              value={selectedRectData.alt || ""}
-                              onChange={(e) => updateRectangle(selectedRect, "alt", e.target.value)}
-                              className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
-                                isTouchDevice ? "py-3 text-base" : ""
-                              }`}
-                              placeholder="描述文本"
-                            />
-                          </div>
-                        </>
-                      )}
 
                       {/* Avatar 类型的专用属性 */}
                       {selectedRectData.type === RectangleType.Avatar && (

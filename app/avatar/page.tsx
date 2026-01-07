@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { snapdom } from "@zumer/snapdom";
 import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
 import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
+import { isNullOrWhitespace } from "@/lib/utils";
 
 // 注册所有可用样式
 const STYLE_REGISTRY = [
@@ -55,7 +56,7 @@ export default function AvatarGeneratorPage() {
 
   const previewEl = useMemo(() => {
     try {
-      if (!imageUrl || !username) return null;
+      if (isNullOrWhitespace(imageUrl) || isNullOrWhitespace(username)) return null;
       const AvatarComponent = selectedStyle?.generateAvatar(inputs);
       return AvatarComponent ? <AvatarComponent /> : null;
     } catch (e) {
