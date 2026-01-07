@@ -11,6 +11,14 @@ export function clamp(value: number, min: number, max: number) {
     return Math.min(Math.max(value, min), max);
 }
 
+/**
+ * 判断所给字符串是否为 null / undefined 或空白串（仅由空格组成）
+ * @param value 输入字符串
+ */
+export function isNullOrWhitespace(value?: string) {
+    return !value?.trim();
+}
+
 // 用户设置的服务器链接，用于生成资料链接与获取头像
 function getServerLink() {
     return typeof window !== "undefined"
