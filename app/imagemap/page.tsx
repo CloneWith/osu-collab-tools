@@ -41,7 +41,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { clamp, generateUserLinkFromId, generateUserLinkFromName, isNullOrWhitespace } from "@/lib/utils";
+import { clamp, generateUserLinkFromId, generateUserLinkFromName } from "@/lib/utils";
 import DragAndDropOverlay, { DnDRejectReason } from "@/app/imagemap/dnd-overlay";
 import { common } from "@/app/common";
 import hljs from "highlight.js/lib/core";
@@ -51,10 +51,12 @@ import { registerBBCodeHighlight } from "@/lib/hljs-support";
 import { ExportDialog } from "@/components/imagemap/export-dialog";
 import { ImportDialog } from "@/components/imagemap/import-dialog";
 import { ImageMapConfig, RectangleType, Rectangle } from "@/app/imagemap/types";
-import type { IAvatarStyle, AvatarInputs } from "@/app/avatar/styles/IAvatarStyle";
+import type { IAvatarStyle } from "@/app/avatar/styles/IAvatarStyle";
 import { ClassicAvatarStyle } from "@/app/avatar/styles/ClassicAvatarStyle";
 import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
 import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
+import { snapdom } from "@zumer/snapdom";
+import { AvatarBox, isRenderableAvatar } from "@/app/imagemap/avatar-render";
 
 // 大小调整的八个点
 type ResizeHandle =
@@ -96,43 +98,6 @@ const STYLE_REGISTRY = [
   {key: "modern", style: new ModernAvatarStyle() as IAvatarStyle},
   {key: "simple", style: new SimpleAvatarStyle() as IAvatarStyle},
 ] as const;
-type StyleKey = typeof STYLE_REGISTRY[number]["key"];
-
-// 用于测量子组件自然尺寸（未受 transform 缩放影响）
-function MeasuredAvatar({
-  rectId,
-  onMeasure,
-  scale,
-  offsetX = 0,
-  offsetY = 0,
-  children,
-}: {
-  rectId: string;
-  onMeasure: (w: number, h: number) => void;
-  scale: number;
-  offsetX?: number;
-  offsetY?: number;
-  children: React.ReactNode;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const report = () => onMeasure(el.clientWidth, el.clientHeight);
-    report();
-    const ro = new ResizeObserver(() => report());
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [rectId, onMeasure]);
-  return (
-    <div
-      ref={ref}
-      style={{ position: "absolute", left: offsetX, top: offsetY, transformOrigin: "top left", transform: `scale(${scale})` }}
-    >
-      {children}
-    </div>
-  );
-}
 
 export default function ImagemapEditorPage() {
   // Image states
@@ -195,6 +160,8 @@ export default function ImagemapEditorPage() {
   const selectedRectRef = useRef<string | null>(null);
   const avatarCacheRef = useRef<Map<string, { comp: React.FC; signature: string }>>(new Map());
   const [avatarNaturalSizes, setAvatarNaturalSizes] = useState<Record<string, { width: number; height: number }>>({});
+  const exportContainerRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleSize = isTouchDevice ? 16 : 10;
   const handleOffset = handleSize / 2;
@@ -1213,6 +1180,51 @@ ${areas}
     }
   };
 
+  // 重新渲染组件，以供导出
+  const handleExportAvatars = async () => {
+    if (!uploadedImage || !exportContainerRef.current || isExporting) return;
+    setIsExporting(true);
+    const base = (mapName && mapName.trim()) || (imageName && imageName.split(".")[0]) || "imagemap";
+    const waitForMeasured = async (timeoutMs = 800) => {
+      const start = performance.now();
+      while (performance.now() - start < timeoutMs) {
+        const targets = rectangles.filter(isRenderableAvatar);
+        const allMeasured = targets.every(r => {
+          const m = avatarNaturalSizes[r.id];
+          return !!m && m.width > 0 && m.height > 0;
+        });
+        if (allMeasured) return true;
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+      return false;
+    };
+    const doCapture = async () => {
+      // 等两帧，确保布局稳定
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      // 等待头像自然尺寸测量（最多 800ms，失败则继续）
+      await waitForMeasured(800);
+      const result = await snapdom(exportContainerRef.current!);
+      await result.download({ filename: `exported-${base}-${Date.now()}.png` });
+    };
+    try {
+      await doCapture();
+    } catch (e1) {
+      try {
+        await new Promise((r) => setTimeout(r, 120));
+        await doCapture();
+      } catch (e2) {
+        toast({
+          title: "导出失败",
+          description: e2 instanceof Error ? e2.message : "未知错误",
+          variant: "destructive",
+        });
+        console.error("Error while exporting avatars image.", e2);
+      }
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1234,6 +1246,21 @@ ${areas}
                 <span>预览区</span>
               </h2>
               <div className="flex items-center gap-2">
+                {uploadedImage && (
+                  <Button onClick={handleExportAvatars} size="sm" variant="outline" className="gap-2" disabled={isExporting}>
+                    {isExporting ? (
+                      <>
+                        <span className="w-4 h-4 animate-spin border-2 border-current border-t-transparent rounded-full" />
+                        保存中…
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4"/>
+                        保存
+                      </>
+                    )}
+                  </Button>
+                )}
                 <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden"
                        id="image-upload"/>
                 <label htmlFor="image-upload">
@@ -1336,77 +1363,27 @@ ${areas}
                           }}
                         >
                           {/* Avatar 区域渲染：在矩形中显示头像卡片 */}
-                          {rect.type === RectangleType.Avatar &&
-                            rect.avatar &&
-                            (() => {
-                              const styleObj = STYLE_REGISTRY.find(
-                                (s) => s.key === (rect.avatar!.styleKey as StyleKey)
-                              )?.style;
-                              if (!styleObj) return null;
-                              const inputs: AvatarInputs = {
-                                imageUrl: rect.avatar!.imageUrl,
-                                username: rect.avatar!.username,
-                                countryCode: rect.avatar!.countryCode?.trim()
-                                  ? rect.avatar!.countryCode!.trim().toUpperCase()
-                                  : undefined,
-                              };
-                              if (isNullOrWhitespace(inputs.imageUrl) || isNullOrWhitespace(inputs.username)) return null;
-
-                              const signature = `${rect.avatar!.styleKey}|${inputs.imageUrl}|${inputs.username}|${
-                                inputs.countryCode ?? ""
-                              }`;
-                              let cache = avatarCacheRef.current.get(rect.id);
-                              if (!cache || cache.signature !== signature) {
-                                try {
-                                  const Comp = styleObj.generateAvatar(inputs);
-                                  if (Comp) {
-                                    cache = { comp: Comp, signature };
-                                    avatarCacheRef.current.set(rect.id, cache);
-                                  }
-                                } catch {
-                                  return null;
-                                }
-                              }
-                              const AvatarComponent = cache?.comp;
-                              if (!AvatarComponent) return null;
-                              // 计算统一缩放以保持原始宽高比（contain 居中）
-                              const displayW = Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX);
-                              const displayH = Math.max(
-                                rect.height / scaleY,
-                                isTouchDevice ? 44 : rect.height / scaleY
-                              );
-                              const measured = avatarNaturalSizes[rect.id];
-                              const naturalW = measured?.width ?? styleObj.size.width;
-                              const naturalH = measured?.height ?? styleObj.size.height;
-                              const uniformScale = Math.max(
-                                0,
-                                Math.min(naturalW > 0 ? displayW / naturalW : 1, naturalH > 0 ? displayH / naturalH : 1)
-                              );
-                              return (
-                                <div
-                                  style={{
-                                    width: displayW,
-                                    height: displayH,
-                                    overflow: "hidden",
-                                    position: "relative",
-                                  }}
-                                >
-                                  <MeasuredAvatar
-                                    rectId={rect.id}
-                                    onMeasure={(w, h) => {
-                                      setAvatarNaturalSizes(prev => {
-                                        const current = prev[rect.id];
-                                        if (current && current.width === w && current.height === h) return prev;
-                                        return { ...prev, [rect.id]: { width: w, height: h } };
-                                      });
-                                    }}
-                                    scale={uniformScale}
-                                  >
-                                    <AvatarComponent />
-                                  </MeasuredAvatar>
-                                </div>
-                              );
-                            })()}
+                          {(() => {
+                            const displayW = Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX);
+                            const displayH = Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY);
+                            return isRenderableAvatar(rect) ? (
+                              <AvatarBox
+                                rect={rect}
+                                displayW={displayW}
+                                displayH={displayH}
+                                styleRegistry={STYLE_REGISTRY}
+                                cacheRef={avatarCacheRef}
+                                measured={avatarNaturalSizes[rect.id]}
+                                onMeasure={(w, h) => {
+                                  setAvatarNaturalSizes(prev => {
+                                    const current = prev[rect.id];
+                                    if (current && current.width === w && current.height === h) return prev;
+                                    return { ...prev, [rect.id]: { width: w, height: h } };
+                                  });
+                                }}
+                              />
+                            ) : null;
+                          })()}
                           {rect.alt.trim() && (
                             <div
                               className={`absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none max-w-full truncate ${
@@ -2056,6 +2033,68 @@ ${areas}
         onOpenChange={setImportDialogOpen}
         onImport={handleImportData}
       />
+
+      {/* 离屏导出容器：渲染原图背景 + 头像层，尺寸为原图大小 */}
+      {uploadedImage && imageSize.width > 0 && imageSize.height > 0 && (
+        <div
+          ref={exportContainerRef}
+          style={{
+            position: "fixed",
+            left: -10000,
+            top: -10000,
+            width: imageSize.width,
+            height: imageSize.height,
+            pointerEvents: "none",
+            background: "transparent",
+          }}
+        >
+          <div style={{ position: "relative", width: imageSize.width, height: imageSize.height }}>
+            {/* 背景原图，按原尺寸铺满 */}
+            <img
+              src={uploadedImage}
+              alt="background"
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: imageSize.width,
+                height: imageSize.height,
+                objectFit: "fill",
+                display: "block",
+              }}
+            />
+            {rectangles.filter(isRenderableAvatar).map(rect => (
+              <div
+                key={rect.id}
+                style={{
+                  position: "absolute",
+                  left: Math.round(rect.x),
+                  top: Math.round(rect.y),
+                  width: Math.round(rect.width),
+                  height: Math.round(rect.height),
+                  overflow: "hidden",
+                }}
+              >
+                <AvatarBox
+                  rect={rect}
+                  displayW={rect.width}
+                  displayH={rect.height}
+                  styleRegistry={STYLE_REGISTRY}
+                  cacheRef={avatarCacheRef}
+                  measured={avatarNaturalSizes[rect.id]}
+                  onMeasure={(w, h) => {
+                    setAvatarNaturalSizes(prev => {
+                      const current = prev[rect.id];
+                      if (current && current.width === w && current.height === h) return prev;
+                      return { ...prev, [rect.id]: { width: w, height: h } };
+                    });
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
