@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
+  CircleUserRound,
   Code,
   Copy,
   Download,
@@ -49,7 +50,11 @@ import { HelpIconButton } from "@/components/help-icon-button";
 import { registerBBCodeHighlight } from "@/lib/hljs-support";
 import { ExportDialog } from "@/components/imagemap/export-dialog";
 import { ImportDialog } from "@/components/imagemap/import-dialog";
-import type { ImageMapConfig, Rectangle as RectangleType } from "@/app/imagemap/types";
+import { ImageMapConfig, RectangleType, Rectangle } from "@/app/imagemap/types";
+import type { IAvatarStyle, AvatarInputs } from "@/app/avatar/styles/IAvatarStyle";
+import { ClassicAvatarStyle } from "@/app/avatar/styles/ClassicAvatarStyle";
+import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
+import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
 
 // 大小调整的八个点
 type ResizeHandle =
@@ -75,16 +80,61 @@ interface Tool {
   icon: ReactElement;
 }
 
+// 工具栏中可用工具
 const tools: Tool[] = [
   {key: "select", name: "选择", icon: <MousePointer className="w-5 h-5"/>},
-  {key: "create", name: "创建", icon: <Square className="w-5 h-5"/>},
+  {key: "create", name: "创建区域", icon: <Square className="w-5 h-5"/>},
+  {key: "create-avatar", name: "创建头像区域", icon: <CircleUserRound className="w-5 h-5"/>},
   {key: "delete", name: "删除", icon: <Trash2 className="w-5 h-5"/>},
 ];
 
 type EditorTool = Tool["key"];
 
+// 注册所有可用头像样式（与 avatar/page.tsx 保持一致）
+const STYLE_REGISTRY = [
+  {key: "classic", style: new ClassicAvatarStyle() as IAvatarStyle},
+  {key: "modern", style: new ModernAvatarStyle() as IAvatarStyle},
+  {key: "simple", style: new SimpleAvatarStyle() as IAvatarStyle},
+] as const;
+type StyleKey = typeof STYLE_REGISTRY[number]["key"];
 
-export default function EditorPage() {
+// 用于测量子组件自然尺寸（未受 transform 缩放影响）
+function MeasuredAvatar({
+  rectId,
+  onMeasure,
+  scale,
+  offsetX = 0,
+  offsetY = 0,
+  children,
+}: {
+  rectId: string;
+  onMeasure: (w: number, h: number) => void;
+  scale: number;
+  offsetX?: number;
+  offsetY?: number;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const report = () => onMeasure(el.clientWidth, el.clientHeight);
+    report();
+    const ro = new ResizeObserver(() => report());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [rectId, onMeasure]);
+  return (
+    <div
+      ref={ref}
+      style={{ position: "absolute", left: offsetX, top: offsetY, transformOrigin: "top left", transform: `scale(${scale})` }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export default function ImagemapEditorPage() {
   // Image states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageName, setImageName] = useState<string | null>(null);
@@ -95,17 +145,17 @@ export default function EditorPage() {
   const [mapName, setMapName] = useState<string | null>(null);
 
   // Rectangle and drawing states
-  const [rectangles, setRectangles] = useState<RectangleType[]>([]);
+  const [rectangles, setRectangles] = useState<Rectangle[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({x: 0, y: 0});
-  const [currentRect, setCurrentRect] = useState<RectangleType | null>(null);
+  const [currentRect, setCurrentRect] = useState<Rectangle | null>(null);
   const [selectedRect, setSelectedRectId] = useState<string | null>(null);
   const [movingRect, setMovingRect] = useState<string | null>(null);
   const [moveOffset, setMoveOffset] = useState({x: 0, y: 0});
   const [resizingRect, setResizingRect] = useState<string | null>(null);
   const [resizeHandle, setResizeHandle] = useState<ResizeHandle | null>(null);
   const [resizeStartPoint, setResizeStartPoint] = useState({x: 0, y: 0});
-  const [resizeStartRect, setResizeStartRect] = useState<RectangleType | null>(null);
+  const [resizeStartRect, setResizeStartRect] = useState<Rectangle | null>(null);
   const [draggingRectId, setDraggingRectId] = useState<string | null>(null);
   const [lastPositionInput, setLastPositionInput] = useState({x: "0", y: "0"});
   const [lastSizeInput, setLastSizeInput] = useState({width: "50", height: "50"});
@@ -141,8 +191,51 @@ export default function EditorPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const rectListRef = useRef<HTMLDivElement>(null);
-  const rectanglesRef = useRef<RectangleType[]>([]);
+  const rectanglesRef = useRef<Rectangle[]>([]);
   const selectedRectRef = useRef<string | null>(null);
+  const avatarCacheRef = useRef<Map<string, { comp: React.FC; signature: string }>>(new Map());
+  const [avatarNaturalSizes, setAvatarNaturalSizes] = useState<Record<string, { width: number; height: number }>>({});
+
+  const handleSize = isTouchDevice ? 16 : 10;
+  const handleOffset = handleSize / 2;
+  const handleConfigs: Array<{
+    handle: ResizeHandle;
+    style: React.CSSProperties;
+    cursor: string
+  }> = [
+    {handle: "top-left", style: {top: -handleOffset, left: -handleOffset}, cursor: "nwse-resize"},
+    {
+      handle: "top",
+      style: {top: -handleOffset, left: "50%", transform: "translateX(-50%)"},
+      cursor: "ns-resize",
+    },
+    {handle: "top-right", style: {top: -handleOffset, right: -handleOffset}, cursor: "nesw-resize"},
+    {
+      handle: "right",
+      style: {top: "50%", right: -handleOffset, transform: "translateY(-50%)"},
+      cursor: "ew-resize",
+    },
+    {
+      handle: "bottom-right",
+      style: {bottom: -handleOffset, right: -handleOffset},
+      cursor: "nwse-resize",
+    },
+    {
+      handle: "bottom",
+      style: {bottom: -handleOffset, left: "50%", transform: "translateX(-50%)"},
+      cursor: "ns-resize",
+    },
+    {
+      handle: "bottom-left",
+      style: {bottom: -handleOffset, left: -handleOffset},
+      cursor: "nesw-resize",
+    },
+    {
+      handle: "left",
+      style: {top: "50%", left: -handleOffset, transform: "translateY(-50%)"},
+      cursor: "ew-resize",
+    },
+  ];
 
   // 注册 hljs 语言
   hljs.registerLanguage("html", html);
@@ -264,6 +357,8 @@ export default function EditorPage() {
 
   // Drag & drop handlers (work for both empty and active preview)
   const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    if (uploadedImage) return;
+    
     event.preventDefault();
     event.stopPropagation();
     setIsDraggingOver(true);
@@ -275,6 +370,8 @@ export default function EditorPage() {
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    if (uploadedImage) return;
+
     event.preventDefault();
     event.stopPropagation();
     const items = event.dataTransfer?.items;
@@ -521,7 +618,7 @@ export default function EditorPage() {
     };
   }, [imageSize.height, imageSize.width, selectedRectData]);
 
-  const calculateResizedRect = (rect: RectangleType, handle: ResizeHandle, deltaX: number, deltaY: number) => {
+  const calculateResizedRect = (rect: Rectangle, handle: ResizeHandle, deltaX: number, deltaY: number) => {
     let {x, y, width, height} = rect;
 
     const clampWidth = (w: number, left: number) => clamp(w, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.width - left));
@@ -571,6 +668,33 @@ export default function EditorPage() {
         break;
       }
     }
+    // 当为头像区域时，锁定宽高比（基于组件实时测量 size，回退样式 size）并以左上角为锚点
+    if (rect.type === RectangleType.Avatar) {
+      const styleKey = rect.avatar?.styleKey ?? "simple";
+      const styleObj = STYLE_REGISTRY.find(s => s.key === styleKey)?.style;
+      const measured = avatarNaturalSizes[rect.id];
+      const naturalW = (measured?.width ?? styleObj?.size.width) ?? Math.max(width, MIN_RECT_SIZE);
+      const naturalH = (measured?.height ?? styleObj?.size.height) ?? Math.max(height, MIN_RECT_SIZE);
+      const ar = naturalW > 0 && naturalH > 0 ? naturalW / naturalH : 1;
+
+      const anchorX = rect.x; // 锚定左上角，简化约束行为
+      const anchorY = rect.y;
+      const maxW = Math.max(MIN_RECT_SIZE, imageSize.width - anchorX);
+      const maxH = Math.max(MIN_RECT_SIZE, imageSize.height - anchorY);
+
+      // 以当前宽度为主，计算锁定后的高度，并再回推宽度，确保整数与边界
+      let lockedHeight = clampHeight(Math.round(width / ar), anchorY);
+      lockedHeight = clamp(lockedHeight, MIN_RECT_SIZE, maxH);
+      let lockedWidth = clampWidth(Math.round(lockedHeight * ar), anchorX);
+      lockedWidth = clamp(lockedWidth, MIN_RECT_SIZE, maxW);
+      // 依比例重算高度，避免因宽度边界导致误差
+      lockedHeight = clamp(Math.round(lockedWidth / ar), MIN_RECT_SIZE, maxH);
+
+      x = anchorX;
+      y = anchorY;
+      width = lockedWidth;
+      height = lockedHeight;
+    }
 
     return {
       ...rect,
@@ -614,7 +738,7 @@ export default function EditorPage() {
   const duplicateRectangle = (id: string) => {
     const rectToDuplicate = rectangles.find((rect) => rect.id === id);
     if (rectToDuplicate) {
-      const newRect: RectangleType = {
+      const newRect: Rectangle = {
         ...rectToDuplicate,
         id: Date.now().toString(),
         x: rectToDuplicate.x + 20,
@@ -643,7 +767,7 @@ export default function EditorPage() {
   };
 
   const handleResizeStart = (event: React.MouseEvent | React.TouchEvent, rectId: string, handle: ResizeHandle) => {
-    if (!uploadedImage || (currentTool === "create" || currentTool === "delete")) return;
+    if (!uploadedImage || currentTool !== "select") return;
 
     event.stopPropagation();
     if ("preventDefault" in event) {
@@ -696,6 +820,7 @@ export default function EditorPage() {
         break;
 
       case "create":
+      case "create-avatar":
         setSelectedRect(null);
 
         if (coords.x <= imageSize.width && coords.y <= imageSize.height) {
@@ -747,13 +872,14 @@ export default function EditorPage() {
     }
 
     // 根据当前工具执行不同操作
-    if (isDrawing && currentTool === "create") {
+    if (isDrawing && (currentTool === "create" || currentTool === "create-avatar")) {
       // 创建新矩形
       const width = Math.round(coords.x - startPoint.x);
       const height = Math.round(coords.y - startPoint.y);
 
-      const rect: RectangleType = {
+      const rect: Rectangle = {
         id: "temp",
+        type: currentTool === "create-avatar" ? RectangleType.Avatar : RectangleType.MapArea,
         x: Math.round(Math.min(startPoint.x, coords.x)),
         y: Math.round(Math.min(startPoint.y, coords.y)),
         width: Math.abs(width),
@@ -787,19 +913,46 @@ export default function EditorPage() {
 
   const handlePointerUp = () => {
     // 处理绘制结束
-    if (isDrawing && currentTool === "create") {
+    if (isDrawing && (currentTool === "create" || currentTool === "create-avatar")) {
       if (!currentRect || currentRect.width < 20 || currentRect.height < 20) {
         setIsDrawing(false);
         setCurrentRect(null);
         return;
       }
 
-      const newRect: RectangleType = {
+      const newRect: Rectangle = {
         ...currentRect,
         id: Date.now().toString(),
         width: Math.round(Math.min(currentRect.width, imageSize.width - currentRect.x)),
         height: Math.round(Math.min(currentRect.height, imageSize.height - currentRect.y)),
       };
+
+      // 初始化 Avatar 区域的默认配置
+      if (newRect.type === RectangleType.Avatar) {
+        (newRect as any).avatar = {
+          styleKey: "simple",
+          imageUrl: "",
+          username: "",
+          countryCode: "",
+        };
+
+        // 绘制结束后，依据组件测量/样式宽高比自动调整为等比（contain）大小，锚定左上角
+        const styleObj = STYLE_REGISTRY.find(s => s.key === "simple")?.style;
+        const measured = avatarNaturalSizes[newRect.id];
+        const naturalW = (measured?.width ?? styleObj?.size.width) ?? newRect.width;
+        const naturalH = (measured?.height ?? styleObj?.size.height) ?? newRect.height;
+        const scale = Math.min(
+          naturalW > 0 ? newRect.width / naturalW : 1,
+          naturalH > 0 ? newRect.height / naturalH : 1,
+        );
+        let lockedW = Math.round(naturalW * scale);
+        let lockedH = Math.round(naturalH * scale);
+        // 边界限制
+        lockedW = clamp(lockedW, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.width - newRect.x));
+        lockedH = clamp(lockedH, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.height - newRect.y));
+        newRect.width = lockedW;
+        newRect.height = lockedH;
+      }
 
       setRectangles((prev) => [...prev, newRect]);
 
@@ -837,7 +990,7 @@ export default function EditorPage() {
     }
   };
 
-  const updateRectangle = (id: string, field: keyof RectangleType,
+  const updateRectangle = (id: string, field: keyof Rectangle,
                            value: string, castToNumber: boolean = false) => {
     // Don't update if user needs a number, and we cannot convert the source value to one.
     if (castToNumber && isNaN(Number(value)))
@@ -848,10 +1001,54 @@ export default function EditorPage() {
       (rect.id === id ? {...rect, [field]: castToNumber ? Number(value) : value} : rect)));
   };
 
+  const updateRectangleType = (id: string, nextType: RectangleType) => {
+    setRectangles((prev) => prev.map((rect) => {
+      if (rect.id !== id) return rect;
+      const base: Rectangle = { ...rect, type: nextType };
+      if (nextType === RectangleType.Avatar) {
+        return {
+          ...base,
+          avatar: base.avatar ?? {
+            styleKey: "simple",
+            imageUrl: "",
+            username: "",
+            countryCode: "",
+          },
+        };
+      } else {
+        const { avatar, ...rest } = base as any;
+        // 清理缓存，避免残留的头像组件
+        avatarCacheRef.current.delete(id);
+        // 清理测量尺寸缓存
+        setAvatarNaturalSizes(prev => {
+          const { [id]: _omit, ...restSizes } = prev;
+          return restSizes;
+        });
+        return rest as Rectangle;
+      }
+    }));
+  };
+
+  const updateAvatarField = (id: string, field: "styleKey" | "imageUrl" | "username" | "countryCode", value: string) => {
+    setRectangles((prev) => prev.map((rect) => {
+      if (rect.id !== id) return rect;
+      if (rect.type !== RectangleType.Avatar) return rect;
+      const avatar = rect.avatar ?? { styleKey: "simple", imageUrl: "", username: "", countryCode: "" };
+      return { ...rect, avatar: { ...avatar, [field]: value } };
+    }));
+  };
+
   const deleteRectangle = (id: string) => {
     setRectangles((prev) => prev.filter((rect) => rect.id !== id));
     setSelectedRect(null);
     setContextMenu((prev) => ({...prev, visible: false}));
+    // 清理头像缓存
+    avatarCacheRef.current.delete(id);
+    // 清理测量尺寸缓存
+    setAvatarNaturalSizes(prev => {
+      const { [id]: _omit, ...rest } = prev;
+      return rest;
+    });
   };
 
   const reorderRectangles = (sourceId: string, targetId: string) => {
@@ -978,6 +1175,10 @@ ${areas}
 
   // 处理导入数据
   const handleImportData = (data: ImageMapConfig) => {
+    // 新导入配置前清理头像组件缓存，避免旧组件干扰
+    avatarCacheRef.current.clear();
+    // 清理测量尺寸缓存
+    setAvatarNaturalSizes({});
     if (data.imagePath)
       setImagePath(data.imagePath);
 
@@ -1003,6 +1204,7 @@ ${areas}
   const getCursorStyle = () => {
     switch (currentTool) {
       case "create":
+      case "create-avatar":
         return "cursor-crosshair";
       case "delete":
         return "cursor-no-drop";
@@ -1102,76 +1304,123 @@ ${areas}
                     {/* 显示时将原图像坐标缩放到预览区 */}
                     {rectangles.map((rect, index) => {
                       const {scaleX, scaleY} = getImageScale();
-                      const handleSize = isTouchDevice ? 16 : 10;
-                      const handleOffset = handleSize / 2;
-                      const handleConfigs: Array<{
-                        handle: ResizeHandle;
-                        style: React.CSSProperties;
-                        cursor: string
-                      }> = [
-                        {handle: "top-left", style: {top: -handleOffset, left: -handleOffset}, cursor: "nwse-resize"},
-                        {
-                          handle: "top",
-                          style: {top: -handleOffset, left: "50%", transform: "translateX(-50%)"},
-                          cursor: "ns-resize",
-                        },
-                        {handle: "top-right", style: {top: -handleOffset, right: -handleOffset}, cursor: "nesw-resize"},
-                        {
-                          handle: "right",
-                          style: {top: "50%", right: -handleOffset, transform: "translateY(-50%)"},
-                          cursor: "ew-resize",
-                        },
-                        {
-                          handle: "bottom-right",
-                          style: {bottom: -handleOffset, right: -handleOffset},
-                          cursor: "nwse-resize",
-                        },
-                        {
-                          handle: "bottom",
-                          style: {bottom: -handleOffset, left: "50%", transform: "translateX(-50%)"},
-                          cursor: "ns-resize",
-                        },
-                        {
-                          handle: "bottom-left",
-                          style: {bottom: -handleOffset, left: -handleOffset},
-                          cursor: "nesw-resize",
-                        },
-                        {
-                          handle: "left",
-                          style: {top: "50%", left: -handleOffset, transform: "translateY(-50%)"},
-                          cursor: "ew-resize",
-                        },
-                      ];
+
                       // 十字光标较为特殊（画框），在此处先处理
                       return (
                         <div
                           key={rect.id}
                           className={`absolute border-2 bg-primary/20 select-none touch-manipulation transition-colors ease-out duration-200 ${
-                            selectedRect === rect.id ? "border-primary border-4" : "border-primary/40"
-                          } ${isTouchDevice && "min-w-[44px] min-h-[44px]"} ${getCursorStyle()} ${currentTool === "delete" && "hover:border-red-400"}`}
+                            selectedRect === rect.id ? "border-primary" : "border-primary/40"
+                          } ${isTouchDevice && "min-w-[44px] min-h-[44px]"} ${getCursorStyle()} ${
+                            currentTool === "delete" && "hover:border-red-400"
+                          }`}
                           style={{
                             left: rect.x / scaleX,
                             top: rect.y / scaleY,
                             width: Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX),
                             height: Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY),
-                            cursor: currentTool === "select" ? "move"
-                              : currentTool === "delete" ? "no-drop"
-                                : currentTool === "create" ? "crosshair" : "pointer",
+                            cursor:
+                              currentTool === "select"
+                                ? "move"
+                                : currentTool === "delete"
+                                ? "no-drop"
+                                : currentTool === "create" || currentTool === "create-avatar"
+                                ? "crosshair"
+                                : "pointer",
                             userSelect: "none",
                             zIndex: rectangles.length - index,
+                            // 使用内容盒尺寸，令边框在元素外部，不影响内部组件布局
+                            boxSizing: "border-box",
+                            // 允许选中区域的八个点在边界外正常显示
+                            overflow: selectedRect === rect.id ? "visible" : "hidden",
                           }}
                         >
-                          {rect.alt.trim() &&
+                          {/* Avatar 区域渲染：在矩形中显示头像卡片 */}
+                          {rect.type === RectangleType.Avatar &&
+                            rect.avatar &&
+                            (() => {
+                              const styleObj = STYLE_REGISTRY.find(
+                                (s) => s.key === (rect.avatar!.styleKey as StyleKey)
+                              )?.style;
+                              if (!styleObj) return null;
+                              const inputs: AvatarInputs = {
+                                imageUrl: rect.avatar!.imageUrl,
+                                username: rect.avatar!.username,
+                                countryCode: rect.avatar!.countryCode?.trim()
+                                  ? rect.avatar!.countryCode!.trim().toUpperCase()
+                                  : undefined,
+                              };
+                              const signature = `${rect.avatar!.styleKey}|${inputs.imageUrl}|${inputs.username}|${
+                                inputs.countryCode ?? ""
+                              }`;
+                              let cache = avatarCacheRef.current.get(rect.id);
+                              if (!cache || cache.signature !== signature) {
+                                try {
+                                  const Comp = styleObj.generateAvatar(inputs);
+                                  if (Comp) {
+                                    cache = { comp: Comp, signature };
+                                    avatarCacheRef.current.set(rect.id, cache);
+                                  }
+                                } catch {
+                                  return null;
+                                }
+                              }
+                              const AvatarComponent = cache?.comp;
+                              if (!AvatarComponent) return null;
+                              // 计算统一缩放以保持原始宽高比（contain 居中）
+                              const displayW = Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX);
+                              const displayH = Math.max(
+                                rect.height / scaleY,
+                                isTouchDevice ? 44 : rect.height / scaleY
+                              );
+                              const measured = avatarNaturalSizes[rect.id];
+                              const naturalW = measured?.width ?? styleObj.size.width;
+                              const naturalH = measured?.height ?? styleObj.size.height;
+                              const uniformScale = Math.max(
+                                0,
+                                Math.min(naturalW > 0 ? displayW / naturalW : 1, naturalH > 0 ? displayH / naturalH : 1)
+                              );
+                              return (
+                                <div
+                                  style={{
+                                    width: displayW,
+                                    height: displayH,
+                                    overflow: "hidden",
+                                    position: "relative",
+                                  }}
+                                >
+                                  <MeasuredAvatar
+                                    rectId={rect.id}
+                                    onMeasure={(w, h) => {
+                                      setAvatarNaturalSizes(prev => {
+                                        const current = prev[rect.id];
+                                        if (current && current.width === w && current.height === h) return prev;
+                                        return { ...prev, [rect.id]: { width: w, height: h } };
+                                      });
+                                    }}
+                                    scale={uniformScale}
+                                  >
+                                    <AvatarComponent />
+                                  </MeasuredAvatar>
+                                </div>
+                              );
+                            })()}
+                          {rect.alt.trim() && (
                             <div
                               className={`absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none max-w-full truncate ${
                                 isTouchDevice ? "text-sm px-2 py-1" : ""
                               }`}
                             >
                               {rect.alt.trim()}
-                            </div>}
+                            </div>
+                          )}
 
-                          {selectedRect === rect.id && (
-                            handleConfigs.map((item) => (
+                          {selectedRect === rect.id &&
+                            // 对于头像区域，限制右下角调节
+                            (rect.type === RectangleType.Avatar
+                              ? handleConfigs.filter((h) => h.handle === "bottom-right")
+                              : handleConfigs
+                            ).map((item) => (
                               <div
                                 key={item.handle}
                                 className="absolute bg-primary border border-white shadow-sm"
@@ -1180,12 +1429,13 @@ ${areas}
                                   width: handleSize,
                                   height: handleSize,
                                   cursor: item.cursor,
+                                  // 确保在顶层显示（高于内部内容与边框）
+                                  zIndex: 100,
                                 }}
                                 onMouseDown={(e) => handleResizeStart(e, rect.id, item.handle)}
                                 onTouchStart={(e) => handleResizeStart(e, rect.id, item.handle)}
                               />
-                            ))
-                          )}
+                            ))}
                         </div>
                       );
                     })}
@@ -1498,6 +1748,103 @@ ${areas}
                   </div>
                   {selectedRectData && (
                     <div className="space-y-3">
+                      {/* 区域类型选择 */}
+                      <div>
+                        <label className="block text-sm font-medium mb-1">区域类型</label>
+                        <select
+                          value={selectedRectData.type}
+                          onChange={(e) => updateRectangleType(selectedRect, e.target.value as RectangleType)}
+                          className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
+                            isTouchDevice ? "py-3 text-base" : ""
+                          }`}
+                        >
+                          <option value={RectangleType.MapArea}>一般区域</option>
+                          <option value={RectangleType.Avatar}>头像区域</option>
+                        </select>
+                      </div>
+
+                      {/* MapArea 类型的常规属性 */}
+                      {selectedRectData.type === RectangleType.MapArea && (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">链接地址</label>
+                            <input
+                              type="url"
+                              value={selectedRectData.href || ""}
+                              onChange={(e) => updateRectangle(selectedRect, "href", e.target.value)}
+                              className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
+                                isTouchDevice ? "py-3 text-base" : ""
+                              }`}
+                              placeholder={common.urlPlaceholder}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-1">替代文本</label>
+                            <input
+                              type="text"
+                              value={selectedRectData.alt || ""}
+                              onChange={(e) => updateRectangle(selectedRect, "alt", e.target.value)}
+                              className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
+                                isTouchDevice ? "py-3 text-base" : ""
+                              }`}
+                              placeholder="描述文本"
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      {/* Avatar 类型的专用属性 */}
+                      {selectedRectData.type === RectangleType.Avatar && (
+                        <>
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium">头像样式</label>
+                            <select
+                              value={selectedRectData.avatar?.styleKey ?? "simple"}
+                              onChange={(e) => updateAvatarField(selectedRect, "styleKey", e.target.value)}
+                              className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
+                                isTouchDevice ? "py-3 text-base" : ""
+                              }`}
+                            >
+                              {STYLE_REGISTRY.map(({key, style}) => (
+                                <option key={key} value={key}>{style.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium">头像图片链接</label>
+                            <input
+                              placeholder="https://a.ppy.sh/<用户 ID>"
+                              value={selectedRectData.avatar?.imageUrl ?? ""}
+                              onChange={(e) => updateAvatarField(selectedRect, "imageUrl", e.target.value)}
+                              className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
+                                isTouchDevice ? "py-3 text-base" : ""
+                              }`}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium">用户名</label>
+                            <input
+                              placeholder="peppy"
+                              value={selectedRectData.avatar?.username ?? ""}
+                              onChange={(e) => updateAvatarField(selectedRect, "username", e.target.value)}
+                              className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
+                                isTouchDevice ? "py-3 text-base" : ""
+                              }`}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium">国家/地区代码（可选）</label>
+                            <input
+                              placeholder="两位地区码"
+                              value={selectedRectData.avatar?.countryCode ?? ""}
+                              onChange={(e) => updateAvatarField(selectedRect, "countryCode", e.target.value)}
+                              className={`w-full px-3 py-2 border hover:border-primary rounded-md text-sm ${
+                                isTouchDevice ? "py-3 text-base" : ""
+                              }`}
+                            />
+                          </div>
+                        </>
+                      )}
                       <div>
                         <label className="block text-sm font-medium mb-1">链接地址</label>
                         <input
