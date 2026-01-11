@@ -2,7 +2,6 @@ import { Ban, Inbox } from "lucide-react";
 
 interface DragAndDropOverlayProps {
   isRounded?: boolean;
-  isDragAccepted?: boolean;
   rejectReason?: DnDRejectReason;
 }
 
@@ -23,21 +22,26 @@ export enum DnDRejectReason {
  */
 export default function DragAndDropOverlay({
                                              isRounded = false,
-                                             isDragAccepted,
-                                             rejectReason = DnDRejectReason.Unknown,
+                                             rejectReason = undefined,
                                            }: DragAndDropOverlayProps) {
-  let reasonPrompt = "不允许该操作";
+  const isDragAccepted = rejectReason === undefined;
+  let reasonPrompt = "释放以上传图片";
   let subPrompt: string | null = null;
 
-  switch (rejectReason) {
-    case DnDRejectReason.UnsupportedType:
-      reasonPrompt = "不支持的格式";
-      subPrompt = "拖拽图像进行上传";
-      break;
-    case DnDRejectReason.TooManyEntries:
-      reasonPrompt = "文件过多";
-      subPrompt = "只允许拖放单个图像文件";
-      break;
+  if (rejectReason) {
+    switch (rejectReason) {
+      case DnDRejectReason.UnsupportedType:
+        reasonPrompt = "不支持的格式";
+        subPrompt = "拖拽图像进行上传";
+        break;
+      case DnDRejectReason.TooManyEntries:
+        reasonPrompt = "文件过多";
+        subPrompt = "只允许拖放单个图像文件";
+        break;
+      default:
+        reasonPrompt = "不允许该操作";
+        break;
+    }
   }
 
   return (
@@ -50,7 +54,7 @@ export default function DragAndDropOverlay({
           : <Ban className="w-10 h-10 mx-auto mb-3 text-destructive"/>}
 
         <p className="font-semibold">
-          {isDragAccepted ? "释放以上传图片" : reasonPrompt}
+          {reasonPrompt}
         </p>
         {!isDragAccepted && subPrompt != null && <p className="text-sm">{subPrompt}</p>}
       </div>

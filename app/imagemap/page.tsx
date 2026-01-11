@@ -59,15 +59,7 @@ import { snapdom } from "@zumer/snapdom";
 import { AvatarBox, isRenderableAvatar } from "@/app/imagemap/avatar-render";
 
 // 大小调整的八个点
-type ResizeHandle =
-  | "top"
-  | "bottom"
-  | "left"
-  | "right"
-  | "top-left"
-  | "top-right"
-  | "bottom-left"
-  | "bottom-right";
+type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
 interface ContextMenuPosition {
   x: number;
@@ -84,26 +76,26 @@ interface Tool {
 
 // 工具栏中可用工具
 const tools: Tool[] = [
-  {key: "select", name: "选择", icon: <MousePointer className="w-5 h-5"/>},
-  {key: "create", name: "创建区域", icon: <Square className="w-5 h-5"/>},
-  {key: "create-avatar", name: "创建头像区域", icon: <CircleUserRound className="w-5 h-5"/>},
-  {key: "delete", name: "删除", icon: <Trash2 className="w-5 h-5"/>},
+  { key: "select", name: "选择", icon: <MousePointer className="w-5 h-5" /> },
+  { key: "create", name: "创建区域", icon: <Square className="w-5 h-5" /> },
+  { key: "create-avatar", name: "创建头像区域", icon: <CircleUserRound className="w-5 h-5" /> },
+  { key: "delete", name: "删除", icon: <Trash2 className="w-5 h-5" /> },
 ];
 
 type EditorTool = Tool["key"];
 
 // 注册所有可用头像样式（与 avatar/page.tsx 保持一致）
 const STYLE_REGISTRY = [
-  {key: "classic", style: new ClassicAvatarStyle() as IAvatarStyle},
-  {key: "modern", style: new ModernAvatarStyle() as IAvatarStyle},
-  {key: "simple", style: new SimpleAvatarStyle() as IAvatarStyle},
+  { key: "classic", style: new ClassicAvatarStyle() as IAvatarStyle },
+  { key: "modern", style: new ModernAvatarStyle() as IAvatarStyle },
+  { key: "simple", style: new SimpleAvatarStyle() as IAvatarStyle },
 ] as const;
 
 export default function ImagemapEditorPage() {
   // Image states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageName, setImageName] = useState<string | null>(null);
-  const [imageSize, setImageSize] = useState({width: 0, height: 0});
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
   // Custom image properties
   const [imagePath, setImagePath] = useState<string | null>(null);
@@ -112,18 +104,18 @@ export default function ImagemapEditorPage() {
   // Rectangle and drawing states
   const [rectangles, setRectangles] = useState<Rectangle[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [startPoint, setStartPoint] = useState({x: 0, y: 0});
+  const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [currentRect, setCurrentRect] = useState<Rectangle | null>(null);
   const [selectedRect, setSelectedRectId] = useState<string | null>(null);
   const [movingRect, setMovingRect] = useState<string | null>(null);
-  const [moveOffset, setMoveOffset] = useState({x: 0, y: 0});
+  const [moveOffset, setMoveOffset] = useState({ x: 0, y: 0 });
   const [resizingRect, setResizingRect] = useState<string | null>(null);
   const [resizeHandle, setResizeHandle] = useState<ResizeHandle | null>(null);
-  const [resizeStartPoint, setResizeStartPoint] = useState({x: 0, y: 0});
+  const [resizeStartPoint, setResizeStartPoint] = useState({ x: 0, y: 0 });
   const [resizeStartRect, setResizeStartRect] = useState<Rectangle | null>(null);
   const [draggingRectId, setDraggingRectId] = useState<string | null>(null);
-  const [lastPositionInput, setLastPositionInput] = useState({x: "0", y: "0"});
-  const [lastSizeInput, setLastSizeInput] = useState({width: "50", height: "50"});
+  const [lastPositionInput, setLastPositionInput] = useState({ x: "0", y: "0" });
+  const [lastSizeInput, setLastSizeInput] = useState({ width: "50", height: "50" });
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [_, setWindowResizeCounter] = useState(0);
@@ -137,10 +129,10 @@ export default function ImagemapEditorPage() {
   });
   const [currentTool, setCurrentTool] = useState<EditorTool>("select");
   const [userInfo, setUserInfo] = useState<string>("");
+
   // Drag & drop states
   const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const [isDragAccept, setIsDragAccept] = useState(false);
-  const [rejectReason, setRejectReason] = useState<DnDRejectReason>(DnDRejectReason.Unknown);
+  const [rejectReason, setRejectReason] = useState<DnDRejectReason | undefined>(DnDRejectReason.Unknown);
 
   // Overwrite dialog state
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
@@ -150,7 +142,7 @@ export default function ImagemapEditorPage() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
 
-  const {toast} = useToast();
+  const { toast } = useToast();
 
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -168,38 +160,38 @@ export default function ImagemapEditorPage() {
   const handleConfigs: Array<{
     handle: ResizeHandle;
     style: React.CSSProperties;
-    cursor: string
+    cursor: string;
   }> = [
-    {handle: "top-left", style: {top: -handleOffset, left: -handleOffset}, cursor: "nwse-resize"},
+    { handle: "top-left", style: { top: -handleOffset, left: -handleOffset }, cursor: "nwse-resize" },
     {
       handle: "top",
-      style: {top: -handleOffset, left: "50%", transform: "translateX(-50%)"},
+      style: { top: -handleOffset, left: "50%", transform: "translateX(-50%)" },
       cursor: "ns-resize",
     },
-    {handle: "top-right", style: {top: -handleOffset, right: -handleOffset}, cursor: "nesw-resize"},
+    { handle: "top-right", style: { top: -handleOffset, right: -handleOffset }, cursor: "nesw-resize" },
     {
       handle: "right",
-      style: {top: "50%", right: -handleOffset, transform: "translateY(-50%)"},
+      style: { top: "50%", right: -handleOffset, transform: "translateY(-50%)" },
       cursor: "ew-resize",
     },
     {
       handle: "bottom-right",
-      style: {bottom: -handleOffset, right: -handleOffset},
+      style: { bottom: -handleOffset, right: -handleOffset },
       cursor: "nwse-resize",
     },
     {
       handle: "bottom",
-      style: {bottom: -handleOffset, left: "50%", transform: "translateX(-50%)"},
+      style: { bottom: -handleOffset, left: "50%", transform: "translateX(-50%)" },
       cursor: "ns-resize",
     },
     {
       handle: "bottom-left",
-      style: {bottom: -handleOffset, left: -handleOffset},
+      style: { bottom: -handleOffset, left: -handleOffset },
       cursor: "nesw-resize",
     },
     {
       handle: "left",
-      style: {top: "50%", left: -handleOffset, transform: "translateY(-50%)"},
+      style: { top: "50%", left: -handleOffset, transform: "translateY(-50%)" },
       cursor: "ew-resize",
     },
   ];
@@ -220,7 +212,7 @@ export default function ImagemapEditorPage() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (contextMenuRef.current && !contextMenuRef.current.contains(event.target as Node)) {
-        setContextMenu((prev) => ({...prev, visible: false}));
+        setContextMenu((prev) => ({ ...prev, visible: false }));
       }
     };
 
@@ -296,8 +288,7 @@ export default function ImagemapEditorPage() {
     if (!file.type.startsWith("image/")) {
       toast({
         title: "文件类型不支持",
-        description: "请拖入或选择图片" +
-          "文件（如 .png / .jpg）",
+        description: "请拖入或选择图片" + "文件（如 .png / .jpg）",
         variant: "destructive",
       });
       return;
@@ -307,11 +298,11 @@ export default function ImagemapEditorPage() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const source = e.target?.result as string;
-      const img = document.createElement('img');
+      const img = document.createElement("img");
 
       img.onload = () => {
-        const {naturalWidth, naturalHeight} = img;
-        setImageSize({width: naturalWidth, height: naturalHeight});
+        const { naturalWidth, naturalHeight } = img;
+        setImageSize({ width: naturalWidth, height: naturalHeight });
       };
 
       img.src = source;
@@ -324,8 +315,6 @@ export default function ImagemapEditorPage() {
 
   // Drag & drop handlers (work for both empty and active preview)
   const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
-    if (uploadedImage) return;
-    
     event.preventDefault();
     event.stopPropagation();
     setIsDraggingOver(true);
@@ -334,35 +323,47 @@ export default function ImagemapEditorPage() {
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
+    setIsDraggingOver(false);
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    if (uploadedImage) return;
-
     event.preventDefault();
     event.stopPropagation();
-    const items = event.dataTransfer?.items;
-    let accept = false;
-    if (items && items.length > 0) {
-      if (items.length > 1) {
-        setRejectReason(DnDRejectReason.TooManyEntries);
-      } else if (items[0].kind === "file" && (items[0].type?.startsWith("image/") ?? false)) {
-        accept = true;
-      } else {
-        setRejectReason(DnDRejectReason.UnsupportedType);
+    const dt = event.dataTransfer;
+    let imageCount = 0;
+
+    // File type detection by items, files as a fallback
+    if (dt?.items && dt.items.length > 0) {
+      for (let i = 0; i < dt.items.length; i++) {
+        const it = dt.items[i];
+        if (it.kind === "file") {
+          const t = it.type || "";
+          if (t.startsWith("image/")) imageCount++;
+        }
+      }
+    } else if (dt?.files && dt.files.length > 0) {
+      for (let i = 0; i < dt.files.length; i++) {
+        const f = dt.files[i];
+        if ((f.type || "").startsWith("image/")) imageCount++;
       }
     }
-    setIsDragAccept(accept);
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = accept ? "copy" : "none";
+
+    if (imageCount > 1) {
+      setRejectReason(DnDRejectReason.TooManyEntries);
+    } else if (imageCount === 1) {
+      setRejectReason(undefined);
+    } else {
+      setRejectReason(DnDRejectReason.UnsupportedType);
     }
+
+    setIsDraggingOver(true);
+    if (dt) dt.dropEffect = imageCount === 1 ? "copy" : "none";
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
     setIsDraggingOver(false);
-    setIsDragAccept(false);
 
     const files = event.dataTransfer?.files;
     if (!files || files.length === 0) return;
@@ -382,13 +383,12 @@ export default function ImagemapEditorPage() {
       return;
     }
 
-    if (file)
-      loadImageFile(file);
+    if (file) loadImageFile(file);
   };
 
   // 获取缩放比例
   const getImageScale = () => {
-    if (!imageRef.current) return {scaleX: 1, scaleY: 1};
+    if (!imageRef.current) return { scaleX: 1, scaleY: 1 };
     const displayWidth = imageRef.current.clientWidth;
     const displayHeight = imageRef.current.clientHeight;
     return {
@@ -399,9 +399,9 @@ export default function ImagemapEditorPage() {
 
   // 预览区坐标 => 原图像坐标
   const getRelativeCoordinates = (event: React.MouseEvent) => {
-    if (!imageRef.current || !containerRef.current) return {x: 0, y: 0};
+    if (!imageRef.current || !containerRef.current) return { x: 0, y: 0 };
     const rect = imageRef.current.getBoundingClientRect();
-    const {scaleX, scaleY} = getImageScale();
+    const { scaleX, scaleY } = getImageScale();
     return {
       x: (event.clientX - rect.left) * scaleX,
       y: (event.clientY - rect.top) * scaleY,
@@ -409,10 +409,10 @@ export default function ImagemapEditorPage() {
   };
 
   const getTouchCoordinates = (event: React.TouchEvent) => {
-    if (!imageRef.current || !containerRef.current) return {x: 0, y: 0};
+    if (!imageRef.current || !containerRef.current) return { x: 0, y: 0 };
     const rect = imageRef.current.getBoundingClientRect();
     const touch = event.touches[0] || event.changedTouches[0];
-    const {scaleX, scaleY} = getImageScale();
+    const { scaleX, scaleY } = getImageScale();
     return {
       x: (touch.clientX - rect.left) * scaleX,
       y: (touch.clientY - rect.top) * scaleY,
@@ -424,16 +424,16 @@ export default function ImagemapEditorPage() {
 
     // Restore input values to a sane default
     if (id === null) {
-      setLastPositionInput({x: "0", y: "0"});
-      setLastSizeInput({width: "50", height: "50"});
+      setLastPositionInput({ x: "0", y: "0" });
+      setLastSizeInput({ width: "50", height: "50" });
       return;
     }
 
-    const target = rectangles.find(r => r.id === id);
+    const target = rectangles.find((r) => r.id === id);
 
     if (target) {
-      setLastPositionInput({x: target.x.toString(), y: target.y.toString()});
-      setLastSizeInput({width: target.width.toString(), height: target.height.toString()});
+      setLastPositionInput({ x: target.x.toString(), y: target.y.toString() });
+      setLastSizeInput({ width: target.width.toString(), height: target.height.toString() });
     } else {
       console.warn(`Cannot find a rectangle with selected id ${id}. Got:`, rectangles);
     }
@@ -442,23 +442,23 @@ export default function ImagemapEditorPage() {
   const MIN_RECT_SIZE = 20;
 
   const selectedRectData = useMemo(
-    () => selectedRect ? rectangles.find((r) => r.id === selectedRect) ?? null : null,
-    [selectedRect, rectangles],
+    () => (selectedRect ? rectangles.find((r) => r.id === selectedRect) ?? null : null),
+    [selectedRect, rectangles]
   );
 
   const positionBounds = selectedRectData
     ? {
-      maxX: Math.max(0, imageSize.width - selectedRectData.width),
-      maxY: Math.max(0, imageSize.height - selectedRectData.height),
-    }
-    : {maxX: imageSize.width, maxY: imageSize.height};
+        maxX: Math.max(0, imageSize.width - selectedRectData.width),
+        maxY: Math.max(0, imageSize.height - selectedRectData.height),
+      }
+    : { maxX: imageSize.width, maxY: imageSize.height };
 
   const sizeBounds = selectedRectData
     ? {
-      maxWidth: Math.max(MIN_RECT_SIZE, imageSize.width - selectedRectData.x),
-      maxHeight: Math.max(MIN_RECT_SIZE, imageSize.height - selectedRectData.y),
-    }
-    : {maxWidth: imageSize.width, maxHeight: imageSize.height};
+        maxWidth: Math.max(MIN_RECT_SIZE, imageSize.width - selectedRectData.x),
+        maxHeight: Math.max(MIN_RECT_SIZE, imageSize.height - selectedRectData.y),
+      }
+    : { maxWidth: imageSize.width, maxHeight: imageSize.height };
 
   const clampPositionInput = (field: "x" | "y", value: string) => {
     if (!selectedRectData || value.trim() === "") return null;
@@ -562,7 +562,7 @@ export default function ImagemapEditorPage() {
         return;
       }
 
-      setRectangles((prev) => prev.map((r) => (r.id === selectedId ? {...r, x: newX, y: newY} : r)));
+      setRectangles((prev) => prev.map((r) => (r.id === selectedId ? { ...r, x: newX, y: newY } : r)));
       // Input fields will be updated automatically via useEffect when rectangles change
 
       event.preventDefault();
@@ -572,7 +572,7 @@ export default function ImagemapEditorPage() {
       // Update input fields after arrow key release
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
         if (selectedRectData && selectedRectRef.current === selectedRectData.id) {
-          setLastPositionInput({x: selectedRectData.x.toString(), y: selectedRectData.y.toString()});
+          setLastPositionInput({ x: selectedRectData.x.toString(), y: selectedRectData.y.toString() });
         }
       }
     };
@@ -586,10 +586,12 @@ export default function ImagemapEditorPage() {
   }, [imageSize.height, imageSize.width, selectedRectData]);
 
   const calculateResizedRect = (rect: Rectangle, handle: ResizeHandle, deltaX: number, deltaY: number) => {
-    let {x, y, width, height} = rect;
+    let { x, y, width, height } = rect;
 
-    const clampWidth = (w: number, left: number) => clamp(w, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.width - left));
-    const clampHeight = (h: number, top: number) => clamp(h, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.height - top));
+    const clampWidth = (w: number, left: number) =>
+      clamp(w, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.width - left));
+    const clampHeight = (h: number, top: number) =>
+      clamp(h, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.height - top));
 
     switch (handle) {
       case "right": {
@@ -638,10 +640,10 @@ export default function ImagemapEditorPage() {
     // 当为头像区域时，锁定宽高比（基于组件实时测量 size，回退样式 size）并以左上角为锚点
     if (rect.type === RectangleType.Avatar) {
       const styleKey = rect.avatar?.styleKey ?? "simple";
-      const styleObj = STYLE_REGISTRY.find(s => s.key === styleKey)?.style;
+      const styleObj = STYLE_REGISTRY.find((s) => s.key === styleKey)?.style;
       const measured = avatarNaturalSizes[rect.id];
-      const naturalW = (measured?.width ?? styleObj?.size.width) ?? Math.max(width, MIN_RECT_SIZE);
-      const naturalH = (measured?.height ?? styleObj?.size.height) ?? Math.max(height, MIN_RECT_SIZE);
+      const naturalW = measured?.width ?? styleObj?.size.width ?? Math.max(width, MIN_RECT_SIZE);
+      const naturalH = measured?.height ?? styleObj?.size.height ?? Math.max(height, MIN_RECT_SIZE);
       const ar = naturalW > 0 && naturalH > 0 ? naturalW / naturalH : 1;
 
       const anchorX = rect.x; // 锚定左上角，简化约束行为
@@ -680,7 +682,7 @@ export default function ImagemapEditorPage() {
     const coords = getRelativeCoordinates(event);
     const clickedRect = rectangles.find(
       (rect) =>
-        coords.x >= rect.x && coords.x <= rect.x + rect.width && coords.y >= rect.y && coords.y <= rect.y + rect.height,
+        coords.x >= rect.x && coords.x <= rect.x + rect.width && coords.y >= rect.y && coords.y <= rect.y + rect.height
     );
 
     if (clickedRect) {
@@ -715,7 +717,7 @@ export default function ImagemapEditorPage() {
       setRectangles((prev) => [...prev, newRect]);
       setSelectedRect(newRect.id);
     }
-    setContextMenu((prev) => ({...prev, visible: false}));
+    setContextMenu((prev) => ({ ...prev, visible: false }));
   };
 
   const moveRectangleLayer = (id: string, delta: number) => {
@@ -765,10 +767,7 @@ export default function ImagemapEditorPage() {
     // 检查是否点击在矩形上
     const clickedRect = rectangles.find(
       (rect) =>
-        coords.x >= rect.x &&
-        coords.x <= rect.x + rect.width &&
-        coords.y >= rect.y &&
-        coords.y <= rect.y + rect.height,
+        coords.x >= rect.x && coords.x <= rect.x + rect.width && coords.y >= rect.y && coords.y <= rect.y + rect.height
     );
 
     // 根据当前工具执行不同操作
@@ -792,7 +791,7 @@ export default function ImagemapEditorPage() {
 
         if (coords.x <= imageSize.width && coords.y <= imageSize.height) {
           setIsDrawing(true);
-          setStartPoint({x: Math.round(coords.x), y: Math.round(coords.y)});
+          setStartPoint({ x: Math.round(coords.x), y: Math.round(coords.y) });
         }
         break;
 
@@ -820,15 +819,19 @@ export default function ImagemapEditorPage() {
 
       const resized = calculateResizedRect(resizeStartRect, resizeHandle, deltaX, deltaY);
 
-      setRectangles((prev) => prev.map((rect) =>
-        rect.id === resizingRect ? {
-          ...rect,
-          x: resized.x,
-          y: resized.y,
-          width: resized.width,
-          height: resized.height,
-        } : rect,
-      ));
+      setRectangles((prev) =>
+        prev.map((rect) =>
+          rect.id === resizingRect
+            ? {
+                ...rect,
+                x: resized.x,
+                y: resized.y,
+                width: resized.width,
+                height: resized.height,
+              }
+            : rect
+        )
+      );
 
       // Don't update input fields during drag - only update when drag ends in handlePointerUp
 
@@ -868,7 +871,7 @@ export default function ImagemapEditorPage() {
             };
           }
           return rect;
-        }),
+        })
       );
     }
 
@@ -904,13 +907,13 @@ export default function ImagemapEditorPage() {
         };
 
         // 绘制结束后，依据组件测量/样式宽高比自动调整为等比（contain）大小，锚定左上角
-        const styleObj = STYLE_REGISTRY.find(s => s.key === "simple")?.style;
+        const styleObj = STYLE_REGISTRY.find((s) => s.key === "simple")?.style;
         const measured = avatarNaturalSizes[newRect.id];
-        const naturalW = (measured?.width ?? styleObj?.size.width) ?? newRect.width;
-        const naturalH = (measured?.height ?? styleObj?.size.height) ?? newRect.height;
+        const naturalW = measured?.width ?? styleObj?.size.width ?? newRect.width;
+        const naturalH = measured?.height ?? styleObj?.size.height ?? newRect.height;
         const scale = Math.min(
           naturalW > 0 ? newRect.width / naturalW : 1,
-          naturalH > 0 ? newRect.height / naturalH : 1,
+          naturalH > 0 ? newRect.height / naturalH : 1
         );
         let lockedW = Math.round(naturalW * scale);
         let lockedH = Math.round(naturalH * scale);
@@ -924,8 +927,8 @@ export default function ImagemapEditorPage() {
       setRectangles((prev) => [...prev, newRect]);
 
       setSelectedRectId(newRect.id);
-      setLastPositionInput({x: newRect.x.toString(), y: newRect.y.toString()});
-      setLastSizeInput({width: newRect.width.toString(), height: newRect.height.toString()});
+      setLastPositionInput({ x: newRect.x.toString(), y: newRect.y.toString() });
+      setLastSizeInput({ width: newRect.width.toString(), height: newRect.height.toString() });
 
       // Upon calling of this method, we cannot get the newly added rectangle. Why?
       // setSelectedRect(newRect.id)
@@ -938,9 +941,9 @@ export default function ImagemapEditorPage() {
     if (movingRect) {
       setMovingRect(null);
       // Update input fields after movement is complete
-      const movedRect = rectangles.find(r => r.id === movingRect);
+      const movedRect = rectangles.find((r) => r.id === movingRect);
       if (movedRect && selectedRect === movingRect) {
-        setLastPositionInput({x: movedRect.x.toString(), y: movedRect.y.toString()});
+        setLastPositionInput({ x: movedRect.x.toString(), y: movedRect.y.toString() });
       }
     }
 
@@ -951,68 +954,75 @@ export default function ImagemapEditorPage() {
       setResizeStartRect(null);
       // Update input fields after resize completes
       if (selectedRectData) {
-        setLastPositionInput({x: selectedRectData.x.toString(), y: selectedRectData.y.toString()});
-        setLastSizeInput({width: selectedRectData.width.toString(), height: selectedRectData.height.toString()});
+        setLastPositionInput({ x: selectedRectData.x.toString(), y: selectedRectData.y.toString() });
+        setLastSizeInput({ width: selectedRectData.width.toString(), height: selectedRectData.height.toString() });
       }
     }
   };
 
-  const updateRectangle = (id: string, field: keyof Rectangle,
-                           value: string, castToNumber: boolean = false) => {
+  const updateRectangle = (id: string, field: keyof Rectangle, value: string, castToNumber: boolean = false) => {
     // Don't update if user needs a number, and we cannot convert the source value to one.
-    if (castToNumber && isNaN(Number(value)))
-      return;
+    if (castToNumber && isNaN(Number(value))) return;
 
     console.log("updateRectangle", id, field, value);
-    setRectangles((prev) => prev.map((rect) =>
-      (rect.id === id ? {...rect, [field]: castToNumber ? Number(value) : value} : rect)));
+    setRectangles((prev) =>
+      prev.map((rect) => (rect.id === id ? { ...rect, [field]: castToNumber ? Number(value) : value } : rect))
+    );
   };
 
   const updateRectangleType = (id: string, nextType: RectangleType) => {
-    setRectangles((prev) => prev.map((rect) => {
-      if (rect.id !== id) return rect;
-      const base: Rectangle = { ...rect, type: nextType };
-      if (nextType === RectangleType.Avatar) {
-        return {
-          ...base,
-          avatar: base.avatar ?? {
-            styleKey: "simple",
-            imageUrl: "",
-            username: "",
-            countryCode: "",
-          },
-        };
-      } else {
-        const { avatar, ...rest } = base as any;
-        // 清理缓存，避免残留的头像组件
-        avatarCacheRef.current.delete(id);
-        // 清理测量尺寸缓存
-        setAvatarNaturalSizes(prev => {
-          const { [id]: _omit, ...restSizes } = prev;
-          return restSizes;
-        });
-        return rest as Rectangle;
-      }
-    }));
+    setRectangles((prev) =>
+      prev.map((rect) => {
+        if (rect.id !== id) return rect;
+        const base: Rectangle = { ...rect, type: nextType };
+        if (nextType === RectangleType.Avatar) {
+          return {
+            ...base,
+            avatar: base.avatar ?? {
+              styleKey: "simple",
+              imageUrl: "",
+              username: "",
+              countryCode: "",
+            },
+          };
+        } else {
+          const { avatar, ...rest } = base as any;
+          // 清理缓存，避免残留的头像组件
+          avatarCacheRef.current.delete(id);
+          // 清理测量尺寸缓存
+          setAvatarNaturalSizes((prev) => {
+            const { [id]: _omit, ...restSizes } = prev;
+            return restSizes;
+          });
+          return rest as Rectangle;
+        }
+      })
+    );
   };
 
-  const updateAvatarField = (id: string, field: "styleKey" | "imageUrl" | "username" | "countryCode", value: string) => {
-    setRectangles((prev) => prev.map((rect) => {
-      if (rect.id !== id) return rect;
-      if (rect.type !== RectangleType.Avatar) return rect;
-      const avatar = rect.avatar ?? { styleKey: "simple", imageUrl: "", username: "", countryCode: "" };
-      return { ...rect, avatar: { ...avatar, [field]: value } };
-    }));
+  const updateAvatarField = (
+    id: string,
+    field: "styleKey" | "imageUrl" | "username" | "countryCode",
+    value: string
+  ) => {
+    setRectangles((prev) =>
+      prev.map((rect) => {
+        if (rect.id !== id) return rect;
+        if (rect.type !== RectangleType.Avatar) return rect;
+        const avatar = rect.avatar ?? { styleKey: "simple", imageUrl: "", username: "", countryCode: "" };
+        return { ...rect, avatar: { ...avatar, [field]: value } };
+      })
+    );
   };
 
   const deleteRectangle = (id: string) => {
     setRectangles((prev) => prev.filter((rect) => rect.id !== id));
     setSelectedRect(null);
-    setContextMenu((prev) => ({...prev, visible: false}));
+    setContextMenu((prev) => ({ ...prev, visible: false }));
     // 清理头像缓存
     avatarCacheRef.current.delete(id);
     // 清理测量尺寸缓存
-    setAvatarNaturalSizes(prev => {
+    setAvatarNaturalSizes((prev) => {
       const { [id]: _omit, ...rest } = prev;
       return rest;
     });
@@ -1101,7 +1111,9 @@ export default function ImagemapEditorPage() {
     const areas = rectangles
       .map(
         (rect) =>
-          `  <area shape="rect" coords="${Math.round(rect.x)},${Math.round(rect.y)},${Math.round(rect.x + rect.width)},${Math.round(rect.y + rect.height)}" href="${rect.href}" alt="${rect.alt}">`,
+          `  <area shape="rect" coords="${Math.round(rect.x)},${Math.round(rect.y)},${Math.round(
+            rect.x + rect.width
+          )},${Math.round(rect.y + rect.height)}" href="${rect.href}" alt="${rect.alt}">`
       )
       .join("\n");
 
@@ -1112,7 +1124,7 @@ ${areas}
   };
 
   const toPercent = (num: number, total: number) => {
-    return Math.round(num / total * 1000) / 10;
+    return Math.round((num / total) * 1000) / 10;
   };
 
   const generateImageMapBBCode = () => {
@@ -1121,9 +1133,11 @@ ${areas}
     const areas = rectangles
       .map(
         (rect) =>
-          `${toPercent(rect.x, imageSize.width)} ${toPercent(rect.y, imageSize.height)}`
-          + ` ${toPercent(rect.width, imageSize.width)} ${toPercent(rect.height, imageSize.height)}`
-          + ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${rect.alt.trim() === "" ? "" : ` ${rect.alt.trim()}`}`,
+          `${toPercent(rect.x, imageSize.width)} ${toPercent(rect.y, imageSize.height)}` +
+          ` ${toPercent(rect.width, imageSize.width)} ${toPercent(rect.height, imageSize.height)}` +
+          ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${
+            rect.alt.trim() === "" ? "" : ` ${rect.alt.trim()}`
+          }`
       )
       .join("\n");
 
@@ -1146,14 +1160,11 @@ ${areas}
     avatarCacheRef.current.clear();
     // 清理测量尺寸缓存
     setAvatarNaturalSizes({});
-    if (data.imagePath)
-      setImagePath(data.imagePath);
+    if (data.imagePath) setImagePath(data.imagePath);
 
-    if (data.imageName)
-      setImageName(data.imageName);
+    if (data.imageName) setImageName(data.imageName);
 
-    if (data.mapName)
-      setMapName(data.mapName);
+    if (data.mapName) setMapName(data.mapName);
 
     // 清空选中状态
     setSelectedRect(null);
@@ -1163,7 +1174,9 @@ ${areas}
   // 获取工具按钮的样式
   const getToolButtonClass = (tool: EditorTool) => {
     return `p-2 rounded-md transition-all ease-out duration-200 ${
-      currentTool === tool ? "bg-primary text-primary-foreground" : "bg-background text-foreground hover:bg-foreground/10"
+      currentTool === tool
+        ? "bg-primary text-primary-foreground"
+        : "bg-background text-foreground hover:bg-foreground/10"
     }`;
   };
 
@@ -1189,7 +1202,7 @@ ${areas}
       const start = performance.now();
       while (performance.now() - start < timeoutMs) {
         const targets = rectangles.filter(isRenderableAvatar);
-        const allMeasured = targets.every(r => {
+        const allMeasured = targets.every((r) => {
           const m = avatarNaturalSizes[r.id];
           return !!m && m.width > 0 && m.height > 0;
         });
@@ -1232,7 +1245,7 @@ ${areas}
           <h1 className="flex-title text-3xl font-bold text-foreground mb-2">
             <span className="text-primary">ImageMap </span>
             <span>编辑器</span>
-            <HelpIconButton section="imagemap"/>
+            <HelpIconButton section="imagemap" />
           </h1>
           <p className="text-secondary-foreground">划定可点击区域，以便在个人资料等中使用</p>
         </div>
@@ -1242,12 +1255,18 @@ ${areas}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
-                <Eye/>
+                <Eye />
                 <span>预览区</span>
               </h2>
               <div className="flex items-center gap-2">
                 {uploadedImage && (
-                  <Button onClick={handleExportAvatars} size="sm" variant="outline" className="gap-2" disabled={isExporting}>
+                  <Button
+                    onClick={handleExportAvatars}
+                    size="sm"
+                    variant="outline"
+                    className="gap-2"
+                    disabled={isExporting}
+                  >
                     {isExporting ? (
                       <>
                         <span className="w-4 h-4 animate-spin border-2 border-current border-t-transparent rounded-full" />
@@ -1255,18 +1274,17 @@ ${areas}
                       </>
                     ) : (
                       <>
-                        <Download className="w-4 h-4"/>
+                        <Download className="w-4 h-4" />
                         保存
                       </>
                     )}
                   </Button>
                 )}
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden"
-                       id="image-upload"/>
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="image-upload" />
                 <label htmlFor="image-upload">
                   <Button asChild className="cursor-pointer">
                     <span className="flex items-center gap-2">
-                      <Upload className="w-4 h-4"/>
+                      <Upload className="w-4 h-4" />
                       上传图片
                     </span>
                   </Button>
@@ -1277,18 +1295,16 @@ ${areas}
             {/* 工具栏 */}
             {uploadedImage && (
               <div className="bg-card rounded-md shadow p-1 flex space-x-1 select-none">
-                {
-                  tools.map((tool) => (
-                    <button
-                      key={tool.key}
-                      className={getToolButtonClass(tool.key)}
-                      onClick={() => setCurrentTool(tool.key)}
-                      title={tool.name}
-                    >
-                      {tool.icon}
-                    </button>
-                  ))
-                }
+                {tools.map((tool) => (
+                  <button
+                    key={tool.key}
+                    className={getToolButtonClass(tool.key)}
+                    onClick={() => setCurrentTool(tool.key)}
+                    title={tool.name}
+                  >
+                    {tool.icon}
+                  </button>
+                ))}
               </div>
             )}
 
@@ -1312,7 +1328,7 @@ ${areas}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     tabIndex={0}
-                    style={{touchAction: "none", userSelect: "none", minHeight: "100%"}}
+                    style={{ touchAction: "none", userSelect: "none", minHeight: "100%" }}
                   >
                     <img
                       ref={imageRef}
@@ -1320,17 +1336,21 @@ ${areas}
                       alt="Uploaded"
                       className="w-full object-contain select-none"
                       draggable={false}
-                      style={{userSelect: "none"}}
+                      style={{ userSelect: "none" }}
                     />
 
                     {/* 拖放状态显示 */}
-                    {isDraggingOver && <DragAndDropOverlay isRounded={!uploadedImage} isDragAccepted={isDragAccept}
-                                                           rejectReason={rejectReason}/>}
+                    {isDraggingOver && (
+                      <DragAndDropOverlay
+                        isRounded={!uploadedImage}
+                        rejectReason={rejectReason}
+                      />
+                    )}
 
                     {/* Existing rectangles */}
                     {/* 显示时将原图像坐标缩放到预览区 */}
                     {rectangles.map((rect, index) => {
-                      const {scaleX, scaleY} = getImageScale();
+                      const { scaleX, scaleY } = getImageScale();
 
                       // 十字光标较为特殊（画框），在此处先处理
                       return (
@@ -1375,7 +1395,7 @@ ${areas}
                                 cacheRef={avatarCacheRef}
                                 measured={avatarNaturalSizes[rect.id]}
                                 onMeasure={(w, h) => {
-                                  setAvatarNaturalSizes(prev => {
+                                  setAvatarNaturalSizes((prev) => {
                                     const current = prev[rect.id];
                                     if (current && current.width === w && current.height === h) return prev;
                                     return { ...prev, [rect.id]: { width: w, height: h } };
@@ -1420,21 +1440,22 @@ ${areas}
                     })}
 
                     {/* Current drawing rectangle */}
-                    {currentRect && (() => {
-                      const {scaleX, scaleY} = getImageScale();
-                      return (
-                        <div
-                          className="absolute border-2 border-red-400 bg-red-500 bg-opacity-20 select-none"
-                          style={{
-                            left: currentRect.x / scaleX,
-                            top: currentRect.y / scaleY,
-                            width: currentRect.width / scaleX,
-                            height: currentRect.height / scaleY,
-                            userSelect: "none",
-                          }}
-                        />
-                      );
-                    })()}
+                    {currentRect &&
+                      (() => {
+                        const { scaleX, scaleY } = getImageScale();
+                        return (
+                          <div
+                            className="absolute border-2 border-red-400 bg-red-500 bg-opacity-20 select-none"
+                            style={{
+                              left: currentRect.x / scaleX,
+                              top: currentRect.y / scaleY,
+                              width: currentRect.width / scaleX,
+                              height: currentRect.height / scaleY,
+                              userSelect: "none",
+                            }}
+                          />
+                        );
+                      })()}
 
                     {/* 自定义右键菜单 */}
                     {contextMenu.visible && (
@@ -1453,14 +1474,14 @@ ${areas}
                               className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 flex items-center gap-2"
                               onClick={() => duplicateRectangle(contextMenu.targetId!)}
                             >
-                              <Copy className="w-4 h-4"/>
+                              <Copy className="w-4 h-4" />
                               创建副本
                             </button>
                             <button
                               className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 text-destructive flex items-center gap-2"
                               onClick={() => deleteRectangle(contextMenu.targetId!)}
                             >
-                              <Trash className="w-4 h-4"/>
+                              <Trash className="w-4 h-4" />
                               删除区域
                             </button>
                           </>
@@ -1470,19 +1491,19 @@ ${areas}
                               className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 flex items-center gap-2"
                               onClick={() => {
                                 setCurrentTool("create");
-                                setContextMenu((prev) => ({...prev, visible: false}));
+                                setContextMenu((prev) => ({ ...prev, visible: false }));
                               }}
                             >
-                              <Square className="w-4 h-4"/>
+                              <Square className="w-4 h-4" />
                               创建新区域
                             </button>
                             <button
                               className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 flex items-center gap-2"
                               onClick={() => {
-                                setContextMenu((prev) => ({...prev, visible: false}));
+                                setContextMenu((prev) => ({ ...prev, visible: false }));
                               }}
                             >
-                              <X className="w-4 h-4"/>
+                              <X className="w-4 h-4" />
                               取消
                             </button>
                           </>
@@ -1499,14 +1520,18 @@ ${areas}
                     onDrop={handleDrop}
                   >
                     <div className="text-center">
-                      <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4"/>
+                      <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                       <p className="text-muted-foreground">先上传一张图片</p>
                       <p className="text-muted-foreground">（支持拖放）</p>
                     </div>
 
                     {/* 拖放状态显示 */}
-                    {isDraggingOver && <DragAndDropOverlay isRounded={!uploadedImage} isDragAccepted={isDragAccept}
-                                                           rejectReason={rejectReason}/>}
+                    {isDraggingOver && (
+                      <DragAndDropOverlay
+                        isRounded={!uploadedImage}
+                        rejectReason={rejectReason}
+                      />
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -1517,7 +1542,7 @@ ${areas}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
-                <Settings/>
+                <Settings />
                 <span>设置区</span>
               </h2>
 
@@ -1530,7 +1555,7 @@ ${areas}
                   variant="outline"
                   className="gap-2"
                 >
-                  <Upload className="w-4 h-4"/>
+                  <Upload className="w-4 h-4" />
                   导出
                 </Button>
                 <Button
@@ -1540,21 +1565,18 @@ ${areas}
                   variant="outline"
                   className="gap-2"
                 >
-                  <Download className="w-4 h-4"/>
+                  <Download className="w-4 h-4" />
                   导入
                 </Button>
               </div>
             </div>
-
 
             {/* Image Properties */}
             {uploadedImage && (
               <Card>
                 <CardContent className="p-4">
                   <div className="items-center space-y-3">
-                    <h3 className="font-medium">
-                      图像属性
-                    </h3>
+                    <h3 className="font-medium">图像属性</h3>
                     <div>
                       <label className="block text-sm font-medium mb-1">图片地址</label>
                       <input
@@ -1643,15 +1665,19 @@ ${areas}
                                 e.preventDefault();
                                 handleTouchEndRow();
                               }}
-                              style={{touchAction: "none"}}
+                              style={{ touchAction: "none" }}
                             >
-                              <GripVertical className="w-4 h-4"/>
+                              <GripVertical className="w-4 h-4" />
                             </div>
                             <div className="flex flex-col min-w-0 flex-1">
+                              <span className={`text-sm font-medium text-left truncate ${rect.alt || "italic"}`}>
+                                {rect.alt || `区域 ${index + 1}`}
+                              </span>
                               <span
-                                className={`text-sm font-medium text-left truncate ${rect.alt || "italic"}`}>{rect.alt || `区域 ${index + 1}`}</span>
-                              <span
-                                className={`text-xs text-muted-foreground text-left truncate ${rect.href || "italic"}`}>{rect.href || "未设置链接"}</span>
+                                className={`text-xs text-muted-foreground text-left truncate ${rect.href || "italic"}`}
+                              >
+                                {rect.href || "未设置链接"}
+                              </span>
                             </div>
                           </div>
 
@@ -1663,7 +1689,7 @@ ${areas}
                                 className="h-8 w-8 flex-shrink-0"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <MoreVertical className="w-4 h-4"/>
+                                <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -1673,7 +1699,7 @@ ${areas}
                                   duplicateRectangle(rect.id);
                                 }}
                               >
-                                <Copy className="w-4 h-4 flex-shrink-0"/>
+                                <Copy className="w-4 h-4 flex-shrink-0" />
                                 <span className="truncate">创建副本</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
@@ -1683,7 +1709,7 @@ ${areas}
                                   deleteRectangle(rect.id);
                                 }}
                               >
-                                <Trash className="w-4 h-4 flex-shrink-0"/>
+                                <Trash className="w-4 h-4 flex-shrink-0" />
                                 <span className="truncate">删除</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -1701,9 +1727,7 @@ ${areas}
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium">
-                      区域属性
-                    </h3>
+                    <h3 className="font-medium">区域属性</h3>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
@@ -1711,7 +1735,7 @@ ${areas}
                         onClick={() => duplicateRectangle(selectedRect)}
                         className="flex items-center gap-1"
                       >
-                        <Copy className="w-4 h-4"/>
+                        <Copy className="w-4 h-4" />
                         复制
                       </Button>
                       <Button
@@ -1720,7 +1744,7 @@ ${areas}
                         onClick={() => deleteRectangle(selectedRect)}
                         className="flex items-center gap-1"
                       >
-                        <Trash2 className="w-4 h-4"/>
+                        <Trash2 className="w-4 h-4" />
                         删除
                       </Button>
                     </div>
@@ -1754,8 +1778,10 @@ ${areas}
                                 isTouchDevice ? "py-3 text-base" : ""
                               }`}
                             >
-                              {STYLE_REGISTRY.map(({key, style}) => (
-                                <option key={key} value={key}>{style.name}</option>
+                              {STYLE_REGISTRY.map(({ key, style }) => (
+                                <option key={key} value={key}>
+                                  {style.name}
+                                </option>
                               ))}
                             </select>
                           </div>
@@ -1833,22 +1859,22 @@ ${areas}
                             variant="outline"
                             size="sm"
                             disabled={userInfo.trim().length === 0 || Number.isNaN(Number(userInfo))}
-                            onClick={() => updateRectangle(selectedRect, "href",
-                              generateUserLinkFromId(Number(userInfo)))}
+                            onClick={() =>
+                              updateRectangle(selectedRect, "href", generateUserLinkFromId(Number(userInfo)))
+                            }
                             className="flex items-center gap-1"
                           >
-                            <Hash className="w-4 h-4"/>
+                            <Hash className="w-4 h-4" />
                             <span className="truncate">作为 ID 填入</span>
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             disabled={userInfo.trim().length === 0}
-                            onClick={() => updateRectangle(selectedRect, "href",
-                              generateUserLinkFromName(userInfo))}
+                            onClick={() => updateRectangle(selectedRect, "href", generateUserLinkFromName(userInfo))}
                             className="flex items-center gap-1"
                           >
-                            <UserRound className="w-4 h-4"/>
+                            <UserRound className="w-4 h-4" />
                             <span className="truncate">作为用户名填入</span>
                           </Button>
                         </div>
@@ -1903,7 +1929,7 @@ ${areas}
                               const clamped = clampSizeInput("width", e.target.value);
                               if (clamped === null) return;
 
-                              setLastSizeInput({...lastSizeInput, width: clamped.toString()});
+                              setLastSizeInput({ ...lastSizeInput, width: clamped.toString() });
                               updateRectangle(selectedRect, "width", clamped.toString(), true);
                             }}
                             className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
@@ -1920,7 +1946,7 @@ ${areas}
                               const clamped = clampSizeInput("height", e.target.value);
                               if (clamped === null) return;
 
-                              setLastSizeInput({...lastSizeInput, height: clamped.toString()});
+                              setLastSizeInput({ ...lastSizeInput, height: clamped.toString() });
                               updateRectangle(selectedRect, "height", clamped.toString(), true);
                             }}
                             className="w-full px-3 py-2 border hover:border-primary rounded-md text-sm"
@@ -1938,7 +1964,7 @@ ${areas}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
-                <Code/>
+                <Code />
                 <span>代码区</span>
               </h2>
             </div>
@@ -1948,45 +1974,59 @@ ${areas}
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-medium">HTML 代码</h3>
-                  <Button onClick={() => {
-                    navigator.clipboard.writeText(generateImageMapHtml())
-                      .then(() => toast({
-                        title: "已复制",
-                        description: "HTML 代码已复制到剪贴板",
-                      }));
-                  }}
-                          disabled={rectangles.length === 0} size="sm">
-                    <Copy className="w-4 h-4"/>
+                  <Button
+                    onClick={() => {
+                      navigator.clipboard.writeText(generateImageMapHtml()).then(() =>
+                        toast({
+                          title: "已复制",
+                          description: "HTML 代码已复制到剪贴板",
+                        })
+                      );
+                    }}
+                    disabled={rectangles.length === 0}
+                    size="sm"
+                  >
+                    <Copy className="w-4 h-4" />
                     复制代码
                   </Button>
                 </div>
-                <div
-                  className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
-                  <pre><code dangerouslySetInnerHTML={{
-                    __html: hljs.highlight(generateImageMapHtml(), {language: "html"}).value,
-                  }}/></pre>
+                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
+                  <pre>
+                    <code
+                      dangerouslySetInnerHTML={{
+                        __html: hljs.highlight(generateImageMapHtml(), { language: "html" }).value,
+                      }}
+                    />
+                  </pre>
                 </div>
               </CardContent>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-medium">BBCode 代码</h3>
-                  <Button onClick={() => {
-                    navigator.clipboard.writeText(generateImageMapBBCode())
-                      .then(() => toast({
-                        title: "已复制",
-                        description: "BBCode 代码已复制到剪贴板",
-                      }));
-                  }}
-                          disabled={rectangles.length === 0} size="sm">
-                    <Copy className="w-4 h-4"/>
+                  <Button
+                    onClick={() => {
+                      navigator.clipboard.writeText(generateImageMapBBCode()).then(() =>
+                        toast({
+                          title: "已复制",
+                          description: "BBCode 代码已复制到剪贴板",
+                        })
+                      );
+                    }}
+                    disabled={rectangles.length === 0}
+                    size="sm"
+                  >
+                    <Copy className="w-4 h-4" />
                     复制代码
                   </Button>
                 </div>
-                <div
-                  className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
-                  <pre><code dangerouslySetInnerHTML={{
-                    __html: hljs.highlight(generateImageMapBBCode(), {language: "bbcode"}).value,
-                  }}/></pre>
+                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
+                  <pre>
+                    <code
+                      dangerouslySetInnerHTML={{
+                        __html: hljs.highlight(generateImageMapBBCode(), { language: "bbcode" }).value,
+                      }}
+                    />
+                  </pre>
                 </div>
               </CardContent>
             </Card>
@@ -1998,41 +2038,40 @@ ${areas}
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex flex-row items-center gap-2">
-              <OctagonAlert/>
+              <OctagonAlert />
               加载新图片？
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              当前编辑的图像与 ImageMap 将会被覆盖，此操作不可逆。
-            </AlertDialogDescription>
+            <AlertDialogDescription>当前编辑的图像与 ImageMap 将会被覆盖，此操作不可逆。</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setPendingFile(null);
-            }}>取消</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive/50 hover:bg-destructive" onClick={() => {
-              if (pendingFile) {
-                loadImageFile(pendingFile);
-              }
-              setPendingFile(null);
-              setOverwriteDialogOpen(false);
-            }}>覆盖</AlertDialogAction>
+            <AlertDialogCancel
+              onClick={() => {
+                setPendingFile(null);
+              }}
+            >
+              取消
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive/50 hover:bg-destructive"
+              onClick={() => {
+                if (pendingFile) {
+                  loadImageFile(pendingFile);
+                }
+                setPendingFile(null);
+                setOverwriteDialogOpen(false);
+              }}
+            >
+              覆盖
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* 导出对话框 */}
-      <ExportDialog
-        open={exportDialogOpen}
-        onOpenChange={setExportDialogOpen}
-        data={generateExportData()}
-      />
+      <ExportDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen} data={generateExportData()} />
 
       {/* 导入对话框 */}
-      <ImportDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        onImport={handleImportData}
-      />
+      <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} onImport={handleImportData} />
 
       {/* 离屏导出容器：渲染原图背景 + 头像层，尺寸为原图大小 */}
       {uploadedImage && imageSize.width > 0 && imageSize.height > 0 && (
@@ -2063,7 +2102,7 @@ ${areas}
                 display: "block",
               }}
             />
-            {rectangles.filter(isRenderableAvatar).map(rect => (
+            {rectangles.filter(isRenderableAvatar).map((rect) => (
               <div
                 key={rect.id}
                 style={{
@@ -2083,7 +2122,7 @@ ${areas}
                   cacheRef={avatarCacheRef}
                   measured={avatarNaturalSizes[rect.id]}
                   onMeasure={(w, h) => {
-                    setAvatarNaturalSizes(prev => {
+                    setAvatarNaturalSizes((prev) => {
                       const current = prev[rect.id];
                       if (current && current.width === w && current.height === h) return prev;
                       return { ...prev, [rect.id]: { width: w, height: h } };
