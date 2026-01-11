@@ -37,10 +37,11 @@ export class SimpleAvatarStyle implements IAvatarStyle {
             src={getProxiedImageUrl(inputs.imageUrl)}
             alt={inputs.username}
             crossOrigin="anonymous"
+            draggable={false}
+            className="object-cover select-none"
             style={{
               width: "100%",
               height: "100%",
-              objectFit: "cover",
               filter: "saturate(1.05) contrast(1.05)",
             }}
           />
@@ -60,7 +61,8 @@ export class SimpleAvatarStyle implements IAvatarStyle {
                 alt={inputs.countryCode}
                 crossOrigin="anonymous"
                 style={{ height: 22 }}
-                className="object-cover rounded-md"
+                className="object-cover rounded-md select-none"
+                draggable={false}
               />
             ) : null}
             <span style={{ letterSpacing: 0.2 }} className="truncate">

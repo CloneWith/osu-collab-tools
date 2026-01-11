@@ -34,12 +34,13 @@ export class ClassicAvatarStyle implements IAvatarStyle {
             src={getProxiedImageUrl(inputs.imageUrl)}
             alt={inputs.username}
             crossOrigin="anonymous"
+            draggable={false}
             style={{
               width,
               height,
               boxShadow: "0 0 4px 2px rgba(0, 0, 0, 0.2)",
             }}
-            className="mt-8 border-white border-8 object-cover"
+            className="mt-8 border-white border-8 object-cover select-none"
           />
 
           <div
@@ -58,8 +59,9 @@ export class ClassicAvatarStyle implements IAvatarStyle {
               src={flagUrl}
               alt={inputs.countryCode}
               crossOrigin="anonymous"
+              draggable={false}
               style={{height: 26}}
-              className="mt-2 mb-5 object-cover rounded-md"
+              className="mt-2 mb-5 object-cover rounded-md select-none"
             />
           ) : null}
         </div>

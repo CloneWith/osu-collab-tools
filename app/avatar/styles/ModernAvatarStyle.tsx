@@ -36,11 +36,12 @@ export class ModernAvatarStyle implements IAvatarStyle {
             src={getProxiedImageUrl(inputs.imageUrl)}
             alt={inputs.username}
             crossOrigin="anonymous"
+            draggable={false}
             style={{
               width,
               height,
             }}
-            className="mt-8 rounded-2xl object-cover"
+            className="mt-8 rounded-2xl object-cover select-none"
           />
 
           <div
@@ -59,8 +60,9 @@ export class ModernAvatarStyle implements IAvatarStyle {
               src={flagUrl}
               alt={inputs.countryCode}
               crossOrigin="anonymous"
+              draggable={false}
               style={{height: 72}}
-              className="mt-2 mb-5 object-cover rounded-md"
+              className="mt-2 mb-5 object-cover rounded-md select-none"
             />
           ) : null}
         </div>
