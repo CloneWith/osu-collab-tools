@@ -118,11 +118,18 @@ export function AvatarBox({
 
   return (
     <div
+      key={rect.id}
       style={{
         width: displayW,
         height: displayH,
-        overflow: "hidden",
-        position: "relative",
+      }}
+      className="overflow-hidden relative"
+      onDragStart={(e) => {
+        // 如果拖放源来自内部的 img，阻止事件冒泡
+        if ((e.target as HTMLElement).tagName === 'IMG') {
+          e.preventDefault();
+          e.stopPropagation();
+        }
       }}
     >
       <MeasuredAvatar rectId={rect.id} onMeasure={onMeasure} scale={uniformScale} offsetX={offsetX} offsetY={offsetY}>
