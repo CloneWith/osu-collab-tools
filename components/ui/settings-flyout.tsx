@@ -7,6 +7,8 @@ import { Moon, Sun, Monitor, Settings } from "lucide-react";
 import { useTheme } from "next-themes"
 import { common } from "@/app/common";
 import { useEffect } from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export function SettingsFlyout() {
   const endpointKey = "custom_endpoint";
@@ -68,7 +70,7 @@ export function SettingsFlyout() {
       <PopoverContent className="w-56">
         <div className="flex flex-col space-y-3">
           <div>
-            <h4 className="text-sm font-medium">颜色主题</h4>
+            <Label className="text-sm font-medium">颜色主题</Label>
           </div>
 
           {/* Segmented icon control matching provided design */}
@@ -104,10 +106,11 @@ export function SettingsFlyout() {
           </div>
 
           <div>
-            <h4 className="text-sm font-medium">服务器地址</h4>
-            <span className="text-xs text-muted-foreground">用户资料等链接的前缀</span>
+            <Label htmlFor="endpoint" className="text-sm font-medium">服务器地址</Label>
+            <div className="text-xs text-muted-foreground">用户资料等链接的前缀</div>
           </div>
-          <input className={`w-full px-2 py-1 border font-mono text-sm ${endpointValid ? "" : "border-yellow-600"}`}
+          <Input id="endpoint"
+                 className={`w-full px-2 py-1 border font-mono text-sm ${endpointValid ? "" : "border-yellow-600"}`}
                  aria-label="服务器地址输入框"
                  placeholder={common.defaultEndpoint}
                  defaultValue={currentEndpoint}
