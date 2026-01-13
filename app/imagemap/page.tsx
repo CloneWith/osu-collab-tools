@@ -68,7 +68,7 @@ interface ContextMenuPosition {
   x: number;
   y: number;
   visible: boolean;
-  targetId: string | null;
+  targetId: string | undefined;
 }
 
 interface Tool {
@@ -128,7 +128,7 @@ export default function ImagemapEditorPage() {
     x: 0,
     y: 0,
     visible: false,
-    targetId: null,
+    targetId: undefined,
   });
   const [currentTool, setCurrentTool] = useState<EditorTool>("select");
   const [userInfo, setUserInfo] = useState<string>("");
@@ -688,21 +688,15 @@ export default function ImagemapEditorPage() {
         coords.x >= rect.x && coords.x <= rect.x + rect.width && coords.y >= rect.y && coords.y <= rect.y + rect.height,
     );
 
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      visible: true,
+      targetId: clickedRect?.id,
+    });
+
     if (clickedRect) {
-      setContextMenu({
-        x: event.clientX,
-        y: event.clientY,
-        visible: true,
-        targetId: clickedRect.id,
-      });
       setSelectedRect(clickedRect.id);
-    } else {
-      setContextMenu({
-        x: event.clientX,
-        y: event.clientY,
-        visible: true,
-        targetId: null,
-      });
     }
   };
 
@@ -717,7 +711,7 @@ export default function ImagemapEditorPage() {
         y: rectToDuplicate.y + 20,
         alt: `${rectToDuplicate.alt} (副本)`,
       };
-      setRectangles((prev) => [...prev, newRect]);
+      setRectangles((prev) => [newRect, ...prev]);
       setSelectedRect(newRect.id);
     }
     setContextMenu((prev) => ({...prev, visible: false}));
@@ -927,7 +921,7 @@ export default function ImagemapEditorPage() {
         newRect.height = lockedH;
       }
 
-      setRectangles((prev) => [...prev, newRect]);
+      setRectangles((prev) => [newRect, ...prev]);
 
       setSelectedRectId(newRect.id);
       setLastPositionInput({x: newRect.x.toString(), y: newRect.y.toString()});
