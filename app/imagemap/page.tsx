@@ -60,16 +60,16 @@ import { AvatarBox, isRenderableAvatar } from "@/app/imagemap/avatar-render";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+} from "@/components/ui/context-menu";
 
 // 大小调整的八个点
 type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
-
-interface ContextMenuPosition {
-  x: number;
-  y: number;
-  visible: boolean;
-  targetId: string | undefined;
-}
 
 interface Tool {
   key: string;
@@ -124,12 +124,7 @@ export default function ImagemapEditorPage() {
   const [_, setWindowResizeCounter] = useState(0);
 
   // UI states
-  const [contextMenu, setContextMenu] = useState<ContextMenuPosition>({
-    x: 0,
-    y: 0,
-    visible: false,
-    targetId: undefined,
-  });
+  const [contextTargetId, setContextTargetId] = useState<string | null>(null);
   const [currentTool, setCurrentTool] = useState<EditorTool>("select");
   const [userInfo, setUserInfo] = useState<string>("");
 
@@ -149,7 +144,6 @@ export default function ImagemapEditorPage() {
 
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const contextMenuRef = useRef<HTMLDivElement>(null);
   const rectListRef = useRef<HTMLDivElement>(null);
   const rectanglesRef = useRef<Rectangle[]>([]);
   const selectedRectRef = useRef<string | null>(null);
@@ -210,20 +204,6 @@ export default function ImagemapEditorPage() {
   useEffect(() => {
     selectedRectRef.current = selectedRect;
   }, [selectedRect]);
-
-  // 关闭右键菜单的事件处理
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target as Node)) {
-        setContextMenu((prev) => ({...prev, visible: false}));
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   // 监听容器大小变化，重新计算图像显示位置和大小
   useEffect(() => {
@@ -483,9 +463,6 @@ export default function ImagemapEditorPage() {
     return clamp(Math.round(numeric), MIN_RECT_SIZE, max);
   };
 
-  // Update input fields only after operations complete (no auto-sync during drag/resize)
-  // This prevents performance issues from constant updates during interactions
-
   // 使用键盘移动区域与切换模式
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -679,8 +656,6 @@ export default function ImagemapEditorPage() {
 
   // 处理右键菜单
   const handleContextMenu = (event: React.MouseEvent) => {
-    event.preventDefault();
-
     // 检查是否点击在矩形上
     const coords = getRelativeCoordinates(event);
     const clickedRect = rectangles.find(
@@ -688,12 +663,7 @@ export default function ImagemapEditorPage() {
         coords.x >= rect.x && coords.x <= rect.x + rect.width && coords.y >= rect.y && coords.y <= rect.y + rect.height,
     );
 
-    setContextMenu({
-      x: event.clientX,
-      y: event.clientY,
-      visible: true,
-      targetId: clickedRect?.id,
-    });
+    setContextTargetId(clickedRect?.id ?? null);
 
     if (clickedRect) {
       setSelectedRect(clickedRect.id);
@@ -714,7 +684,6 @@ export default function ImagemapEditorPage() {
       setRectangles((prev) => [newRect, ...prev]);
       setSelectedRect(newRect.id);
     }
-    setContextMenu((prev) => ({...prev, visible: false}));
   };
 
   const moveRectangleLayer = (id: string, delta: number) => {
@@ -753,6 +722,10 @@ export default function ImagemapEditorPage() {
 
   const handlePointerDown = (event: React.MouseEvent | React.TouchEvent) => {
     if (!uploadedImage) return;
+    // 忽略鼠标右键，避免与上下文菜单交叉交互
+    if ("button" in event && (event as React.MouseEvent).button === 2) {
+      return;
+    }
 
     // 检测是否为触摸设备
     if ("touches" in event) {
@@ -1015,7 +988,7 @@ export default function ImagemapEditorPage() {
   const deleteRectangle = (id: string) => {
     setRectangles((prev) => prev.filter((rect) => rect.id !== id));
     setSelectedRect(null);
-    setContextMenu((prev) => ({...prev, visible: false}));
+
     // 清理头像缓存
     avatarCacheRef.current.delete(id);
     // 清理测量尺寸缓存
@@ -1309,206 +1282,181 @@ ${areas}
             <Card className={`${uploadedImage ? "h-auto" : "h-96"} lg:min-h-[500px]`}>
               <CardContent className={`p-4 ${uploadedImage ? "h-auto" : "h-full"}`}>
                 {uploadedImage ? (
-                  <div
-                    ref={containerRef}
-                    className={`relative w-full touch-none select-none flex items-center justify-center
-                    ${getCursorStyle() === "cursor-crosshair" ? "cursor-crosshair" : ""}`}
-                    onMouseDown={handlePointerDown}
-                    onMouseMove={handlePointerMove}
-                    onMouseUp={handlePointerUp}
-                    onMouseLeave={handlePointerUp}
-                    onTouchStart={handlePointerDown}
-                    onTouchMove={handlePointerMove}
-                    onTouchEnd={handlePointerUp}
-                    onContextMenu={handleContextMenu}
-                    onDragEnter={handleDragEnter}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    tabIndex={0}
-                    style={{touchAction: "none", userSelect: "none", minHeight: "100%"}}
-                  >
-                    <img
-                      ref={imageRef}
-                      src={uploadedImage || "/placeholder.svg"}
-                      alt="Uploaded"
-                      className="w-full object-contain select-none"
-                      draggable={false}
-                      style={{userSelect: "none"}}
-                    />
-
-                    {/* 拖放状态显示 */}
-                    {isDraggingOver && (
-                      <DragAndDropOverlay
-                        isRounded={!uploadedImage}
-                        rejectReason={rejectReason}
-                      />
-                    )}
-
-                    {/* Existing rectangles */}
-                    {/* 显示时将原图像坐标缩放到预览区 */}
-                    {rectangles.map((rect, index) => {
-                      const {scaleX, scaleY} = getImageScale();
-
-                      // 十字光标较为特殊（画框），在此处先处理
-                      return (
-                        <div
-                          key={rect.id}
-                          className={`absolute border-2 bg-primary/20 select-none touch-manipulation transition-colors ease-out duration-200 ${
-                            selectedRect === rect.id ? "border-primary" : "border-primary/40"
-                          } ${isTouchDevice && "min-w-[44px] min-h-[44px]"} ${getCursorStyle()} ${
-                            currentTool === "delete" && "hover:border-red-400"
-                          }`}
-                          style={{
-                            left: rect.x / scaleX,
-                            top: rect.y / scaleY,
-                            width: Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX),
-                            height: Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY),
-                            cursor:
-                              currentTool === "select"
-                                ? "move"
-                                : currentTool === "delete"
-                                  ? "no-drop"
-                                  : currentTool === "create" || currentTool === "create-avatar"
-                                    ? "crosshair"
-                                    : "pointer",
-                            userSelect: "none",
-                            zIndex: rectangles.length - index,
-                            // 使用内容盒尺寸，令边框在元素外部，不影响内部组件布局
-                            boxSizing: "border-box",
-                            // 允许选中区域的八个点在边界外正常显示
-                            overflow: "visible",
-                          }}
-                        >
-                          {/* Avatar 区域渲染：在矩形中显示头像卡片 */}
-                          {(() => {
-                            const displayW = Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX);
-                            const displayH = Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY);
-                            return isRenderableAvatar(rect) ? (
-                              <AvatarBox
-                                rect={rect}
-                                displayW={displayW}
-                                displayH={displayH}
-                                styleRegistry={STYLE_REGISTRY}
-                                cacheRef={avatarCacheRef}
-                                measured={avatarNaturalSizes[rect.id]}
-                                onMeasure={(w, h) => {
-                                  setAvatarNaturalSizes((prev) => {
-                                    const current = prev[rect.id];
-                                    if (current && current.width === w && current.height === h) return prev;
-                                    return {...prev, [rect.id]: {width: w, height: h}};
-                                  });
-                                }}
-                              />
-                            ) : null;
-                          })()}
-                          {rect.alt.trim() && (
-                            <div
-                              className={`absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none max-w-full truncate ${
-                                isTouchDevice ? "text-sm px-2 py-1" : ""
-                              }`}
-                            >
-                              {rect.alt.trim()}
-                            </div>
-                          )}
-
-                          {selectedRect === rect.id &&
-                            // 对于头像区域，限制右下角调节
-                            (rect.type === RectangleType.Avatar
-                                ? handleConfigs.filter((h) => h.handle === "bottom-right")
-                                : handleConfigs
-                            ).map((item) => (
-                              <div
-                                key={item.handle}
-                                className="absolute bg-primary border border-white shadow-sm"
-                                style={{
-                                  ...item.style,
-                                  width: handleSize,
-                                  height: handleSize,
-                                  cursor: item.cursor,
-                                  // 确保在顶层显示（高于内部内容与边框）
-                                  zIndex: 100,
-                                }}
-                                onMouseDown={(e) => handleResizeStart(e, rect.id, item.handle)}
-                                onTouchStart={(e) => handleResizeStart(e, rect.id, item.handle)}
-                              />
-                            ))}
-                        </div>
-                      );
-                    })}
-
-                    {/* Current drawing rectangle */}
-                    {currentRect &&
-                      (() => {
-                        const {scaleX, scaleY} = getImageScale();
-                        return (
-                          <div
-                            className="absolute border-2 border-red-400 bg-red-500 bg-opacity-20 select-none"
-                            style={{
-                              left: currentRect.x / scaleX,
-                              top: currentRect.y / scaleY,
-                              width: currentRect.width / scaleX,
-                              height: currentRect.height / scaleY,
-                              userSelect: "none",
-                            }}
-                          />
-                        );
-                      })()}
-
-                    {/* 自定义右键菜单 */}
-                    {contextMenu.visible && (
+                  <ContextMenu onOpenChange={(open) => {
+                    if (!open) setContextTargetId(null);
+                  }}>
+                    <ContextMenuTrigger asChild>
                       <div
-                        ref={contextMenuRef}
-                        className="fixed bg-card rounded-md shadow-lg py-1 z-50 min-w-[160px] select-none"
-                        style={{
-                          left: contextMenu.x,
-                          top: contextMenu.y,
-                          userSelect: "none",
-                        }}
+                        ref={containerRef}
+                        className={`relative w-full touch-none select-none flex items-center justify-center
+                    ${getCursorStyle() === "cursor-crosshair" ? "cursor-crosshair" : ""}`}
+                        onMouseDown={handlePointerDown}
+                        onMouseMove={handlePointerMove}
+                        onMouseUp={handlePointerUp}
+                        onMouseLeave={handlePointerUp}
+                        onTouchStart={handlePointerDown}
+                        onTouchMove={handlePointerMove}
+                        onTouchEnd={handlePointerUp}
+                        onContextMenu={handleContextMenu}
+                        onDragEnter={handleDragEnter}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        tabIndex={0}
+                        style={{touchAction: "none", userSelect: "none", minHeight: "100%"}}
                       >
-                        {contextMenu.targetId ? (
-                          <>
-                            <button
-                              className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 flex items-center gap-2"
-                              onClick={() => duplicateRectangle(contextMenu.targetId!)}
-                            >
-                              <Copy className="w-4 h-4"/>
-                              创建副本
-                            </button>
-                            <button
-                              className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 text-destructive flex items-center gap-2"
-                              onClick={() => deleteRectangle(contextMenu.targetId!)}
-                            >
-                              <Trash className="w-4 h-4"/>
-                              删除区域
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 flex items-center gap-2"
-                              onClick={() => {
-                                setCurrentTool("create");
-                                setContextMenu((prev) => ({...prev, visible: false}));
-                              }}
-                            >
-                              <Square className="w-4 h-4"/>
-                              创建新区域
-                            </button>
-                            <button
-                              className="w-full text-left px-4 py-2 hover:bg-card-foreground/10 flex items-center gap-2"
-                              onClick={() => {
-                                setContextMenu((prev) => ({...prev, visible: false}));
-                              }}
-                            >
-                              <X className="w-4 h-4"/>
-                              取消
-                            </button>
-                          </>
+                        <img
+                          ref={imageRef}
+                          src={uploadedImage || "/placeholder.svg"}
+                          alt="Uploaded"
+                          className="w-full object-contain select-none"
+                          draggable={false}
+                          style={{userSelect: "none"}}
+                        />
+
+                        {/* 拖放状态显示 */}
+                        {isDraggingOver && (
+                          <DragAndDropOverlay
+                            isRounded={!uploadedImage}
+                            rejectReason={rejectReason}
+                          />
                         )}
+
+                        {/* Existing rectangles */}
+                        {/* 显示时将原图像坐标缩放到预览区 */}
+                        {rectangles.map((rect, index) => {
+                          const {scaleX, scaleY} = getImageScale();
+
+                          // 十字光标较为特殊（画框），在此处先处理
+                          return (
+                            <div
+                              key={rect.id}
+                              className={`absolute border-2 bg-primary/20 select-none touch-manipulation transition-colors ease-out duration-200 ${
+                                selectedRect === rect.id ? "border-primary" : "border-primary/40"
+                              } ${isTouchDevice && "min-w-[44px] min-h-[44px]"} ${getCursorStyle()} ${
+                                currentTool === "delete" && "hover:border-red-400"
+                              }`}
+                              style={{
+                                left: rect.x / scaleX,
+                                top: rect.y / scaleY,
+                                width: Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX),
+                                height: Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY),
+                                cursor:
+                                  currentTool === "select"
+                                    ? "move"
+                                    : currentTool === "delete"
+                                      ? "no-drop"
+                                      : currentTool === "create" || currentTool === "create-avatar"
+                                        ? "crosshair"
+                                        : "pointer",
+                                userSelect: "none",
+                                zIndex: rectangles.length - index,
+                                // 使用内容盒尺寸，令边框在元素外部，不影响内部组件布局
+                                boxSizing: "border-box",
+                                // 允许选中区域的八个点在边界外正常显示
+                                overflow: "visible",
+                              }}
+                            >
+                              {/* Avatar 区域渲染：在矩形中显示头像卡片 */}
+                              {(() => {
+                                const displayW = Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX);
+                                const displayH = Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY);
+                                return isRenderableAvatar(rect) ? (
+                                  <AvatarBox
+                                    rect={rect}
+                                    displayW={displayW}
+                                    displayH={displayH}
+                                    styleRegistry={STYLE_REGISTRY}
+                                    cacheRef={avatarCacheRef}
+                                    measured={avatarNaturalSizes[rect.id]}
+                                    onMeasure={(w, h) => {
+                                      setAvatarNaturalSizes((prev) => {
+                                        const current = prev[rect.id];
+                                        if (current && current.width === w && current.height === h) return prev;
+                                        return {...prev, [rect.id]: {width: w, height: h}};
+                                      });
+                                    }}
+                                  />
+                                ) : null;
+                              })()}
+                              {rect.alt.trim() && (
+                                <div
+                                  className={`absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none max-w-full truncate ${
+                                    isTouchDevice ? "text-sm px-2 py-1" : ""
+                                  }`}
+                                >
+                                  {rect.alt.trim()}
+                                </div>
+                              )}
+
+                              {selectedRect === rect.id &&
+                                // 对于头像区域，限制右下角调节
+                                (rect.type === RectangleType.Avatar
+                                    ? handleConfigs.filter((h) => h.handle === "bottom-right")
+                                    : handleConfigs
+                                ).map((item) => (
+                                  <div
+                                    key={item.handle}
+                                    className="absolute bg-primary border border-white shadow-sm"
+                                    style={{
+                                      ...item.style,
+                                      width: handleSize,
+                                      height: handleSize,
+                                      cursor: item.cursor,
+                                      // 确保在顶层显示（高于内部内容与边框）
+                                      zIndex: 100,
+                                    }}
+                                    onMouseDown={(e) => handleResizeStart(e, rect.id, item.handle)}
+                                    onTouchStart={(e) => handleResizeStart(e, rect.id, item.handle)}
+                                  />
+                                ))}
+                            </div>
+                          );
+                        })}
+
+                        {/* Current drawing rectangle */}
+                        {currentRect &&
+                          (() => {
+                            const {scaleX, scaleY} = getImageScale();
+                            return (
+                              <div
+                                className="absolute border-2 border-red-400 bg-red-500 bg-opacity-20 select-none"
+                                style={{
+                                  left: currentRect.x / scaleX,
+                                  top: currentRect.y / scaleY,
+                                  width: currentRect.width / scaleX,
+                                  height: currentRect.height / scaleY,
+                                  userSelect: "none",
+                                }}
+                              />
+                            );
+                          })()}
                       </div>
-                    )}
-                  </div>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      {contextTargetId ? (
+                        <>
+                          <ContextMenuItem onSelect={() => duplicateRectangle(contextTargetId!)}>
+                            <Copy className="w-4 h-4 mr-2"/> 创建副本
+                          </ContextMenuItem>
+                          <ContextMenuItem className="text-destructive"
+                                           onSelect={() => deleteRectangle(contextTargetId!)}>
+                            <Trash className="w-4 h-4 mr-2"/> 删除区域
+                          </ContextMenuItem>
+                        </>
+                      ) : (
+                        <>
+                          <ContextMenuItem onSelect={() => setCurrentTool("create")}>
+                            <Square className="w-4 h-4 mr-2"/> 创建新区域
+                          </ContextMenuItem>
+                          <ContextMenuSeparator/>
+                          <ContextMenuItem>
+                            <X className="w-4 h-4 mr-2"/> 取消
+                          </ContextMenuItem>
+                        </>
+                      )}
+                    </ContextMenuContent>
+                  </ContextMenu>
                 ) : (
                   <div
                     className="relative h-full flex items-center justify-center border-2 border-dashed hover:border-primary rounded-lg animate-simple"
