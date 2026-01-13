@@ -57,9 +57,11 @@ export interface ImageMapConfig {
 /**
  * 验证给定的数据是否是有效的 Imagemap 配置。
  * @param data 待验证的数据
+ * @param width 图像宽度
+ * @param height 图像高度
  * @returns `true` 为有效，否则为 `false`
  */
-export function validateImageMapJsonConfig(data: unknown): ValidationResult {
+export function validateImageMapJsonConfig(data: unknown, width: number, height: number): ValidationResult {
     if (!data || typeof data !== "object") return { success: false };
 
     const obj = data as Record<string, unknown>;
@@ -87,26 +89,20 @@ export function validateImageMapJsonConfig(data: unknown): ValidationResult {
         }
 
         if (r.type !== RectangleType.MapArea && r.type !== RectangleType.Avatar) {
-            return { success: false, message: `不支持的区域类型：${String(r.type)}` };
+            return { success: false, message: `不支持的区域类型：${String(r.id)} 的类型为 ${String(r.type)}` };
         }
 
         // 基本数值范围
-        // TODO: 依然可能导入超图像范围的数据
         if ((r.x as number) < 0 || (r.y as number) < 0 || (r.width as number) < 0 || (r.height as number) < 0) {
             return { success: false, message: `区域位置信息不合理：${String(r.id)}` };
         }
 
-        // Avatar 类型的附加验证
-        if (r.type === RectangleType.Avatar) {
-            const avatar = (r as any).avatar as Avatar | undefined;
-            if (avatar) {
-                if (typeof avatar.styleKey !== "string"
-                    || typeof avatar.imageUrl !== "string"
-                    || typeof avatar.username !== "string"
-                    || (avatar.countryCode !== undefined && typeof avatar.countryCode !== "string")) {
-                    return { success: false, message: `Avatar 区域配置无效：${String(r.id)}` };
-                }
-            }
+        if (r.x + r.width > width || r.y + r.height > height) {
+            const sizePrompt: string[] = [];
+
+            if (r.x + r.width > width) sizePrompt.push(`${r.x} + ${r.width} > ${width}`);
+            if (r.y + r.height > height) sizePrompt.push(`${r.y} + ${r.height} > ${height}`);
+            return { success: false, message: `区域尺寸不可超出图像范围：对于 ${String(r.id)}，${sizePrompt.join(", ")}` };
         }
     }
 

@@ -52,7 +52,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
         // 验证 JSON 语法和数据结构
         try {
           const parsed = JSON.parse(confInput);
-          const result = validateImageMapJsonConfig(parsed);
+          const result = validateImageMapJsonConfig(parsed, imageWidth, imageHeight);
 
           // 验证数据结构
           if (!result.success) {
@@ -94,7 +94,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
       switch (currentSource) {
         case "json-conf": {
           parsed = JSON.parse(confInput);
-          result = validateImageMapJsonConfig(parsed);
+          result = validateImageMapJsonConfig(parsed, imageWidth, imageHeight);
           break;
         }
 
