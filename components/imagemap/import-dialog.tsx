@@ -12,56 +12,98 @@ import {
 import { Button } from "@/components/ui/button";
 import { Upload, AlertCircle, CheckCircle, ClipboardPaste, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ImageMapConfig, validateImageMapConfig } from "@/app/imagemap/types";
+import {
+  ImageMapConfig,
+  parseImageMapBBCode,
+  validateImageMapJsonConfig,
+} from "@/app/imagemap/types";
 import { CodeMirrorEditor } from "../codemirror-editor";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onImport: (data: ImageMapConfig) => void;
+  imageWidth: number;
+  imageHeight: number;
 }
 
-export function ImportDialog({open, onOpenChange, onImport}: ImportDialogProps) {
+type DataSource = "json-conf" | "bbcode";
+
+export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHeight}: ImportDialogProps) {
   const {toast} = useToast();
-  const [jsonInput, setJsonInput] = useState<string>("");
+  const [confInput, setConfInput] = useState<string>("");
   const [validationError, setValidationError] = useState<string>("");
   const [isValid, setIsValid] = useState<boolean>(false);
+  const [currentSource, setCurrentSource] = useState<DataSource>("json-conf");
 
   // 实时验证
   useEffect(() => {
     setValidationError("");
     setIsValid(false);
 
-    if (!jsonInput.trim()) {
+    if (!confInput.trim()) {
       return;
     }
 
-    // 验证 JSON 语法和数据结构
-    try {
-      const parsed = JSON.parse(jsonInput);
-      const result = validateImageMapConfig(parsed);
+    switch (currentSource) {
+      case "json-conf": {
+        // 验证 JSON 语法和数据结构
+        try {
+          const parsed = JSON.parse(confInput);
+          const result = validateImageMapJsonConfig(parsed);
 
-      // 验证数据结构
-      if (!result.success) {
-        setValidationError(result.message ?? "配置文件无效");
-        return;
+          // 验证数据结构
+          if (!result.success) {
+            setValidationError(result.message ?? "配置文件无效");
+            return;
+          }
+
+          setIsValid(true);
+          setValidationError("");
+        } catch (error) {
+          if (error instanceof SyntaxError) {
+            setValidationError(`JSON 语法错误: ${error.message}`);
+          } else {
+            setValidationError("无效的 JSON 格式");
+          }
+        }
+        break;
       }
 
-      setIsValid(true);
-      setValidationError("");
-    } catch (error) {
-      if (error instanceof SyntaxError) {
-        setValidationError(`JSON 语法错误: ${error.message}`);
-      } else {
-        setValidationError("无效的 JSON 格式");
+      case "bbcode": {
+        const result = parseImageMapBBCode(confInput, imageWidth, imageHeight);
+
+        if (!result.success) {
+          setValidationError(result.message ?? "配置文件无效");
+          return;
+        }
+
+        setIsValid(true);
+        setValidationError("");
+        break;
       }
     }
-  }, [jsonInput]);
+  }, [confInput]);
 
   const handleImport = () => {
     try {
-      const parsed = JSON.parse(jsonInput);
-      const result = validateImageMapConfig(parsed);
+      let parsed, result;
+
+      switch (currentSource) {
+        case "json-conf": {
+          parsed = JSON.parse(confInput);
+          result = validateImageMapJsonConfig(parsed);
+          break;
+        }
+
+        case "bbcode": {
+          result = parseImageMapBBCode(confInput, imageWidth, imageHeight);
+          parsed = result.config;
+          break;
+        }
+      }
 
       if (!result.success) {
         toast({
@@ -73,7 +115,7 @@ export function ImportDialog({open, onOpenChange, onImport}: ImportDialogProps) 
       }
 
       onImport(parsed);
-      setJsonInput("");
+      setConfInput("");
       setValidationError("");
       setIsValid(false);
       onOpenChange(false);
@@ -94,7 +136,7 @@ export function ImportDialog({open, onOpenChange, onImport}: ImportDialogProps) 
   const handlePaste = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      setJsonInput(text);
+      setConfInput(text);
     } catch (error) {
       toast({
         title: "无法读取剪贴板",
@@ -113,17 +155,28 @@ export function ImportDialog({open, onOpenChange, onImport}: ImportDialogProps) 
             导入配置
           </AlertDialogTitle>
           <AlertDialogDescription>
-            <span>快速恢复之前的工作，在下方区域输入 JSON 配置。</span>
+            <span>快速恢复之前的工作，在下方区域输入要导入的数据。</span>
             <br/>
             <span className="text-orange-400"><b>注意</b>：导入配置后，已定义的区域将被全部覆盖，配置中定义的内容将覆盖已有内容。</span>
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="space-y-3">
+          <Label>数据源</Label>
+          <Select value={currentSource} onValueChange={(s) => setCurrentSource(s as DataSource)}>
+            <SelectTrigger>
+              <SelectValue/>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="json-conf">JSON 配置文件</SelectItem>
+              <SelectItem value="bbcode">BBCode</SelectItem>
+            </SelectContent>
+          </Select>
+
           {/* CodeMirror 编辑器区域 */}
           <CodeMirrorEditor
-            value={jsonInput}
-            onChange={setJsonInput}
+            value={confInput}
+            onChange={setConfInput}
             className="border-gray-700"
           />
 

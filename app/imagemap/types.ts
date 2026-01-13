@@ -4,6 +4,8 @@
 
 import { ValidationResult } from "@/lib/validation";
 import type { Avatar } from "@/app/avatar/types";
+import { parse } from "@bbob/parser";
+import { generateId } from "@/lib/utils";
 
 /**
  * 一个矩形区域。
@@ -57,7 +59,7 @@ export interface ImageMapConfig {
  * @param data 待验证的数据
  * @returns `true` 为有效，否则为 `false`
  */
-export function validateImageMapConfig(data: unknown): ValidationResult {
+export function validateImageMapJsonConfig(data: unknown): ValidationResult {
     if (!data || typeof data !== "object") return { success: false };
 
     const obj = data as Record<string, unknown>;
@@ -118,3 +120,99 @@ export function validateImageMapConfig(data: unknown): ValidationResult {
 
     return { success: true };
 }
+
+export interface ImageMapBBCodeParseResult extends ValidationResult {
+    config?: ImageMapConfig;
+}
+
+/**
+ * 解析并验证 imagemap BBCode 内容，使用图像宽高将区域信息标准化。
+ */
+export function parseImageMapBBCode(bbcode: string, width: number, height: number): ImageMapBBCodeParseResult {
+    let parseError: string | undefined;
+
+    let ast;
+    try {
+        ast = parse(bbcode, {
+            onlyAllowTags: ["imagemap"],
+            onError: (err) => {
+                parseError = `解析 BBCode 时出现错误于 (${err.lineNumber}, ${err.columnNumber})`;
+            },
+        });
+    } catch (error) {
+        return { success: false, message: error instanceof Error ? error.message : "无法解析 BBCode" };
+    }
+
+    if (parseError) return { success: false, message: parseError };
+
+    if (!ast.some((n) => n.tag === "imagemap")) {
+        return { success: false, message: "需要使用 [imagemap] 标签" };
+    }
+
+    if (ast.length !== 1) {
+        return { success: false, message: "只能包含一个 [imagemap] 标签" };
+    }
+
+    const root = ast[0];
+
+    const content = Array.isArray(root.content) ? root.content : [];
+    const rawText = content
+        .map((c: unknown) => (typeof c === "string" || typeof c === "number" ? String(c) : ""))
+        .join("");
+
+    const lines = rawText
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+    if (lines.length === 0) {
+        return { success: false, message: "[imagemap] 标签缺少内容" };
+    }
+
+    const imagePath = lines[0];
+    try {
+        // 验证为合法链接
+        new URL(imagePath);
+    } catch {
+        return { success: false, message: "标签内首行必须是有效的链接" };
+    }
+
+    const rectangles: ImageMapConfig["rectangles"] = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        const parts = line.split(/\s+/);
+
+        if (parts.length < 5 || parts.length > 6) {
+            return { success: false, message: `第 ${i} 行格式错误：不是有效的区域定义` };
+        }
+
+        const [xStr, yStr, wStr, hStr, href, alt] = parts;
+        const numbers = [xStr, yStr, wStr, hStr].map((n) => Number.parseFloat(n));
+
+        if (numbers.some((n) => Number.isNaN(n))) {
+            return { success: false, message: `第 ${i} 行格式错误：坐标或尺寸不是数字` };
+        }
+
+        rectangles.push({
+            id: generateId(`rect-${Date.now()}-${i}`),
+            type: RectangleType.MapArea,
+            // 注意：BBCode imagemap 区域使用的是百分比
+            x: Math.round(numbers[0] / 100 * width),
+            y: Math.round(numbers[1] / 100 * height),
+            width: Math.round(numbers[2] / 100 * width),
+            height: Math.round(numbers[3] / 100 * height),
+            href,
+            alt: alt ?? "",
+        });
+    }
+
+    return {
+        success: true,
+        config: {
+            imagePath,
+            rectangles,
+        },
+    };
+}
+

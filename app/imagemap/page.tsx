@@ -2005,7 +2005,8 @@ ${areas}
       <ExportDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen} data={generateExportData()}/>
 
       {/* 导入对话框 */}
-      <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} onImport={handleImportData}/>
+      <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} onImport={handleImportData}
+                    imageWidth={imageSize.width} imageHeight={imageSize.height}/>
 
       {/* 离屏导出容器：渲染原图背景 + 头像层，尺寸为原图大小 */}
       {uploadedImage && imageSize.width > 0 && imageSize.height > 0 && (

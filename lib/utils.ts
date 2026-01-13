@@ -19,8 +19,12 @@ export function isNullOrWhitespace(value?: string) {
     return !value?.trim();
 }
 
+export function generateId(fallback: string) {
+    return typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : fallback;
+}
+
 // 用户设置的服务器链接，用于生成资料链接与获取头像
-function getServerLink() {
+export function getServerLink() {
     return typeof window !== "undefined"
         ? (localStorage.getItem("custom_endpoint") ?? common.defaultEndpoint)
         // 在 SSR / 构建阶段没有 window / localStorage
