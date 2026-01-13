@@ -56,6 +56,13 @@ export default function ImagemapDocCard() {
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold flex items-center gap-2 text-primary">
+                <UserRound className="w-4 h-4"/>
+                头像区域工具
+              </h3>
+              <p className="text-secondary-foreground">在预览区拖动，创建新的头像组件区域。</p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold flex items-center gap-2 text-primary">
                 <Trash2 className="w-4 h-4"/>
                 删除工具
               </h3>
@@ -65,7 +72,8 @@ export default function ImagemapDocCard() {
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">3. 设置属性</h3>
-          <p className="text-secondary-foreground">为每个区域设置链接地址和描述文本，也可继续调整位置与大小。</p>
+          <p className="text-secondary-foreground">为每个区域设置链接地址、描述文本与区域类型，也可继续调整位置与大小。</p>
+          <p className="text-secondary-foreground">目前支持将区域设置为头像区域，以在该区域显示指定用户的头像卡片，设置与头像卡片生成工具相似。</p>
           <Alert>
             <AlertTitle className="flex-title">
               <Info />
@@ -89,6 +97,10 @@ export default function ImagemapDocCard() {
           <p className="text-secondary-foreground">点击“复制代码”按钮，按需获取生成的 HTML 或
             BBCode 代码。</p>
         </div>
+        <div className="space-y-2">
+          <h3 className="font-semibold">5. 导出图像</h3>
+          <p className="text-secondary-foreground">如果为图像添加了头像区域，可以点击预览区的“保存”按钮，将叠加了头像卡片的图像保存到本地。</p>
+        </div>
       </CardContent>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -98,6 +110,15 @@ export default function ImagemapDocCard() {
         <CardDescription>在个人资料或其他地方使用</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <Alert>
+          <AlertTitle className="flex-title">
+            <Info />
+            <span>新功能预告</span>
+          </AlertTitle>
+          <AlertDescription>
+            我们正在规划向 ImageMap 编辑器添加便捷上传到主流图床平台的功能，敬请期待。
+          </AlertDescription>
+        </Alert>
         <div className="space-y-2">在其他网站使用 ImageMap 前，需要先将图像上传到支持的平台（图床）。
         </div>
         <div className="space-y-2">
@@ -140,11 +161,13 @@ export default function ImagemapDocCard() {
             <ul className="list-disc list-inside space-y-1">
               <li>导出编辑器配置时，编辑的图像<b>不会</b>随之导出，导入时也是如此。因此在导入配置前，请确保加载了适合的图像。</li>
               <li>从配置导入更改时，已有区域<b>会被覆盖</b>，配置文件中已有的设置会<b>覆盖</b>现有值。</li>
+              <li>从 BBCode 导入的区域<b>不会</b>包含区域类型信息。</li>
             </ul>
           </AlertDescription>
         </Alert>
         <div className="space-y-2">
-          支持将当前的编辑器配置导出为 JSON，或从 JSON 导入。导出的 JSON 含有 Imagemap 的所有基本信息，以及已定义的区域信息。
+          <p>支持将当前的编辑器配置导出为 JSON，或从 JSON 导入。导出的 JSON 含有 Imagemap 的所有基本信息，以及已定义的区域信息。</p>
+          <p>与此同时，你也可以从 BBCode 源码导入 Imagemap 的图像链接与区域信息。可以使用导入提示框的“数据源”来调整数据类型。</p>
         </div>
       </CardContent>
       <CardHeader>
