@@ -19,7 +19,7 @@ export function isNullOrWhitespace(value?: string) {
     return !value?.trim();
 }
 
-export function generateId(fallback: string) {
+export function generateId(fallback: string = `rect-${Date.now()}`) {
     return typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : fallback;
 }
 

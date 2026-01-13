@@ -41,7 +41,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { clamp, generateUserLinkFromId, generateUserLinkFromName } from "@/lib/utils";
+import { clamp, generateId, generateUserLinkFromId, generateUserLinkFromName } from "@/lib/utils";
 import DragAndDropOverlay, { DnDRejectReason } from "@/app/imagemap/dnd-overlay";
 import { common } from "@/app/common";
 import hljs from "highlight.js/lib/core";
@@ -676,7 +676,7 @@ export default function ImagemapEditorPage() {
     if (rectToDuplicate) {
       const newRect: Rectangle = {
         ...rectToDuplicate,
-        id: Date.now().toString(),
+        id: generateId(),
         x: rectToDuplicate.x + 20,
         y: rectToDuplicate.y + 20,
         alt: `${rectToDuplicate.alt} (副本)`,
