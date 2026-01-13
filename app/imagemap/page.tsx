@@ -27,7 +27,7 @@ import {
   Code,
   Copy,
   Download,
-  Eye,
+  Eye, FolderOpen,
   GripVertical,
   Hash,
   MoreVertical,
@@ -1102,7 +1102,7 @@ export default function ImagemapEditorPage() {
   };
 
   const generateImageMapHtml = () => {
-    if (!uploadedImage || rectangles.length === 0) return "<!-- 上传图片并创建区域后，HTML 代码将在这里显示 -->";
+    if (!uploadedImage || rectangles.length === 0) return "<!-- 选择图片并创建区域后，HTML 代码将在这里显示 -->";
 
     const name = mapName ?? "imagemap";
     const areas = rectangles
@@ -1125,7 +1125,7 @@ ${areas}
   };
 
   const generateImageMapBBCode = () => {
-    if (!uploadedImage || rectangles.length === 0) return "[i]上传图片并创建区域后，BBCode 代码将在这里显示[/i]";
+    if (!uploadedImage || rectangles.length === 0) return "[i]选择图片并创建区域后，BBCode 代码将在这里显示[/i]";
 
     const areas = rectangles
       .map(
@@ -1282,8 +1282,8 @@ ${areas}
                 <label htmlFor="image-upload">
                   <Button asChild className="cursor-pointer">
                     <span className="flex items-center gap-2">
-                      <Upload className="w-4 h-4"/>
-                      上传图片
+                      <FolderOpen className="w-4 h-4"/>
+                      选择图片
                     </span>
                   </Button>
                 </label>
@@ -1518,9 +1518,9 @@ ${areas}
                     onDrop={handleDrop}
                   >
                     <div className="text-center">
-                      <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4"/>
-                      <p className="text-muted-foreground">先上传一张图片</p>
-                      <p className="text-muted-foreground">（支持拖放）</p>
+                      <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4"/>
+                      <p className="text-muted-foreground">先选择一张图片</p>
+                      <p className="text-sm text-muted-foreground">拖拽到此区域亦可</p>
                     </div>
 
                     {/* 拖放状态显示 */}
