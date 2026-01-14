@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -20,6 +20,7 @@ import {
 import { CodeMirrorEditor } from "../codemirror-editor";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Timeout } from "@radix-ui/primitive";
 
 interface ImportDialogProps {
   open: boolean;
@@ -37,9 +38,28 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
   const [validationError, setValidationError] = useState<string>("");
   const [isValid, setIsValid] = useState<boolean>(false);
   const [currentSource, setCurrentSource] = useState<DataSource>("json-conf");
+  const [inputActive, setInputActive] = useState<boolean>();
+  const currentTimerRef = useRef<Timeout>(null);
 
   // 实时验证
   useEffect(() => {
+    // This will always execute
+    if (currentTimerRef.current !== null) {
+      clearTimeout(currentTimerRef.current);
+    }
+
+    setInputActive(true);
+    currentTimerRef.current = setTimeout(() => {
+      setInputActive(false);
+      checkConf();
+    }, 500);
+  }, [confInput]);
+
+  useEffect(() => {
+    checkConf();
+  }, [currentSource]);
+
+  const checkConf = () => {
     setValidationError("");
     setIsValid(false);
 
@@ -85,7 +105,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
         break;
       }
     }
-  }, [confInput]);
+  };
 
   const handleImport = () => {
     try {
@@ -183,7 +203,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
           {/* 验证状态指示 */}
           {validationError ? (
             <div
-              className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md">
+              className={`flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md ${inputActive && "opacity-30"}`}>
               <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"/>
               <div>
                 <p className="text-sm font-medium text-red-800 dark:text-red-200">验证失败</p>
@@ -192,7 +212,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
             </div>
           ) : isValid ? (
             <div
-              className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-md">
+              className={`flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-md ${inputActive && "opacity-30"}`}>
               <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400"/>
               <p className="text-sm font-medium text-green-800 dark:text-green-200">格式正确，可以导入</p>
             </div>
@@ -213,7 +233,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
           </Button>
           <Button
             onClick={handleImport}
-            disabled={!isValid}
+            disabled={!isValid || inputActive}
             className="gap-2"
           >
             <Download className="w-4 h-4"/>

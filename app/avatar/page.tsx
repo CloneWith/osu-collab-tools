@@ -81,12 +81,15 @@ export default function AvatarGeneratorPage() {
 
   // 头像与旗子的延时更新
   useEffect(() => {
-    if (reloadTimerRef.current !== null)
+    // This will always execute
+    if (reloadTimerRef.current !== null) {
       clearTimeout(reloadTimerRef.current);
+    }
 
     reloadTimerRef.current = setTimeout(() => {
       setImageUrl(inputImageUrl);
       setCountryCode(inputCountryCode);
+      console.log(`After timeout, reloadTimerRef is ${reloadTimerRef.current}`);
     }, 300);
   }, [inputImageUrl, inputCountryCode]);
 
