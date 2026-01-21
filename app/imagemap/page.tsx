@@ -24,7 +24,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   CircleUserRound,
-  Code,
+  Code, Construction,
   Copy,
   Download,
   Eye, FolderOpen,
@@ -67,6 +67,7 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // 大小调整的八个点
 type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -1219,6 +1220,16 @@ ${areas}
           </h1>
           <p className="text-secondary-foreground">划定可点击区域，以便在个人资料等中使用</p>
         </div>
+
+        <Alert variant="warning" className="mb-5">
+          <AlertTitle className="flex-title">
+            <Construction />
+            <span>已知的功能缺陷</span>
+          </AlertTitle>
+          <AlertDescription>
+            目前编辑器导出带有头像组件图像时，会出现头像组件错位、过大、不完全显示等问题，现正计划修复中。
+          </AlertDescription>
+        </Alert>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
           {/* Preview Area */}

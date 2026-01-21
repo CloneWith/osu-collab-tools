@@ -1,5 +1,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Code, Hash, Info, Keyboard, Map, MousePointer, Square, Trash2, TriangleAlert, UserRound } from "lucide-react";
+import {
+  Code,
+  Construction,
+  Hash,
+  Info,
+  Keyboard,
+  Map,
+  MousePointer,
+  Square,
+  Trash2,
+  TriangleAlert,
+  UserRound,
+} from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ImagemapDocCard() {
@@ -97,6 +109,17 @@ export default function ImagemapDocCard() {
           <p className="text-secondary-foreground">点击“复制代码”按钮，按需获取生成的 HTML 或
             BBCode 代码。</p>
         </div>
+
+        <Alert variant="warning">
+          <AlertTitle className="flex-title">
+            <Construction />
+            <span>已知的功能缺陷</span>
+          </AlertTitle>
+          <AlertDescription>
+            目前来看，编辑器导出图像时，会出现头像组件错位、过大、不完全显示等问题，现正计划修复中。
+          </AlertDescription>
+        </Alert>
+
         <div className="space-y-2">
           <h3 className="font-semibold">5. 导出图像</h3>
           <p className="text-secondary-foreground">如果为图像添加了头像区域，可以点击预览区的“保存”按钮，将叠加了头像卡片的图像保存到本地。</p>
