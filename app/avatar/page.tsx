@@ -31,6 +31,16 @@ const STYLE_REGISTRY = [
 
 type StyleKey = typeof STYLE_REGISTRY[number]["key"];
 
+const SCALE_REGISTRY = [
+  {key: "0.5x", scale: 0.5},
+  {key: "0.75x", scale: 0.75},
+  {key: "1x", scale: 1},
+  {key: "1.5x", scale: 1.5},
+  {key: "2x", scale: 2},
+  {key: "3x", scale: 3},
+  {key: "4x", scale: 4},
+] as const;
+
 export default function AvatarGeneratorPage() {
   const {toast} = useToast();
 
@@ -40,6 +50,7 @@ export default function AvatarGeneratorPage() {
   const [imageUrl, setImageUrl] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [countryCode, setCountryCode] = useState<string>("");
+  const [selectedExportScale, setSelectedExportScale] = useState<string>("1x");
 
   // 缓冲输入
   const [inputImageUrl, setInputImageUrl] = useState<string>("");
@@ -97,9 +108,15 @@ export default function AvatarGeneratorPage() {
     if (!previewRef.current?.firstElementChild) return;
 
     try {
+      const scale = SCALE_REGISTRY.find(s => s.key === selectedExportScale)?.scale;
+      if (!scale) {
+        console.warn(`Cannot find a proper export scale for ${selectedExportScale}. Falling back to 1x.`);
+      }
+
       const result = await snapdom(previewRef.current?.firstElementChild as HTMLElement);
       await result.download({
         filename: `avatar-${username}-${Date.now()}.png`,
+        scale: scale ?? 1,
       });
     } catch (e) {
       toast({
@@ -175,6 +192,20 @@ export default function AvatarGeneratorPage() {
                   </SelectContent>
                 </Select>
                 <div className="text-sm text-muted-foreground">{selectedStyle?.description ?? "<无描述>"}</div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>导出分辨率</Label>
+                <Select value={selectedExportScale} onValueChange={(v) => setSelectedExportScale(v)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="选择导出分辨率"/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SCALE_REGISTRY.map(({key}) => (
+                      <SelectItem key={key} value={key}>{key}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
