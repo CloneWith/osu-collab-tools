@@ -40,8 +40,8 @@ export class SimpleAvatarStyle implements IAvatarStyle {
             draggable={false}
             className="object-cover select-none"
             style={{
-              width: "100%",
-              height: "100%",
+              width,
+              height,
               filter: "saturate(1.05) contrast(1.05)",
             }}
           />

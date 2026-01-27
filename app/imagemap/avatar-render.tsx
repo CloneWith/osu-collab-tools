@@ -5,16 +5,17 @@ import type { Rectangle } from "@/app/imagemap/types";
 import { RectangleType } from "@/app/imagemap/types";
 import type { IAvatarStyle, AvatarInputs } from "@/app/avatar/styles/IAvatarStyle";
 import { isNullOrWhitespace } from "@/lib/utils";
+import { snapdom } from "@zumer/snapdom";
 
 // 仅在该模块内部使用的测量容器
 export function MeasuredAvatar({
-  rectId,
-  onMeasure,
-  scale,
-  offsetX = 0,
-  offsetY = 0,
-  children,
-}: {
+                                 rectId,
+                                 onMeasure,
+                                 scale,
+                                 offsetX = 0,
+                                 offsetY = 0,
+                                 children,
+                               }: {
   rectId: string;
   onMeasure: (w: number, h: number) => void;
   scale: number;
@@ -35,7 +36,13 @@ export function MeasuredAvatar({
   return (
     <div
       ref={ref}
-      style={{ position: "absolute", left: offsetX, top: offsetY, transformOrigin: "top left", transform: `scale(${scale})` }}
+      style={{
+        position: "absolute",
+        left: offsetX,
+        top: offsetY,
+        transformOrigin: "top left",
+        transform: `scale(${scale})`,
+      }}
     >
       {children}
     </div>
@@ -49,7 +56,7 @@ export const isRenderableAvatar = (rect: Rectangle) =>
 export function resolveAvatar(
   rect: Rectangle,
   styleRegistry: ReadonlyArray<{ key: string; style: IAvatarStyle }>,
-  cacheRef: React.MutableRefObject<Map<string, { comp: React.FC; signature: string }>>,
+  cacheRef: React.RefObject<Map<string, { comp: React.FC; signature: string }>>,
 ): { AvatarComponent: React.FC; styleObj: IAvatarStyle; inputs: AvatarInputs } | null {
   if (!isRenderableAvatar(rect)) return null;
   const styleObj = styleRegistry.find(s => s.key === (rect.avatar!.styleKey as any))?.style;
@@ -65,7 +72,7 @@ export function resolveAvatar(
     try {
       const Comp = styleObj.generateAvatar(inputs);
       if (Comp) {
-        cache = { comp: Comp, signature };
+        cache = {comp: Comp, signature};
         cacheRef.current.set(rect.id, cache);
       }
     } catch {
@@ -73,7 +80,7 @@ export function resolveAvatar(
     }
   }
   const AvatarComponent = cache?.comp ?? null;
-  return AvatarComponent ? { AvatarComponent, styleObj, inputs } : null;
+  return AvatarComponent ? {AvatarComponent, styleObj, inputs} : null;
 }
 
 export const computeUniformScale = (
@@ -89,25 +96,25 @@ export const computeUniformScale = (
 };
 
 export function AvatarBox({
-  rect,
-  displayW,
-  displayH,
-  styleRegistry,
-  cacheRef,
-  measured,
-  onMeasure,
-}: {
+                            rect,
+                            displayW,
+                            displayH,
+                            styleRegistry,
+                            cacheRef,
+                            measured,
+                            onMeasure,
+                          }: {
   rect: Rectangle;
   displayW: number;
   displayH: number;
   styleRegistry: ReadonlyArray<{ key: string; style: IAvatarStyle }>;
-  cacheRef: React.MutableRefObject<Map<string, { comp: React.FC; signature: string }>>;
+  cacheRef: React.RefObject<Map<string, { comp: React.FC; signature: string }>>;
   measured?: { width: number; height: number };
   onMeasure: (w: number, h: number) => void;
 }) {
   const resolved = resolveAvatar(rect, styleRegistry, cacheRef);
   if (!resolved) return null;
-  const { AvatarComponent } = resolved;
+  const {AvatarComponent} = resolved;
   const naturalW = measured?.width ?? displayW;
   const naturalH = measured?.height ?? displayH;
   const uniformScale = computeUniformScale(naturalW, naturalH, displayW, displayH);
@@ -126,15 +133,186 @@ export function AvatarBox({
       className="overflow-hidden relative"
       onDragStart={(e) => {
         // 如果拖放源来自内部的 img，阻止事件冒泡
-        if ((e.target as HTMLElement).tagName === 'IMG') {
+        if ((e.target as HTMLElement).tagName === "IMG") {
           e.preventDefault();
           e.stopPropagation();
         }
       }}
     >
       <MeasuredAvatar rectId={rect.id} onMeasure={onMeasure} scale={uniformScale} offsetX={offsetX} offsetY={offsetY}>
-        <AvatarComponent />
+        <AvatarComponent/>
       </MeasuredAvatar>
     </div>
   );
+}
+
+export interface RenderableAvatar {
+  data: string;
+  attrs: Rectangle;
+}
+
+import ReactDOM from "react-dom/client";
+
+/**
+ * 生成头像组件的 dataURL
+ * @param rect 头像区域的 Rectangle 对象
+ * @param styleRegistry 头像样式注册表
+ * @param cacheRef 头像组件缓存
+ * @param measured 测量的头像尺寸（可选）
+ * @param onMeasure 尺寸测量回调（可选）
+ * @returns 头像组件的 dataURL，失败则返回 null
+ */
+export async function getAvatarDataURL(
+  rect: Rectangle,
+  styleRegistry: ReadonlyArray<{ key: string; style: IAvatarStyle }>,
+  cacheRef: React.RefObject<Map<string, { comp: React.FC; signature: string }>>,
+  measured?: { width: number; height: number },
+  onMeasure?: (w: number, h: number) => void,
+): Promise<string | null> {
+  // 检查是否为可渲染的头像
+  if (!isRenderableAvatar(rect)) {
+    return null;
+  }
+
+  // 创建临时容器
+  const tempContainer = document.createElement("div");
+  tempContainer.style.position = "fixed";
+  tempContainer.style.left = "-9999px";
+  tempContainer.style.top = "-9999px";
+  tempContainer.style.width = `${rect.width}px`;
+  tempContainer.style.height = `${rect.height}px`;
+  tempContainer.style.pointerEvents = "none";
+  document.body.appendChild(tempContainer);
+
+  try {
+    // 渲染 AvatarBox 组件到临时容器
+    const root = ReactDOM.createRoot(tempContainer);
+    root.render(
+      <AvatarBox
+        rect={rect}
+        displayW={rect.width}
+        displayH={rect.height}
+        styleRegistry={styleRegistry}
+        cacheRef={cacheRef}
+        measured={measured}
+        onMeasure={onMeasure || (() => {
+        })}
+      />,
+    );
+
+    // 等待组件渲染完成（使用 requestAnimationFrame 确保 DOM 更新）
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        // 再等一帧确保所有子组件都渲染完成
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    });
+
+    const result = await snapdom(tempContainer, {
+      // 取决于设备缩放设置，头像组件可能仍需调整
+      // 如：200% -> devicePixelRatio = 2
+      scale: 1 / (window.devicePixelRatio ?? 1),
+      backgroundColor: "transparent",
+      embedFonts: true,
+      fast: false,
+      placeholders: false,
+    });
+
+    // 获取 PNG 图像并返回其 dataURL
+    const image = await result.toPng();
+    return image?.src || null;
+  } catch (error) {
+    console.error("生成头像 dataURL 失败:", error);
+    return null;
+  } finally {
+    if (tempContainer.parentNode) {
+      tempContainer.parentNode.removeChild(tempContainer);
+    }
+  }
+}
+
+/**
+ * 使用原生 Canvas 方式，生成带有头像组件的合成图像
+ * @param backgroundDataURL 背景图像的 dataURL
+ * @param avatars 所有需要合成到背景的头像
+ * @returns 合成图像的 dataURL，失败则返回 null
+ */
+export async function generateCompositeImage(
+  backgroundDataURL: string,
+  avatars: Array<RenderableAvatar>,
+): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
+    try {
+      // 加载背景图像以获取尺寸
+      const bgImage = new Image();
+      bgImage.crossOrigin = "anonymous";
+      bgImage.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = bgImage.naturalWidth;
+          canvas.height = bgImage.naturalHeight;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(null);
+            return;
+          }
+
+          // 绘制背景图像
+          ctx.drawImage(bgImage, 0, 0);
+
+          console.log(`Drawing background: ${bgImage.naturalWidth}x${bgImage.naturalHeight}`);
+          console.log(`${avatars.length} avatars will be rendered.`);
+
+          // 加载并绘制所有头像
+          const avatarPromises = avatars.map((avatar) => {
+            return new Promise<void>((resolveAvatar) => {
+              const avatarImage = new Image();
+              avatarImage.crossOrigin = "anonymous";
+              avatarImage.onload = () => {
+                try {
+                  // 绘制头像到指定位置，仅指定坐标以使用原图大小
+                  ctx.drawImage(
+                    avatarImage,
+                    Math.round(avatar.attrs.x),
+                    Math.round(avatar.attrs.y),
+                  );
+                } catch (error) {
+                  console.error("绘制头像失败:", error);
+                } finally {
+                  resolveAvatar();
+                }
+              };
+              avatarImage.onerror = () => {
+                console.warn("Failed to load avatar image:", avatar);
+                resolveAvatar();
+              };
+              console.log(avatar.data);
+              avatarImage.src = avatar.data;
+            });
+          });
+
+          // 等待所有头像绘制完成
+          Promise.all(avatarPromises).then(() => {
+            // 导出为 PNG 并返回 dataURL
+            const dataURL = canvas.toDataURL("image/png");
+            resolve(dataURL);
+          }).catch(() => {
+            resolve(null);
+          });
+        } catch (error) {
+          console.error("生成合成图像失败:", error);
+          resolve(null);
+        }
+      };
+      bgImage.onerror = () => {
+        resolve(null);
+      };
+      bgImage.src = backgroundDataURL;
+    } catch (error) {
+      console.error("生成合成图像失败:", error);
+      resolve(null);
+    }
+  });
 }

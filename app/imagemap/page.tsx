@@ -24,7 +24,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   CircleUserRound,
-  Code, Construction,
+  Code,
   Copy,
   Download,
   Eye, FolderOpen,
@@ -55,8 +55,7 @@ import type { IAvatarStyle } from "@/app/avatar/styles/IAvatarStyle";
 import { ClassicAvatarStyle } from "@/app/avatar/styles/ClassicAvatarStyle";
 import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
 import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
-import { snapdom } from "@zumer/snapdom";
-import { AvatarBox, isRenderableAvatar } from "@/app/imagemap/avatar-render";
+import { AvatarBox, isRenderableAvatar, getAvatarDataURL, generateCompositeImage } from "@/app/imagemap/avatar-render";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -67,7 +66,6 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // 大小调整的八个点
 type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -1166,44 +1164,61 @@ ${areas}
 
   // 重新渲染组件，以供导出
   const handleExportAvatars = async () => {
-    if (!uploadedImage || !exportContainerRef.current || isExporting) return;
+    if (!uploadedImage || isExporting) return;
     setIsExporting(true);
+
     const base = (mapName && mapName.trim()) || (imageName && imageName.split(".")[0]) || "imagemap";
-    const waitForMeasured = async (timeoutMs = 800) => {
-      const start = performance.now();
-      while (performance.now() - start < timeoutMs) {
-        const targets = rectangles.filter(isRenderableAvatar);
-        const allMeasured = targets.every((r) => {
-          const m = avatarNaturalSizes[r.id];
-          return !!m && m.width > 0 && m.height > 0;
-        });
-        if (allMeasured) return true;
-        await new Promise((r) => requestAnimationFrame(r));
-      }
-      return false;
-    };
-    const doCapture = async () => {
-      // 等两帧，确保布局稳定
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-      // 等待头像自然尺寸测量（最多 800ms，失败则继续）
-      await waitForMeasured(800);
-      const result = await snapdom(exportContainerRef.current!);
-      await result.download({filename: `exported-${base}-${Date.now()}.png`});
-    };
+
     try {
-      await doCapture();
-    } catch (e1) {
-      try {
-        await new Promise((r) => setTimeout(r, 120));
-        await doCapture();
-      } catch (e2) {
-        toast({
-          title: "导出失败",
-          description: e2 instanceof Error ? e2.message : "未知错误",
-          variant: "destructive",
+      // 生成所有头像的 dataURL
+      const avatarPromises = rectangles
+        .filter(isRenderableAvatar)
+        .map(async (rect) => {
+          const avatarDataURL = await getAvatarDataURL(
+            rect,
+            STYLE_REGISTRY,
+            avatarCacheRef,
+            avatarNaturalSizes[rect.id],
+          );
+          return {
+            data: avatarDataURL,
+            attrs: rect,
+          };
         });
-        console.error("Error while exporting avatars image.", e2);
+
+      // 等待所有头像生成完成
+      const avatarsWithData = await Promise.all(avatarPromises);
+
+      // 过滤掉生成失败的头像
+      const validAvatars = avatarsWithData
+        .filter((avatar): avatar is { data: string; attrs: typeof avatar.attrs } => {
+          return avatar.data !== null;
+        });
+
+      // 生成合成图像
+      const compositeDataURL = await generateCompositeImage(
+        uploadedImage,
+        validAvatars,
+      );
+
+      if (compositeDataURL) {
+        // 创建下载链接
+        const link = document.createElement("a");
+        link.href = compositeDataURL;
+        link.download = `exported-${base}-${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        throw new Error("无法生成合成图像");
       }
+    } catch (error) {
+      console.error("导出失败:", error);
+      toast({
+        title: "导出失败",
+        description: error instanceof Error ? error.message : "未知错误",
+        variant: "destructive",
+      });
     } finally {
       setIsExporting(false);
     }
@@ -1220,16 +1235,6 @@ ${areas}
           </h1>
           <p className="text-secondary-foreground">划定可点击区域，以便在个人资料等中使用</p>
         </div>
-
-        <Alert variant="warning" className="mb-5">
-          <AlertTitle className="flex-title">
-            <Construction />
-            <span>已知的功能缺陷</span>
-          </AlertTitle>
-          <AlertDescription>
-            目前编辑器导出带有头像组件图像时，会出现头像组件错位、过大、不完全显示等问题，现正计划修复中。
-          </AlertDescription>
-        </Alert>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
           {/* Preview Area */}
