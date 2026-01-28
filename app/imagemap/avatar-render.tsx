@@ -160,6 +160,8 @@ import ReactDOM from "react-dom/client";
  * @param cacheRef 头像组件缓存
  * @param measured 测量的头像尺寸（可选）
  * @param onMeasure 尺寸测量回调（可选）
+ * @param previewScaleX 预览区的X轴缩放比例（可选）
+ * @param previewScaleY 预览区的Y轴缩放比例（可选）
  * @returns 头像组件的 dataURL，失败则返回 null
  */
 export async function getAvatarDataURL(
@@ -168,10 +170,22 @@ export async function getAvatarDataURL(
   cacheRef: React.RefObject<Map<string, { comp: React.FC; signature: string }>>,
   measured?: { width: number; height: number },
   onMeasure?: (w: number, h: number) => void,
+  previewScaleX?: number,
+  previewScaleY?: number,
 ): Promise<string | null> {
   // 检查是否为可渲染的头像
   if (!isRenderableAvatar(rect)) {
     return null;
+  }
+
+  // 如果提供了预览缩放比例，使用与预览区相同的显示逻辑
+  let displayW = rect.width;
+  let displayH = rect.height;
+  
+  if (previewScaleX && previewScaleY) {
+    // 确保渲染一致性
+    displayW = rect.width / previewScaleX;
+    displayH = rect.height / previewScaleY;
   }
 
   // 创建临时容器
@@ -179,19 +193,25 @@ export async function getAvatarDataURL(
   tempContainer.style.position = "fixed";
   tempContainer.style.left = "-9999px";
   tempContainer.style.top = "-9999px";
-  tempContainer.style.width = `${rect.width}px`;
-  tempContainer.style.height = `${rect.height}px`;
+  tempContainer.style.width = `${displayW}px`;
+  tempContainer.style.height = `${displayH}px`;
   tempContainer.style.pointerEvents = "none";
+  // HQ渲染
+  tempContainer.style.imageRendering = "high-quality";
+  tempContainer.style.fontSmooth = "always";
+  tempContainer.style.webkitFontSmoothing = "antialiased";
   document.body.appendChild(tempContainer);
 
   try {
     // 渲染 AvatarBox 组件到临时容器
     const root = ReactDOM.createRoot(tempContainer);
+    
+    // 使用与预览区相同的渲染逻辑
     root.render(
       <AvatarBox
         rect={rect}
-        displayW={rect.width}
-        displayH={rect.height}
+        displayW={displayW}
+        displayH={displayH}
         styleRegistry={styleRegistry}
         cacheRef={cacheRef}
         measured={measured}
@@ -200,24 +220,52 @@ export async function getAvatarDataURL(
       />,
     );
 
-    // 等待组件渲染完成（使用 requestAnimationFrame 确保 DOM 更新）
+    // 等待组件渲染完成并且所有资源加载完毕
     await new Promise<void>((resolve) => {
+      const checkResourcesLoaded = () => {
+        const images = tempContainer.querySelectorAll('img');
+        const allImagesLoaded = Array.from(images).every(img => {
+          return img.complete && img.naturalHeight !== 0;
+        });
+        
+        // 检查字体是否加载完成
+        const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+        
+        if (allImagesLoaded) {
+          fontsReady.then(() => {
+            // 额外等待确保所有渲染完成
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                resolve();
+              });
+            });
+          });
+        } else {
+          // 继续等待图片加载
+          setTimeout(checkResourcesLoaded, 50);
+        }
+      };
+      
+      // 初始等待React渲染完成
       requestAnimationFrame(() => {
-        // 再等一帧确保所有子组件都渲染完成
         requestAnimationFrame(() => {
-          resolve();
+          checkResourcesLoaded();
         });
       });
     });
 
+    // 等待确保所有异步操作完成
+    await new Promise(resolve => setTimeout(resolve, 200));
+
     const result = await snapdom(tempContainer, {
-      // 取决于设备缩放设置，头像组件可能仍需调整
-      // 如：200% -> devicePixelRatio = 2
-      scale: 1 / (window.devicePixelRatio ?? 1),
-      backgroundColor: "transparent",
+      // 使用2倍缩放提高质量，但保持组件逻辑尺寸不变
+      scale: 2.0,
+      backgroundColor: "transparent", 
       embedFonts: true,
       fast: false,
       placeholders: false,
+      width: displayW,
+      height: displayH,
     });
 
     // 获取 PNG 图像并返回其 dataURL
@@ -259,6 +307,10 @@ export async function generateCompositeImage(
             return;
           }
 
+          // 启用HQ渲染
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+
           // 绘制背景图像
           ctx.drawImage(bgImage, 0, 0);
 
@@ -272,11 +324,13 @@ export async function generateCompositeImage(
               avatarImage.crossOrigin = "anonymous";
               avatarImage.onload = () => {
                 try {
-                  // 绘制头像到指定位置，仅指定坐标以使用原图大小
+                  // 绘制头像到指定位置和尺寸
                   ctx.drawImage(
                     avatarImage,
                     Math.round(avatar.attrs.x),
                     Math.round(avatar.attrs.y),
+                    Math.round(avatar.attrs.width),
+                    Math.round(avatar.attrs.height),
                   );
                 } catch (error) {
                   console.error("绘制头像失败:", error);
@@ -295,8 +349,8 @@ export async function generateCompositeImage(
 
           // 等待所有头像绘制完成
           Promise.all(avatarPromises).then(() => {
-            // 导出为 PNG 并返回 dataURL
-            const dataURL = canvas.toDataURL("image/png");
+            // 导出为高质量 PNG
+            const dataURL = canvas.toDataURL("image/png", 1.0);
             resolve(dataURL);
           }).catch(() => {
             resolve(null);
