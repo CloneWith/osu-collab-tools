@@ -1380,8 +1380,8 @@ ${areas}
                             >
                               {/* Avatar 区域渲染：在矩形中显示头像卡片 */}
                               {(() => {
-                                const displayW = Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX);
-                                const displayH = Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY);
+                                const displayW = isTouchDevice ? Math.max(rect.width / scaleX, 44) : rect.width / scaleX;
+                                const displayH = isTouchDevice ? Math.max(rect.height / scaleY, 44) : rect.height / scaleY;
                                 
                                 return isRenderableAvatar(rect) ? (
                                   <AvatarBox
