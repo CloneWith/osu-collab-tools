@@ -349,8 +349,8 @@ export async function generateCompositeImage(
 
           // 等待所有头像绘制完成
           Promise.all(avatarPromises).then(() => {
-            // 导出为高质量 PNG
-            const dataURL = canvas.toDataURL("image/png", 1.0);
+            // 导出为高质量 PNG（PNG 为无损格式，quality 参数无效）
+            const dataURL = canvas.toDataURL("image/png");
             resolve(dataURL);
           }).catch(() => {
             resolve(null);
