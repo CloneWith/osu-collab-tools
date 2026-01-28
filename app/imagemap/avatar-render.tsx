@@ -190,16 +190,13 @@ export async function getAvatarDataURL(
 
   // 创建临时容器
   const tempContainer = document.createElement("div");
+  tempContainer.className = "export-container";
   tempContainer.style.position = "fixed";
   tempContainer.style.left = "-9999px";
   tempContainer.style.top = "-9999px";
   tempContainer.style.width = `${displayW}px`;
   tempContainer.style.height = `${displayH}px`;
-  tempContainer.style.pointerEvents = "none";
-  // HQ渲染
-  tempContainer.style.imageRendering = "high-quality";
-  tempContainer.style.fontSmooth = "always";
-  tempContainer.style.webkitFontSmoothing = "antialiased";
+
   document.body.appendChild(tempContainer);
 
   try {
