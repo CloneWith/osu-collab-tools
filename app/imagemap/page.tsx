@@ -148,7 +148,6 @@ export default function ImagemapEditorPage() {
   const selectedRectRef = useRef<string | null>(null);
   const avatarCacheRef = useRef<Map<string, { comp: React.FC; signature: string }>>(new Map());
   const [avatarNaturalSizes, setAvatarNaturalSizes] = useState<Record<string, { width: number; height: number }>>({});
-  const exportContainerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
   const handleSize = isTouchDevice ? 16 : 10;
@@ -2023,68 +2022,6 @@ ${areas}
       {/* 导入对话框 */}
       <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} onImport={handleImportData}
                     imageWidth={imageSize.width} imageHeight={imageSize.height}/>
-
-      {/* 离屏导出容器：渲染原图背景 + 头像层，尺寸为原图大小 */}
-      {uploadedImage && imageSize.width > 0 && imageSize.height > 0 && (
-        <div
-          ref={exportContainerRef}
-          style={{
-            position: "fixed",
-            left: -10000,
-            top: -10000,
-            width: imageSize.width,
-            height: imageSize.height,
-            pointerEvents: "none",
-            background: "transparent",
-          }}
-        >
-          <div style={{position: "relative", width: imageSize.width, height: imageSize.height}}>
-            {/* 背景原图，按原尺寸铺满 */}
-            <img
-              src={uploadedImage}
-              alt="background"
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: imageSize.width,
-                height: imageSize.height,
-                objectFit: "fill",
-                display: "block",
-              }}
-            />
-            {rectangles.filter(isRenderableAvatar).map((rect) => (
-              <div
-                key={rect.id}
-                style={{
-                  position: "absolute",
-                  left: Math.round(rect.x),
-                  top: Math.round(rect.y),
-                  width: Math.round(rect.width),
-                  height: Math.round(rect.height),
-                  overflow: "hidden",
-                }}
-              >
-                <AvatarBox
-                  rect={rect}
-                  displayW={rect.width}
-                  displayH={rect.height}
-                  styleRegistry={STYLE_REGISTRY}
-                  cacheRef={avatarCacheRef}
-                  measured={avatarNaturalSizes[rect.id]}
-                  onMeasure={(w, h) => {
-                    setAvatarNaturalSizes((prev) => {
-                      const current = prev[rect.id];
-                      if (current && current.width === w && current.height === h) return prev;
-                      return {...prev, [rect.id]: {width: w, height: h}};
-                    });
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
