@@ -1181,7 +1181,8 @@ ${areas}
             STYLE_REGISTRY,
             avatarCacheRef,
             avatarNaturalSizes[rect.id],
-            (() => {}), // onMeasure
+            // Keep previous measured sizes as the preview uses them
+            (() => {}),
             scaleX,
             scaleY
           );

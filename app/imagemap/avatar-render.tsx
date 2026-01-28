@@ -212,14 +212,13 @@ export async function getAvatarDataURL(
         styleRegistry={styleRegistry}
         cacheRef={cacheRef}
         measured={measured}
-        onMeasure={onMeasure || (() => {
-        })}
+        onMeasure={onMeasure || (() => {})}
       />,
     );
 
     // 等待组件渲染完成并且所有资源加载完毕
     await new Promise<void>((resolve) => {
-      const checkResourcesLoaded = () => {
+      const checkResourcesLoaded = (time: number = 0) => {
         const images = tempContainer.querySelectorAll('img');
         const allImagesLoaded = Array.from(images).every(img => {
           return img.complete && img.naturalHeight !== 0;
@@ -227,8 +226,9 @@ export async function getAvatarDataURL(
         
         // 检查字体是否加载完成
         const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
-        
-        if (allImagesLoaded) {
+
+        // 图像已加载 / 超时，按需增加超时限制
+        if (allImagesLoaded || time >= 1000) {
           fontsReady.then(() => {
             // 额外等待确保所有渲染完成
             requestAnimationFrame(() => {
@@ -239,7 +239,7 @@ export async function getAvatarDataURL(
           });
         } else {
           // 继续等待图片加载
-          setTimeout(checkResourcesLoaded, 50);
+          setTimeout(() => checkResourcesLoaded(time + 50), 50);
         }
       };
       
@@ -251,9 +251,6 @@ export async function getAvatarDataURL(
       });
     });
 
-    // 等待确保所有异步操作完成
-    await new Promise(resolve => setTimeout(resolve, 200));
-
     const result = await snapdom(tempContainer, {
       // 使用2倍缩放提高质量，但保持组件逻辑尺寸不变
       scale: 2.0,
@@ -261,8 +258,6 @@ export async function getAvatarDataURL(
       embedFonts: true,
       fast: false,
       placeholders: false,
-      width: displayW,
-      height: displayH,
     });
 
     // 获取 PNG 图像并返回其 dataURL
