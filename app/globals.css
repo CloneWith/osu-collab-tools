@@ -163,4 +163,13 @@
   img {
     @apply inline-block;
   }
+
+  .export-container {
+    @apply pointer-events-none;
+    image-rendering: high-quality;
+
+    /* Non-standard attribute */
+    font-smooth: always;
+    -webkit-font-smoothing: antialiased;
+  }
 }

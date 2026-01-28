@@ -1161,7 +1161,7 @@ ${areas}
     }
   };
 
-  // 重新渲染组件，以供导出
+  // 导出高质量图像，使用与预览区相同的渲染逻辑
   const handleExportAvatars = async () => {
     if (!uploadedImage || isExporting) return;
     setIsExporting(true);
@@ -1169,7 +1169,10 @@ ${areas}
     const base = (mapName && mapName.trim()) || (imageName && imageName.split(".")[0]) || "imagemap";
 
     try {
-      // 生成所有头像的 dataURL
+      // 获取预览使用的当前缩放比例
+      const {scaleX, scaleY} = getImageScale();
+      
+      // 生成所有头像的 dataURL，传递缩放信息
       const avatarPromises = rectangles
         .filter(isRenderableAvatar)
         .map(async (rect) => {
@@ -1178,6 +1181,10 @@ ${areas}
             STYLE_REGISTRY,
             avatarCacheRef,
             avatarNaturalSizes[rect.id],
+            // Keep previous measured sizes as the preview uses them
+            (() => {}),
+            scaleX,
+            scaleY
           );
           return {
             data: avatarDataURL,
@@ -1374,8 +1381,9 @@ ${areas}
                             >
                               {/* Avatar 区域渲染：在矩形中显示头像卡片 */}
                               {(() => {
-                                const displayW = Math.max(rect.width / scaleX, isTouchDevice ? 44 : rect.width / scaleX);
-                                const displayH = Math.max(rect.height / scaleY, isTouchDevice ? 44 : rect.height / scaleY);
+                                const displayW = isTouchDevice ? Math.max(rect.width / scaleX, 44) : rect.width / scaleX;
+                                const displayH = isTouchDevice ? Math.max(rect.height / scaleY, 44) : rect.height / scaleY;
+                                
                                 return isRenderableAvatar(rect) ? (
                                   <AvatarBox
                                     rect={rect}
