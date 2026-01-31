@@ -27,7 +27,8 @@ import {
   Code,
   Copy,
   Download,
-  Eye, FolderOpen,
+  Eye,
+  FolderOpen,
   GripVertical,
   Hash,
   MoreVertical,
@@ -50,22 +51,25 @@ import { HelpIconButton } from "@/components/help-icon-button";
 import { registerBBCodeHighlight } from "@/lib/hljs-support";
 import { ExportDialog } from "@/components/imagemap/export-dialog";
 import { ImportDialog } from "@/components/imagemap/import-dialog";
-import { ImageMapConfig, RectangleType, Rectangle } from "@/app/imagemap/types";
+import { ImageMapConfig, Rectangle, RectangleType } from "@/app/imagemap/types";
 import type { IAvatarStyle } from "@/app/avatar/styles/IAvatarStyle";
 import { ClassicAvatarStyle } from "@/app/avatar/styles/ClassicAvatarStyle";
 import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
 import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
-import { AvatarBox, isRenderableAvatar, getAvatarDataURL, generateCompositeImage } from "@/app/imagemap/avatar-render";
+import { AvatarBox, generateCompositeImage, getAvatarDataURL, isRenderableAvatar } from "@/app/imagemap/avatar-render";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   ContextMenu,
-  ContextMenuTrigger,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
+  ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Kbd } from "@/components/ui/kbd";
 
 // 大小调整的八个点
 type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -1171,7 +1175,7 @@ ${areas}
     try {
       // 获取预览使用的当前缩放比例
       const {scaleX, scaleY} = getImageScale();
-      
+
       // 生成所有头像的 dataURL，传递缩放信息
       const avatarPromises = rectangles
         .filter(isRenderableAvatar)
@@ -1182,9 +1186,10 @@ ${areas}
             avatarCacheRef,
             avatarNaturalSizes[rect.id],
             // Keep previous measured sizes as the preview uses them
-            (() => {}),
+            (() => {
+            }),
             scaleX,
-            scaleY
+            scaleY,
           );
           return {
             data: avatarDataURL,
@@ -1288,15 +1293,18 @@ ${areas}
             {/* 工具栏 */}
             {uploadedImage && (
               <div className="bg-card rounded-md shadow p-1 flex space-x-1 select-none">
-                {tools.map((tool) => (
-                  <button
-                    key={tool.key}
-                    className={getToolButtonClass(tool.key)}
-                    onClick={() => setCurrentTool(tool.key)}
-                    title={tool.name}
-                  >
-                    {tool.icon}
-                  </button>
+                {tools.map((tool, index) => (
+                  <Tooltip key={tool.key}>
+                    <TooltipTrigger asChild>
+                      <button
+                        className={getToolButtonClass(tool.key)}
+                        onClick={() => setCurrentTool(tool.key)}
+                      >
+                        {tool.icon}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{tool.name} <Kbd>{index}</Kbd></TooltipContent>
+                  </Tooltip>
                 ))}
               </div>
             )}
@@ -1383,7 +1391,7 @@ ${areas}
                               {(() => {
                                 const displayW = isTouchDevice ? Math.max(rect.width / scaleX, 44) : rect.width / scaleX;
                                 const displayH = isTouchDevice ? Math.max(rect.height / scaleY, 44) : rect.height / scaleY;
-                                
+
                                 return isRenderableAvatar(rect) ? (
                                   <AvatarBox
                                     rect={rect}
@@ -1609,9 +1617,9 @@ ${areas}
                           data-rect-row="true"
                           data-rect-id={rect.id}
                         >
-                          <div className="flex w-full items-center gap-3 min-w-0">
+                          <div className="flex w-full items-center gap-2 min-w-0">
                             <div
-                              className="h-full text-muted-foreground hover:text-foreground cursor-grab flex-shrink-0 -ml-3 pl-3 pr-2 py-2 rounded-md"
+                              className="h-full text-muted-foreground hover:text-foreground cursor-grab flex-shrink-0 -ml-3 pl-3 py-2 rounded-md"
                               onDragStart={(e) => handleDragStartRow(e, rect.id)}
                               onDragEnd={handleDragEndRow}
                               draggable
@@ -1634,6 +1642,8 @@ ${areas}
                             >
                               <GripVertical className="w-4 h-4"/>
                             </div>
+                            {rect.type === RectangleType.Avatar ? <CircleUserRound/> : <Square/>}
+
                             <div className="flex flex-col min-w-0 flex-1">
                               <span className={`text-sm font-medium text-left truncate ${rect.alt || "italic"}`}>
                                 {rect.alt || `区域 ${index + 1}`}
@@ -1644,6 +1654,7 @@ ${areas}
                                 {rect.href || "未设置链接"}
                               </span>
                             </div>
+
                           </div>
 
                           <DropdownMenu>
@@ -1715,15 +1726,15 @@ ${areas}
                     </div>
                   </div>
                   {selectedRectData && (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {/* 区域类型选择 */}
-                      <div>
-                        <Label>区域类型</Label>
+                      <div className="space-y-1">
+                        <Label htmlFor="rectType">区域类型</Label>
                         <Select
                           value={selectedRectData.type}
                           onValueChange={(e) => updateRectangleType(selectedRect, e as RectangleType)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger id="rectType">
                             <SelectValue/>
                           </SelectTrigger>
                           <SelectContent>
@@ -1736,13 +1747,13 @@ ${areas}
                       {/* Avatar 类型的专用属性 */}
                       {selectedRectData.type === RectangleType.Avatar && (
                         <>
-                          <div className="space-y-2">
-                            <Label>头像样式</Label>
+                          <div className="space-y-1">
+                            <Label htmlFor="avatarStyle">头像样式</Label>
                             <Select
                               value={selectedRectData.avatar?.styleKey ?? "simple"}
                               onValueChange={(e) => updateAvatarField(selectedRect, "styleKey", e)}
                             >
-                              <SelectTrigger>
+                              <SelectTrigger id="avatarStyle">
                                 <SelectValue/>
                               </SelectTrigger>
                               <SelectContent>
@@ -1752,7 +1763,7 @@ ${areas}
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-2">
+                          <div className="space-y-1">
                             <Label htmlFor="avatarLink">头像图片链接</Label>
                             <Input
                               id="avatarLink"
@@ -1761,27 +1772,29 @@ ${areas}
                               onChange={(e) => updateAvatarField(selectedRect, "imageUrl", e.target.value)}
                             />
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="user">用户名</Label>
-                            <Input
-                              id="user"
-                              placeholder="peppy"
-                              value={selectedRectData.avatar?.username ?? ""}
-                              onChange={(e) => updateAvatarField(selectedRect, "username", e.target.value)}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="countryCode">国家/地区代码（可选）</Label>
-                            <Input
-                              id="countryCode"
-                              placeholder="两位地区码"
-                              value={selectedRectData.avatar?.countryCode ?? ""}
-                              onChange={(e) => updateAvatarField(selectedRect, "countryCode", e.target.value)}
-                            />
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <Label htmlFor="user">用户名</Label>
+                              <Input
+                                id="user"
+                                placeholder="peppy"
+                                value={selectedRectData.avatar?.username ?? ""}
+                                onChange={(e) => updateAvatarField(selectedRect, "username", e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <Label htmlFor="countryCode">国家/地区代码（可选）</Label>
+                              <Input
+                                id="countryCode"
+                                placeholder="两位地区码"
+                                value={selectedRectData.avatar?.countryCode ?? ""}
+                                onChange={(e) => updateAvatarField(selectedRect, "countryCode", e.target.value)}
+                              />
+                            </div>
                           </div>
                         </>
                       )}
-                      <div>
+                      <div className="space-y-1">
                         <Label htmlFor="link">链接地址</Label>
                         <Input
                           id="link"
@@ -1791,7 +1804,7 @@ ${areas}
                           placeholder={common.urlPlaceholder}
                         />
                       </div>
-                      <div>
+                      <div className="space-y-1">
                         <Label htmlFor="altText">替代文本</Label>
                         <Input
                           id="altText"
@@ -1801,41 +1814,45 @@ ${areas}
                           placeholder="描述文本"
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label htmlFor="userInfo">用户信息</Label>
-                          <Input
+                      <div className="space-y-1">
+                        <Label htmlFor="userInfo">用户信息</Label>
+                        <InputGroup className="overflow-visible">
+                          <InputGroupInput
                             id="userInfo"
                             value={userInfo}
                             onChange={(e) => setUserInfo(e.target.value)}
                             onBlur={(e) => setUserInfo(e.target.value.trim())}
                           />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 items-center">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={userInfo.trim().length === 0 || Number.isNaN(Number(userInfo))}
-                            onClick={() =>
-                              updateRectangle(selectedRect, "href", generateUserLinkFromId(Number(userInfo)))
-                            }
-                            className="flex items-center gap-1"
-                          >
-                            <Hash className="w-4 h-4"/>
-                            <span className="truncate">作为 ID 填入</span>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={userInfo.trim().length === 0}
-                            onClick={() => updateRectangle(selectedRect, "href", generateUserLinkFromName(userInfo))}
-                            className="flex items-center gap-1"
-                          >
-                            <UserRound className="w-4 h-4"/>
-                            <span className="truncate">作为用户名填入</span>
-                          </Button>
-                        </div>
-                        <div>
+                          <InputGroupAddon align="inline-end">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <InputGroupButton
+                                  disabled={userInfo.trim().length === 0 || Number.isNaN(Number(userInfo))}
+                                  onClick={() =>
+                                    updateRectangle(selectedRect, "href", generateUserLinkFromId(Number(userInfo)))
+                                  }
+                                >
+                                  <Hash className="w-4 h-4"/>
+                                </InputGroupButton>
+                              </TooltipTrigger>
+                              <TooltipContent>作为 ID 填入</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <InputGroupButton
+                                  disabled={userInfo.trim().length === 0}
+                                  onClick={() => updateRectangle(selectedRect, "href", generateUserLinkFromName(userInfo))}
+                                >
+                                  <UserRound className="w-4 h-4"/>
+                                </InputGroupButton>
+                              </TooltipTrigger>
+                              <TooltipContent>作为用户名填入</TooltipContent>
+                            </Tooltip>
+                          </InputGroupAddon>
+                        </InputGroup>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
                           <Label htmlFor="posX">X 坐标</Label>
                           <Input
                             id="posX"
@@ -1855,7 +1872,7 @@ ${areas}
                             }}
                           />
                         </div>
-                        <div>
+                        <div className="space-y-1">
                           <Label htmlFor="posY">Y 坐标</Label>
                           <Input
                             id="posY"
@@ -1875,7 +1892,7 @@ ${areas}
                             }}
                           />
                         </div>
-                        <div>
+                        <div className="space-y-1">
                           <Label htmlFor="width">宽度</Label>
                           <Input
                             id="width"
@@ -1892,7 +1909,7 @@ ${areas}
                             }}
                           />
                         </div>
-                        <div>
+                        <div className="space-y-1">
                           <Label htmlFor="height">高度</Label>
                           <Input
                             id="height"

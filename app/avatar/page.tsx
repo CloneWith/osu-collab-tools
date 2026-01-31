@@ -180,9 +180,9 @@ export default function AvatarGeneratorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>头像样式</Label>
+                <Label htmlFor="avatarStyle">头像样式</Label>
                 <Select value={styleKey} onValueChange={(v) => setStyleKey(v as StyleKey)}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger id="avatarStyle" className="w-full">
                     <SelectValue placeholder="选择一种样式"/>
                   </SelectTrigger>
                   <SelectContent>
@@ -195,9 +195,9 @@ export default function AvatarGeneratorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>导出分辨率</Label>
+                <Label htmlFor="exportRes">导出分辨率</Label>
                 <Select value={selectedExportScale} onValueChange={(v) => setSelectedExportScale(v)}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger id="exportRes" className="w-full">
                     <SelectValue placeholder="选择导出分辨率"/>
                   </SelectTrigger>
                   <SelectContent>
