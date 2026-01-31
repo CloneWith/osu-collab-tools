@@ -120,10 +120,6 @@
     font-family: Arial, Helvetica, sans-serif;
   }
 
-  input {
-    @apply hover:border-primary rounded-md ease-out duration-200;
-  }
-
   .hero {
     /* hero should inherit the semantic background token */
     @apply bg-background;
@@ -136,24 +132,6 @@
 
   .inline-code {
     @apply bg-primary/50 px-1 rounded;
-  }
-
-  kbd {
-    @apply bg-muted text-foreground;
-    display: inline-block;
-    padding: 0.2rem 0.4rem;
-    border-radius: 0.35rem;
-    border: 1px solid hsl(var(--border));
-    font-size: 0.85em;
-    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-    line-height: 1.1;
-    box-shadow: inset 0 -1px 0 hsl(var(--muted-foreground) / 0.3);
-  }
-
-  .dark kbd {
-    @apply bg-gray-800;
-    border-color: hsl(var(--border));
-    box-shadow: inset 0 -1px 0 hsl(var(--muted-foreground) / 0.45);
   }
 
   /**

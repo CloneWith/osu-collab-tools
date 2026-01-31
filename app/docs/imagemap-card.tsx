@@ -13,6 +13,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 
 export default function ImagemapDocCard() {
   return (
@@ -193,19 +194,19 @@ export default function ImagemapDocCard() {
         <div className="space-y-2">
           <h3 className="font-semibold">全局</h3>
           <ul className="list-disc list-inside space-y-1 text-secondary-foreground">
-            <li><b><kbd>Alt</kbd> + 数字键</b>：切换编辑模式（按从 1 开始的对应数字序）</li>
+            <li><b><Kbd>Alt</Kbd> + 数字键</b>：切换编辑模式（按从 1 开始的对应数字序）</li>
           </ul>
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">选定区域时</h3>
           <ul className="list-disc list-inside space-y-1 text-secondary-foreground">
-            <li><b><kbd>Del</kbd></b>：删除选定区域</li>
-            <li><b><kbd>Ctrl</kbd> + <kbd>D</kbd></b>：创建副本</li>
-            <li><b><kbd>-</kbd> / <kbd>=</kbd></b>：移至下层/上层</li>
+            <li><b><Kbd>Del</Kbd></b>：删除选定区域</li>
+            <li><b><Kbd>Ctrl + D</Kbd></b>：创建副本</li>
+            <li><b><KbdGroup><Kbd>-</Kbd><Kbd>=</Kbd></KbdGroup></b>：移至下层/上层</li>
             <li><b>方向键</b>：移动选定区域</li>
             <ul className="pl-5 list-disc list-inside space-y-1 text-secondary-foreground">
-              <li><b>同时按下 <kbd>Shift</kbd></b>：精细移动（每次 1 像素）</li>
-              <li><b>同时按下 <kbd>Ctrl</kbd></b>：快速移动（每次 20 像素）</li>
+              <li><b>同时按下 <Kbd>Shift</Kbd></b>：精细移动（每次 1 像素）</li>
+              <li><b>同时按下 <Kbd>Ctrl</Kbd></b>：快速移动（每次 20 像素）</li>
             </ul>
           </ul>
         </div>
