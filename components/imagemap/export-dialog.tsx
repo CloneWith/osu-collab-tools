@@ -1,20 +1,20 @@
 "use client";
 
 import React from "react";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Copy, DownloadCloud, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageMapConfig } from "@/app/imagemap/types";
 import hljs from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface ExportDialogProps {
   open: boolean;
@@ -61,28 +61,28 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-2xl">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex flex-row items-center gap-2">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex flex-row items-center gap-2">
             <Upload className="w-5 h-5"/>
             导出配置
-          </AlertDialogTitle>
-          <AlertDialogDescription>
+          </DialogTitle>
+          <DialogDescription>
             以下是当前 Imagemap 的 JSON 配置，您可以复制或下载它以供后用。
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+          </DialogDescription>
+        </DialogHeader>
 
         <div className="space-y-3">
           <div
             className="bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96 border border-gray-700">
-            <pre className="whitespace-pre-wrap break-words" dangerouslySetInnerHTML={{
+            <pre className="whitespace-pre-wrap wrap-break-word" dangerouslySetInnerHTML={{
               __html: hljs.highlight(jsonString, {language: "json"}).value,
             }}/>
           </div>
         </div>
 
-        <AlertDialogFooter className="flex flex-row gap-2 justify-end">
+        <DialogFooter className="flex flex-row gap-2 justify-end">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -104,8 +104,8 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
             <DownloadCloud className="w-4 h-4"/>
             下载 JSON
           </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

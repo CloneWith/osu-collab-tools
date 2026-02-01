@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 interface Triangle {
   x: number;
@@ -243,12 +244,7 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
   return (
     <canvas
       ref={canvasRef}
-      className={`pointer-events-none ${className}`}
-      style={{ 
-        display: 'block', 
-        width: '100%', 
-        height: '100%'
-      }}
+      className={cn("block w-full h-full pointer-events-none", className)}
     />
   );
 };

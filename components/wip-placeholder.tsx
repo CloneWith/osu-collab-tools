@@ -7,7 +7,7 @@ import { common } from "@/app/common";
 
 export default function WorkingPlaceholder() {
   return (
-    <Card className="h-96 lg:h-[500px]">
+    <Card className="h-96 lg:h-125">
       <CardContent className="p-4 h-full flex flex-col items-center justify-center space-y-2">
         <CircleDotDashed className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-spin"/>
         <b className="text-4xl animate-pulse">WIP</b>

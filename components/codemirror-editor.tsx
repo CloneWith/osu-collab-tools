@@ -7,6 +7,7 @@ import { json } from "@codemirror/lang-json";
 import { keymap, EditorView as ViewExt } from "@codemirror/view";
 import { defaultKeymap, indentWithTab } from "@codemirror/commands";
 import { githubDark } from "@fsegurai/codemirror-theme-github-dark";
+import { cn } from "@/lib/utils";
 
 interface CodeMirrorEditorProps {
   value: string;
@@ -123,7 +124,7 @@ export function CodeMirrorEditor({
   return (
     <div
       ref={containerRef}
-      className={`w-full border border-gray-700 rounded-md overflow-y-auto overflow-x-hidden bg-gray-900 dark:bg-gray-950 ${className}`}
+      className={cn("w-full border border-gray-700 rounded-md overflow-y-auto overflow-x-hidden bg-gray-900 dark:bg-gray-950", className)}
       style={{ height }}
     />
   );

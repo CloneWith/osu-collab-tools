@@ -1280,7 +1280,7 @@ ${areas}
                 )}
                 <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="image-upload"/>
                 <label htmlFor="image-upload">
-                  <Button asChild className="cursor-pointer">
+                  <Button asChild>
                     <span className="flex items-center gap-2">
                       <FolderOpen className="w-4 h-4"/>
                       选择图片
@@ -1292,7 +1292,7 @@ ${areas}
 
             {/* 工具栏 */}
             {uploadedImage && (
-              <div className="bg-card rounded-md shadow p-1 flex space-x-1 select-none">
+              <div className="bg-card rounded-md shadow-sm p-1 flex space-x-1 select-none">
                 {tools.map((tool, index) => (
                   <Tooltip key={tool.key}>
                     <TooltipTrigger asChild>
@@ -1428,7 +1428,7 @@ ${areas}
                                 ).map((item) => (
                                   <div
                                     key={item.handle}
-                                    className="absolute bg-primary border border-white shadow-sm"
+                                    className="absolute bg-primary border border-white shadow-xs"
                                     style={{
                                       ...item.style,
                                       width: handleSize,
@@ -1619,7 +1619,7 @@ ${areas}
                         >
                           <div className="flex w-full items-center gap-2 min-w-0">
                             <div
-                              className="h-full text-muted-foreground hover:text-foreground cursor-grab flex-shrink-0 -ml-3 pl-3 py-2 rounded-md"
+                              className="h-full text-muted-foreground hover:text-foreground cursor-grab shrink-0 -ml-3 pl-3 py-2 rounded-md"
                               onDragStart={(e) => handleDragStartRow(e, rect.id)}
                               onDragEnd={handleDragEndRow}
                               draggable
@@ -1662,7 +1662,7 @@ ${areas}
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 flex-shrink-0"
+                                className="h-8 w-8 shrink-0"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <MoreVertical className="w-4 h-4"/>
@@ -1675,7 +1675,7 @@ ${areas}
                                   duplicateRectangle(rect.id);
                                 }}
                               >
-                                <Copy className="w-4 h-4 flex-shrink-0"/>
+                                <Copy className="w-4 h-4 shrink-0"/>
                                 <span className="truncate">创建副本</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
@@ -1685,7 +1685,7 @@ ${areas}
                                   deleteRectangle(rect.id);
                                 }}
                               >
-                                <Trash className="w-4 h-4 flex-shrink-0"/>
+                                <Trash className="w-4 h-4 shrink-0"/>
                                 <span className="truncate">删除</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>

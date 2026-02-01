@@ -1,14 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Upload, AlertCircle, CheckCircle, ClipboardPaste, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +13,14 @@ import { CodeMirrorEditor } from "../codemirror-editor";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Timeout } from "@radix-ui/primitive";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface ImportDialogProps {
   open: boolean;
@@ -167,19 +167,19 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-3xl">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex flex-row items-center gap-2">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="flex flex-row items-center gap-2">
             <Upload className="w-5 h-5"/>
             导入配置
-          </AlertDialogTitle>
-          <AlertDialogDescription>
+          </DialogTitle>
+          <DialogDescription>
             <span>快速恢复之前的工作，在下方区域输入要导入的数据。</span>
             <br/>
             <span className="text-orange-400"><b>注意</b>：导入配置后，已定义的区域将被全部覆盖，配置中定义的内容将覆盖已有内容。</span>
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+          </DialogDescription>
+        </DialogHeader>
 
         <div className="space-y-3">
           <Label>数据源</Label>
@@ -204,7 +204,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
           {validationError ? (
             <div
               className={`flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md ${inputActive && "opacity-30"}`}>
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"/>
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5"/>
               <div>
                 <p className="text-sm font-medium text-red-800 dark:text-red-200">验证失败</p>
                 <p className="text-sm text-red-700 dark:text-red-300">{validationError}</p>
@@ -219,7 +219,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
           ) : null}
         </div>
 
-        <AlertDialogFooter className="flex flex-row gap-2 justify-end">
+        <DialogFooter className="flex flex-row gap-2 justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
@@ -239,8 +239,8 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
             <Download className="w-4 h-4"/>
             导入配置
           </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
