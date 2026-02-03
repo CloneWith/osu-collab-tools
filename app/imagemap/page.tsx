@@ -75,7 +75,7 @@ import {
 } from "@/components/ui/context-menu";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Kbd } from "@/components/ui/kbd";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { fileTypeFromBlob } from "file-type";
@@ -1274,7 +1274,14 @@ export default function ImagemapEditorPage() {
                         {tool.icon}
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent>{tool.name} <Kbd>{index}</Kbd></TooltipContent>
+                    <TooltipContent>
+                      {tool.name}{" "}
+                      <KbdGroup>
+                        <Kbd>Alt</Kbd>
+                        <span>+</span>
+                        <Kbd>{index + 1}</Kbd>
+                      </KbdGroup>
+                    </TooltipContent>
                   </Tooltip>
                 ))}
               </div>
