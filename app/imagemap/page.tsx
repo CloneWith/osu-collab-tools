@@ -30,7 +30,7 @@ import {
   Eye,
   FolderOpen,
   GripVertical,
-  Hash,
+  Hash, LayoutDashboard, List,
   MoreVertical,
   MousePointer,
   OctagonAlert,
@@ -142,6 +142,9 @@ export default function ImagemapEditorPage() {
   // Export & Import dialog states
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+
+  // Layout state
+  const [preferLayout, setPreferLayout] = useState<"two-column" | "single-column">("two-column");
 
   const {toast} = useToast();
 
@@ -1238,16 +1241,27 @@ ${areas}
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="flex-title text-3xl font-bold text-foreground mb-2">
-            <span className="text-primary">ImageMap </span>
-            <span>编辑器</span>
-            <HelpIconButton section="imagemap"/>
-          </h1>
-          <p className="text-secondary-foreground">划定可点击区域，以便在个人资料等中使用</p>
+        <div className="mb-8 grid items-center md:grid-cols-2">
+          <div>
+            <h1 className="flex-title text-3xl font-bold text-foreground mb-2">
+              <span className="text-primary">ImageMap </span>
+              <span>编辑器</span>
+              <HelpIconButton section="imagemap"/>
+            </h1>
+            <p className="text-secondary-foreground">划定可点击区域，以便在个人资料等中使用</p>
+          </div>
+          <div className="justify-self-end-safe mt-2 md:mt-0">
+            <Tabs value={preferLayout} onValueChange={(value) => setPreferLayout(value as "two-column" | "single-column")}>
+              <TabsList>
+                <TabsTrigger value="two-column"><LayoutDashboard/></TabsTrigger>
+                <TabsTrigger value="single-column"><List/></TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+        <div
+          className={`grid gap-8 h-full transition-all duration-300 ease-in-out ${preferLayout === "two-column" ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}>
           {/* Preview Area */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
