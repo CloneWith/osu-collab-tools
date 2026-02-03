@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { common } from "@/app/common";
 import flagFallback from "@/public/flag-fallback.png";
+import { Rectangle } from "@/app/imagemap/types";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -9,6 +10,10 @@ export function cn(...inputs: ClassValue[]) {
 
 export function clamp(value: number, min: number, max: number) {
     return Math.min(Math.max(value, min), max);
+}
+
+export function toRoundedPercent(num: number, total: number) {
+    return Math.round((num / total) * 1000) / 10;
 }
 
 /**
@@ -40,6 +45,38 @@ export function generateUserLinkFromName(username: string) {
     return encodeURI(`${getServerLink()}/u/${username}`.toWellFormed());
 }
 
+export function generateImageMapHtml(rectangles: Rectangle[], imagePath: string | undefined, mapName: string | undefined) {
+    const name = mapName ?? "imagemap";
+    const areas = rectangles
+        .map(
+            (rect) =>
+                `  <area shape="rect" coords="${Math.round(rect.x)},${Math.round(rect.y)},${Math.round(
+                    rect.x + rect.width,
+                )},${Math.round(rect.y + rect.height)}" href="${rect.href}" alt="${rect.alt}">`,
+        )
+        .join("\n");
+
+    return `<img src="${imagePath ?? "your-image.jpg"}" alt="Collab Image" usemap="#${name}">
+<map name="${name}">
+${areas}
+</map>`;
+}
+
+export function generateImageMapBBCode(rectangles: Rectangle[], width: number, height: number, imagePath: string | undefined) {
+    const areas = rectangles
+        .map(
+            (rect) =>
+                `${toRoundedPercent(rect.x, width)} ${toRoundedPercent(rect.y, height)}` +
+                ` ${toRoundedPercent(rect.width, width)} ${toRoundedPercent(rect.height, height)}` +
+                ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${
+                    rect.alt.trim() === "" ? "" : ` ${rect.alt.trim()}`
+                }`,
+        )
+        .join("\n");
+
+    return `[imagemap]\n${imagePath ?? "your-image.jpg"}\n${areas}\n[/imagemap]`;
+}
+
 export enum FlagTheme {
     Normal,
     Twemoji,
@@ -64,9 +101,9 @@ export async function getCountryFlagDataUrl(code: string, theme: FlagTheme): Pro
         case FlagTheme.Twemoji: {
             const baseFileName = trimmed
                 .toUpperCase()
-                .split('')
+                .split("")
                 .map((c) => (c.charCodeAt(0) + 127397).toString(16))
-                .join('-');
+                .join("-");
 
             url = `https://twemoji.maxcdn.com/v/latest/72x72/${baseFileName}.png`;
             break;

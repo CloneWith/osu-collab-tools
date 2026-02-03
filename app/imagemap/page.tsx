@@ -32,7 +32,7 @@ import {
   GripVertical,
   Hash, LayoutDashboard, List,
   MoreVertical,
-  MousePointer,
+  MousePointer, MousePointerClick,
   OctagonAlert,
   Settings,
   Square,
@@ -42,7 +42,13 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { clamp, generateId, generateUserLinkFromId, generateUserLinkFromName } from "@/lib/utils";
+import {
+  clamp, cn,
+  generateId, generateImageMapBBCode,
+  generateImageMapHtml,
+  generateUserLinkFromId,
+  generateUserLinkFromName,
+} from "@/lib/utils";
 import DragAndDropOverlay, { DnDRejectReason } from "@/app/imagemap/dnd-overlay";
 import { common } from "@/app/common";
 import hljs from "highlight.js/lib/core";
@@ -70,6 +76,9 @@ import {
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Kbd } from "@/components/ui/kbd";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { fileTypeFromBlob } from "file-type";
 
 // 大小调整的八个点
 type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -100,12 +109,12 @@ const STYLE_REGISTRY = [
 export default function ImagemapEditorPage() {
   // Image states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [imageName, setImageName] = useState<string | null>(null);
+  const [imageName, setImageName] = useState<string | undefined>(undefined);
   const [imageSize, setImageSize] = useState({width: 0, height: 0});
 
   // Custom image properties
-  const [imagePath, setImagePath] = useState<string | null>(null);
-  const [mapName, setMapName] = useState<string | null>(null);
+  const [imagePath, setImagePath] = useState<string | undefined>(undefined);
+  const [mapName, setMapName] = useState<string | undefined>(undefined);
 
   // Rectangle and drawing states
   const [rectangles, setRectangles] = useState<Rectangle[]>([]);
@@ -267,16 +276,17 @@ export default function ImagemapEditorPage() {
     const file = event.target.files?.[0];
 
     if (file) {
-      loadImageFile(file);
+      loadImageFile(file).then(_ => {});
     }
   };
 
   // Shared image loader for file input & drag-drop
-  const loadImageFile = (file: File) => {
-    if (!file.type.startsWith("image/")) {
+  const loadImageFile = async (file: File) => {
+    const detected = await fileTypeFromBlob(file);
+    if (!detected?.mime?.startsWith("image/")) {
       toast({
-        title: "文件类型不支持",
-        description: "请拖入或选择图片" + "文件（如 .png / .jpg）",
+        title: "无法加载文件",
+        description: "图像文件格式不支持或已损坏",
         variant: "destructive",
       });
       return;
@@ -371,7 +381,7 @@ export default function ImagemapEditorPage() {
       return;
     }
 
-    if (file) loadImageFile(file);
+    if (file) loadImageFile(file).then(_ => {});
   };
 
   // 获取缩放比例
@@ -1079,52 +1089,12 @@ export default function ImagemapEditorPage() {
     setDraggingRectId(null);
   };
 
-  const generateImageMapHtml = () => {
-    if (!uploadedImage || rectangles.length === 0) return "<!-- 选择图片并创建区域后，HTML 代码将在这里显示 -->";
-
-    const name = mapName ?? "imagemap";
-    const areas = rectangles
-      .map(
-        (rect) =>
-          `  <area shape="rect" coords="${Math.round(rect.x)},${Math.round(rect.y)},${Math.round(
-            rect.x + rect.width,
-          )},${Math.round(rect.y + rect.height)}" href="${rect.href}" alt="${rect.alt}">`,
-      )
-      .join("\n");
-
-    return `<img src="${imagePath ?? imageName ?? "your-image.jpg"}" alt="Collab Image" usemap="#${name}">
-<map name="${name}">
-${areas}
-</map>`;
-  };
-
-  const toPercent = (num: number, total: number) => {
-    return Math.round((num / total) * 1000) / 10;
-  };
-
-  const generateImageMapBBCode = () => {
-    if (!uploadedImage || rectangles.length === 0) return "[i]选择图片并创建区域后，BBCode 代码将在这里显示[/i]";
-
-    const areas = rectangles
-      .map(
-        (rect) =>
-          `${toPercent(rect.x, imageSize.width)} ${toPercent(rect.y, imageSize.height)}` +
-          ` ${toPercent(rect.width, imageSize.width)} ${toPercent(rect.height, imageSize.height)}` +
-          ` ${rect.href.trim() === "" ? common.urlPlaceholder : rect.href.trim()}${
-            rect.alt.trim() === "" ? "" : ` ${rect.alt.trim()}`
-          }`,
-      )
-      .join("\n");
-
-    return `[imagemap]\n${imagePath ?? imageName ?? "your-image.jpg"}\n${areas}\n[/imagemap]`;
-  };
-
   // 生成导出数据
   const generateExportData = (): ImageMapConfig => {
     return {
-      imagePath: imagePath ?? undefined,
-      imageName: imageName ?? undefined,
-      mapName: mapName ?? undefined,
+      imagePath: imagePath,
+      imageName: imageName,
+      mapName: mapName,
       rectangles: rectangles,
     };
   };
@@ -1153,19 +1123,6 @@ ${areas}
         ? "bg-primary text-primary-foreground"
         : "bg-background text-foreground hover:bg-foreground/10"
     }`;
-  };
-
-  // 获取鼠标样式
-  const getCursorStyle = () => {
-    switch (currentTool) {
-      case "create":
-      case "create-avatar":
-        return "cursor-crosshair";
-      case "delete":
-        return "cursor-no-drop";
-      default:
-        return "cursor-default";
-    }
   };
 
   // 导出高质量图像，使用与预览区相同的渲染逻辑
@@ -1323,7 +1280,7 @@ ${areas}
               </div>
             )}
 
-            <Card className={`${uploadedImage ? "h-auto" : "h-96"} lg:min-h-[500px]`}>
+            <Card className={`${uploadedImage ? "h-auto" : "h-96"} lg:min-h-125`}>
               <CardContent className={`p-4 ${uploadedImage ? "h-auto" : "h-full"}`}>
                 {uploadedImage ? (
                   <ContextMenu onOpenChange={(open) => {
@@ -1332,8 +1289,8 @@ ${areas}
                     <ContextMenuTrigger asChild>
                       <div
                         ref={containerRef}
-                        className={`relative w-full touch-none select-none flex items-center justify-center
-                    ${getCursorStyle() === "cursor-crosshair" ? "cursor-crosshair" : ""}`}
+                        className={`relative w-full min-h-full touch-none select-none flex items-center justify-center
+                    ${currentTool.startsWith("create") && "cursor-crosshair"}`}
                         onMouseDown={handlePointerDown}
                         onMouseMove={handlePointerMove}
                         onMouseUp={handlePointerUp}
@@ -1347,15 +1304,13 @@ ${areas}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                         tabIndex={0}
-                        style={{touchAction: "none", userSelect: "none", minHeight: "100%"}}
                       >
                         <img
                           ref={imageRef}
-                          src={uploadedImage || "/placeholder.svg"}
+                          src={uploadedImage}
                           alt="Uploaded"
                           className="w-full object-contain select-none"
                           draggable={false}
-                          style={{userSelect: "none"}}
                         />
 
                         {/* 拖放状态显示 */}
@@ -1375,11 +1330,14 @@ ${areas}
                           return (
                             <div
                               key={rect.id}
-                              className={`absolute border-2 bg-primary/20 select-none touch-manipulation transition-colors ease-out duration-200 ${
-                                selectedRect === rect.id ? "border-primary" : "border-primary/40"
-                              } ${isTouchDevice && "min-w-[44px] min-h-[44px]"} ${getCursorStyle()} ${
-                                currentTool === "delete" && "hover:border-red-400"
-                              }`}
+                              className={cn(
+                                "absolute border-2 bg-primary/20 select-none touch-manipulation transition-colors ease-out duration-200",
+                                selectedRect === rect.id ? "border-primary" : "border-primary/40",
+                                isTouchDevice && "min-w-11 min-h-11",
+                                currentTool === "delete" && "hover:border-red-400",
+                                // 允许选中区域的八个点在边界外正常显示
+                                "overflow-visible box-border",
+                              )}
                               style={{
                                 left: rect.x / scaleX,
                                 top: rect.y / scaleY,
@@ -1393,12 +1351,7 @@ ${areas}
                                       : currentTool === "create" || currentTool === "create-avatar"
                                         ? "crosshair"
                                         : "pointer",
-                                userSelect: "none",
                                 zIndex: rectangles.length - index,
-                                // 使用内容盒尺寸，令边框在元素外部，不影响内部组件布局
-                                boxSizing: "border-box",
-                                // 允许选中区域的八个点在边界外正常显示
-                                overflow: "visible",
                               }}
                             >
                               {/* Avatar 区域渲染：在矩形中显示头像卡片 */}
@@ -1426,15 +1379,16 @@ ${areas}
                               })()}
                               {rect.alt.trim() && (
                                 <div
-                                  className={`absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none max-w-full truncate ${
-                                    isTouchDevice ? "text-sm px-2 py-1" : ""
-                                  }`}
+                                  className={cn(
+                                    "absolute -top-6 left-0 bg-primary text-primary-foreground text-xs px-1 rounded select-none max-w-full truncate",
+                                    isTouchDevice && "text-sm px-2 py-1",
+                                  )}
                                 >
                                   {rect.alt.trim()}
                                 </div>
                               )}
 
-                              {selectedRect === rect.id &&
+                              {selectedRect === rect.id && currentTool === "select" &&
                                 // 对于头像区域，限制右下角调节
                                 (rect.type === RectangleType.Avatar
                                     ? handleConfigs.filter((h) => h.handle === "bottom-right")
@@ -1465,13 +1419,12 @@ ${areas}
                             const {scaleX, scaleY} = getImageScale();
                             return (
                               <div
-                                className="absolute border-2 border-red-400 bg-red-500 bg-opacity-20 select-none"
+                                className="absolute border-2 border-red-400 bg-red-500/10 select-none"
                                 style={{
                                   left: currentRect.x / scaleX,
                                   top: currentRect.y / scaleY,
                                   width: currentRect.width / scaleX,
                                   height: currentRect.height / scaleY,
-                                  userSelect: "none",
                                 }}
                               />
                             );
@@ -1576,8 +1529,7 @@ ${areas}
                         value={imagePath ?? ""}
                         onChange={(e) => setImagePath(e.target.value)}
                         onBlur={(e) => {
-                          const value = e.target.value.trim();
-                          setImagePath(value === "" ? null : value);
+                          setImagePath(e.target.value.trim() || undefined);
                         }}
                         placeholder={common.urlPlaceholder}
                       />
@@ -1589,8 +1541,7 @@ ${areas}
                         value={mapName ?? ""}
                         onChange={(e) => setMapName(e.target.value)}
                         onBlur={(e) => {
-                          const value = e.target.value.trim();
-                          setMapName(value === "" ? null : value);
+                          setMapName(e.target.value.trim() || undefined);
                         }}
                         placeholder="imagemap"
                       />
@@ -1608,15 +1559,25 @@ ${areas}
                   </div>
 
                   {rectangles.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">还没有区域，先在预览区创建。</p>
+                    <Empty>
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <MousePointerClick/>
+                        </EmptyMedia>
+                        <EmptyTitle>暂无区域</EmptyTitle>
+                        <EmptyDescription>先在预览区创建</EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
                   ) : (
                     <div className="space-y-2" ref={rectListRef}>
                       {rectangles.map((rect, index) => (
                         <div
                           key={rect.id}
-                          className={`flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2 transition-colors min-w-0 ${
-                            selectedRect === rect.id ? "border-primary bg-primary/15" : "border-border bg-card"
-                          } ${draggingRectId === rect.id ? "opacity-70" : "hover:bg-primary/5"}`}
+                          className={cn(
+                            "flex w-full min-w-0 px-3 py-2 rounded-md border items-center justify-between gap-3  transition-colors",
+                            selectedRect === rect.id ? "border-primary bg-primary/15" : "border-border bg-card",
+                            draggingRectId === rect.id ? "opacity-70" : "hover:bg-primary/5",
+                          )}
                           role="button"
                           tabIndex={0}
                           onClick={() => setSelectedRect(rect.id)}
@@ -1959,64 +1920,77 @@ ${areas}
 
             {/* Generated Code */}
             <Card className="flex-1">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium">HTML 代码</h3>
-                  <Button
-                    onClick={() => {
-                      navigator.clipboard.writeText(generateImageMapHtml()).then(() =>
-                        toast({
-                          title: "已复制",
-                          description: "HTML 代码已复制到剪贴板",
-                        }),
-                      );
-                    }}
-                    disabled={rectangles.length === 0}
-                    size="sm"
-                  >
-                    <Copy className="w-4 h-4"/>
-                    复制代码
-                  </Button>
-                </div>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
-                  <pre>
+              {uploadedImage && rectangles.length !== 0 ?
+                (<>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-medium">HTML 代码</h3>
+                      <Button
+                        onClick={() => {
+                          navigator.clipboard.writeText(generateImageMapHtml(rectangles, imagePath ?? imageName, mapName))
+                            .then(() => toast({
+                                title: "已复制",
+                                description: "HTML 代码已复制到剪贴板",
+                              }),
+                            );
+                        }}
+                        size="sm"
+                      >
+                        <Copy className="w-4 h-4"/>
+                        复制代码
+                      </Button>
+                    </div>
+                    <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
+                    <pre>
                     <code
                       dangerouslySetInnerHTML={{
-                        __html: hljs.highlight(generateImageMapHtml(), {language: "html"}).value,
-                      }}
-                    />
-                  </pre>
-                </div>
-              </CardContent>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium">BBCode 代码</h3>
-                  <Button
-                    onClick={() => {
-                      navigator.clipboard.writeText(generateImageMapBBCode()).then(() =>
-                        toast({
-                          title: "已复制",
-                          description: "BBCode 代码已复制到剪贴板",
-                        }),
-                      );
-                    }}
-                    disabled={rectangles.length === 0}
-                    size="sm"
-                  >
-                    <Copy className="w-4 h-4"/>
-                    复制代码
-                  </Button>
-                </div>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
-                  <pre>
-                    <code
-                      dangerouslySetInnerHTML={{
-                        __html: hljs.highlight(generateImageMapBBCode(), {language: "bbcode"}).value,
-                      }}
-                    />
-                  </pre>
-                </div>
-              </CardContent>
+                        __html: hljs.highlight(generateImageMapHtml(rectangles, imagePath ?? imageName, mapName),
+                          {language: "html"}).value,
+                      }}/>
+                    </pre>
+                    </div>
+                  </CardContent>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-medium">BBCode 代码</h3>
+                      <Button
+                        onClick={() => {
+                          navigator.clipboard.writeText(generateImageMapBBCode(rectangles, imageSize.width, imageSize.height, imagePath ?? imageName))
+                            .then(() => toast({
+                                title: "已复制",
+                                description: "BBCode 代码已复制到剪贴板",
+                              }),
+                            );
+                        }}
+                        size="sm"
+                      >
+                        <Copy className="w-4 h-4"/>
+                        复制代码
+                      </Button>
+                    </div>
+                    <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
+                      <pre>
+                        <code
+                          dangerouslySetInnerHTML={{
+                            __html: hljs.highlight(generateImageMapBBCode(rectangles, imageSize.width, imageSize.height, imagePath ?? imageName),
+                              {language: "bbcode"}).value,
+                          }}/>
+                      </pre>
+                    </div>
+                  </CardContent>
+                </>)
+                : (
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <Code/>
+                      </EmptyMedia>
+                      <EmptyTitle>无可用的代码</EmptyTitle>
+                      <EmptyDescription>选择图片并创建区域后，ImageMap 代码将在这里显示</EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
+                )
+              }
             </Card>
           </div>
         </div>
@@ -2043,7 +2017,7 @@ ${areas}
               className="bg-destructive/50 hover:bg-destructive"
               onClick={() => {
                 if (pendingFile) {
-                  loadImageFile(pendingFile);
+                  loadImageFile(pendingFile).then(_ => {});
                 }
                 setPendingFile(null);
                 setOverwriteDialogOpen(false);
