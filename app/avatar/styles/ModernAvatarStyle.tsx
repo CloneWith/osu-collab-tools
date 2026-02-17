@@ -4,8 +4,7 @@ import { FlagTheme, getCountryFlagDataUrl, getProxiedImageUrl } from "@/lib/util
 import flagFallback from "@/public/flag-fallback.png";
 
 export class ModernAvatarStyle implements IAvatarStyle {
-  name = "现代";
-  description = "目前的 osu! 论坛使用的用户头像样式。";
+  key = "modern";
   size = {width: 300, height: 300};
   defaultFont = {family: "Torus", size: 40, weight: "500"};
 

@@ -1,0 +1,16 @@
+{
+  "viewOnGitHub": "在 GitHub 查看",
+  "hostedByNetlify": "使用 Netlify 托管",
+  "toolsTitle": "工具",
+  "externalProjects": "友情链接",
+  "nav": {
+    "home": "首页",
+    "avatar": "头像卡片",
+    "imagemap": "Imagemap 编辑",
+    "docs": "使用文档"
+  },
+  "external": {
+    "colorcode": "Exsper 的渐变颜色生成器",
+    "mobe": "BBCode 编辑器 (MOBE)"
+  }
+}

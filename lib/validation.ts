@@ -6,5 +6,8 @@ export interface ValidationResult {
     success: boolean,
 
     /** 验证附带的消息，用于显示 */
-    message?: string
+    messageKey?: string,
+
+    /** 附加信息，用于 l10n */
+    details?: Record<string, any>,
 }

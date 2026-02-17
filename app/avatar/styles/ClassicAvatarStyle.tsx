@@ -4,8 +4,7 @@ import { FlagTheme, getCountryFlagDataUrl, getProxiedImageUrl } from "@/lib/util
 import flagFallback from "@/public/flag-fallback.png";
 
 export class ClassicAvatarStyle implements IAvatarStyle {
-  name = "经典";
-  description = "旧版 osu! 论坛使用的头像样式，或许是你最熟悉的...？";
+  key = "classic";
   size = {width: 320, height: 320};
   defaultFont = {family: "Tahoma", size: 48, weight: "500"};
 

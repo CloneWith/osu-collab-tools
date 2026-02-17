@@ -1,33 +1,36 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { Moon, Sun, Monitor, Settings } from "lucide-react";
-import { useTheme } from "next-themes"
+import * as React from "react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Moon, Sun, Monitor, Settings, Globe, Languages, SunMoon } from "lucide-react";
+import { useTheme } from "next-themes";
 import { common } from "@/app/common";
 import { useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { useTranslation } from "react-i18next";
 
 export function SettingsFlyout() {
+  const {t} = useTranslation("settings");
   const endpointKey = "custom_endpoint";
-  const [currentEndpoint, setCurrentEndpoint] = React.useState<string>(typeof window !== 'undefined'
-      ? (localStorage.getItem("custom_endpoint") ?? "")
-      : "");
+  const [currentEndpoint, setCurrentEndpoint] = React.useState<string>(typeof window !== "undefined"
+    ? (localStorage.getItem("custom_endpoint") ?? "")
+    : "");
 
-  const { theme, setTheme } = useTheme()
-  const [themeValue, setThemeValue] = React.useState<string>(theme ?? "system")
-  const [endpointValid, setEndpointValid] = React.useState<boolean>(true)
+  const {theme, setTheme} = useTheme();
+  const [themeValue, setThemeValue] = React.useState<string>(theme ?? "system");
+  const [endpointValid, setEndpointValid] = React.useState<boolean>(true);
 
   useEffect(() => {
     // keep local selection synced with next-themes
-    if (theme) setThemeValue(theme)
-  }, [theme])
+    if (theme) setThemeValue(theme);
+  }, [theme]);
 
   function onThemeChange(v: string) {
-    setThemeValue(v)
-    setTheme(v)
+    setThemeValue(v);
+    setTheme(v);
   }
 
   function onEndpointChange(v: string) {
@@ -63,14 +66,19 @@ export function SettingsFlyout() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="flex items-center space-x-2 p-2">
-          <Settings className="w-4 h-4" />
+        <Button variant="ghost" size="icon" className="flex items-center space-x-2 p-2">
+          <Settings className="w-4 h-4"/>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-56">
         <div className="flex flex-col space-y-3">
+          <Label className="flex items-center flex-row gap-1 text-sm font-medium">
+            <Languages className="w-4 h-4"/>{t("language")}
+          </Label>
+          <LanguageSwitcher/>
+
           <div>
-            <Label className="text-sm font-medium">颜色主题</Label>
+            <Label className="text-sm font-medium">{t("colorScheme")}</Label>
           </div>
 
           {/* Segmented icon control matching provided design */}
@@ -80,11 +88,11 @@ export function SettingsFlyout() {
             className="inline-flex items-center rounded-full border border-border/60 bg-transparent p-1 justify-between"
           >
             {[
-              { key: "light", icon: <Sun className="w-4 h-4" />, title: "浅色" },
-              { key: "system", icon: <Monitor className="w-4 h-4" />, title: "系统" },
-              { key: "dark", icon: <Moon className="w-4 h-4" />, title: "深色" },
+              {key: "light", icon: <Sun className="w-4 h-4"/>, title: t("themes.light")},
+              {key: "system", icon: <SunMoon className="w-4 h-4"/>, title: t("themes.system")},
+              {key: "dark", icon: <Moon className="w-4 h-4"/>, title: t("themes.dark")},
             ].map((opt, _, __) => {
-              const selected = themeValue === (opt.key as string)
+              const selected = themeValue === (opt.key as string);
               return (
                 <Button
                   key={opt.key}
@@ -101,13 +109,13 @@ export function SettingsFlyout() {
                   {/* icon */}
                   <span className="pointer-events-none">{opt.icon}</span>
                 </Button>
-              )
+              );
             })}
           </div>
 
           <div>
-            <Label htmlFor="endpoint" className="text-sm font-medium">服务器地址</Label>
-            <div className="text-xs text-muted-foreground">用户资料等链接的前缀</div>
+            <Label htmlFor="endpoint" className="text-sm font-medium">{t("serverEndpoint")}</Label>
+            <div className="text-xs text-muted-foreground">{t("serverEndpointDescription")}</div>
           </div>
           <Input id="endpoint"
                  className={`w-full px-2 py-1 border font-mono text-sm ${endpointValid ? "" : "border-yellow-600"}`}
@@ -119,5 +127,5 @@ export function SettingsFlyout() {
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

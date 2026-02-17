@@ -1,4 +1,5 @@
 import { Ban, Inbox } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface DragAndDropOverlayProps {
   isRounded?: boolean;
@@ -24,22 +25,23 @@ export default function DragAndDropOverlay({
                                              isRounded = false,
                                              rejectReason = undefined,
                                            }: DragAndDropOverlayProps) {
+  const {t} = useTranslation("imagemap");
   const isDragAccepted = rejectReason === undefined;
-  let reasonPrompt = "释放以上传图片";
+  let reasonPrompt = t("dnd.dropAccepted");
   let subPrompt: string | null = null;
 
   if (rejectReason) {
     switch (rejectReason) {
       case DnDRejectReason.UnsupportedType:
-        reasonPrompt = "不支持的格式";
-        subPrompt = "拖拽图像进行上传";
+        reasonPrompt = t("dnd.unsupportedType");
+        subPrompt = t("dnd.supportedTypeHint");
         break;
       case DnDRejectReason.TooManyEntries:
-        reasonPrompt = "文件过多";
-        subPrompt = "只允许拖放单个图像文件";
+        reasonPrompt = t("dnd.tooManyEntries");
+        subPrompt = t("dnd.entriesHint");
         break;
       default:
-        reasonPrompt = "不允许该操作";
+        reasonPrompt = t("dnd.disallowed");
         break;
     }
   }

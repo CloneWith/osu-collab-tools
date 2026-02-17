@@ -1,0 +1,11 @@
+{
+  "language": "语言",
+  "colorScheme": "颜色主题",
+  "themes": {
+    "light": "浅色",
+    "system": "跟随系统",
+    "dark": "深色"
+  },
+  "serverEndpoint": "服务器地址",
+  "serverEndpointDescription": "用户资料等链接的前缀"
+}

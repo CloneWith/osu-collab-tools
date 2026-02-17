@@ -30,9 +30,12 @@ import {
   Eye,
   FolderOpen,
   GripVertical,
-  Hash, LayoutDashboard, List,
+  Hash,
+  LayoutDashboard,
+  List,
   MoreVertical,
-  MousePointer, MousePointerClick,
+  MousePointer,
+  MousePointerClick,
   OctagonAlert,
   Settings,
   Square,
@@ -42,9 +45,13 @@ import {
   UserRound,
   X,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import "../../lib/i18n";
 import {
-  clamp, cn,
-  generateId, generateImageMapBBCode,
+  clamp,
+  cn,
+  generateId,
+  generateImageMapBBCode,
   generateImageMapHtml,
   generateUserLinkFromId,
   generateUserLinkFromName,
@@ -91,10 +98,10 @@ interface Tool {
 
 // 工具栏中可用工具
 const tools: Tool[] = [
-  {key: "select", name: "选择", icon: <MousePointer className="w-5 h-5"/>},
-  {key: "create", name: "创建区域", icon: <Square className="w-5 h-5"/>},
-  {key: "create-avatar", name: "创建头像区域", icon: <CircleUserRound className="w-5 h-5"/>},
-  {key: "delete", name: "删除", icon: <Trash2 className="w-5 h-5"/>},
+  {key: "select", name: "select", icon: <MousePointer className="w-5 h-5"/>},
+  {key: "create", name: "create", icon: <Square className="w-5 h-5"/>},
+  {key: "create-avatar", name: "createAvatar", icon: <CircleUserRound className="w-5 h-5"/>},
+  {key: "delete", name: "delete", icon: <Trash2 className="w-5 h-5"/>},
 ];
 
 type EditorTool = Tool["key"];
@@ -107,6 +114,8 @@ const STYLE_REGISTRY = [
 ] as const;
 
 export default function ImagemapEditorPage() {
+  const {t} = useTranslation("imagemap");
+
   // Image states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageName, setImageName] = useState<string | undefined>(undefined);
@@ -276,7 +285,8 @@ export default function ImagemapEditorPage() {
     const file = event.target.files?.[0];
 
     if (file) {
-      loadImageFile(file).then(_ => {});
+      loadImageFile(file).then(_ => {
+      });
     }
   };
 
@@ -285,8 +295,8 @@ export default function ImagemapEditorPage() {
     const detected = await fileTypeFromBlob(file);
     if (!detected?.mime?.startsWith("image/")) {
       toast({
-        title: "无法加载文件",
-        description: "图像文件格式不支持或已损坏",
+        title: t("error.loadImage"),
+        description: t("error.imageFormat"),
         variant: "destructive",
       });
       return;
@@ -381,7 +391,8 @@ export default function ImagemapEditorPage() {
       return;
     }
 
-    if (file) loadImageFile(file).then(_ => {});
+    if (file) loadImageFile(file).then(_ => {
+    });
   };
 
   // 获取缩放比例
@@ -694,7 +705,7 @@ export default function ImagemapEditorPage() {
         id: generateId(),
         x: rectToDuplicate.x + 20,
         y: rectToDuplicate.y + 20,
-        alt: `${rectToDuplicate.alt} (副本)`,
+        alt: `${rectToDuplicate.alt} ${t("common:duplicateSuffix")}`,
       };
       setRectangles((prev) => [newRect, ...prev]);
       setSelectedRect(newRect.id);
@@ -1186,7 +1197,7 @@ export default function ImagemapEditorPage() {
     } catch (error) {
       console.error("导出失败:", error);
       toast({
-        title: "导出失败",
+        title: t("error.exportFailed"),
         description: error instanceof Error ? error.message : "未知错误",
         variant: "destructive",
       });
@@ -1201,14 +1212,14 @@ export default function ImagemapEditorPage() {
         <div className="mb-8 grid items-center md:grid-cols-2">
           <div>
             <h1 className="flex-title text-3xl font-bold text-foreground mb-2">
-              <span className="text-primary">ImageMap </span>
-              <span>编辑器</span>
+              <span className="text-primary">{t("title")}</span>
               <HelpIconButton section="imagemap"/>
             </h1>
-            <p className="text-secondary-foreground">划定可点击区域，以便在个人资料等中使用</p>
+            <p className="text-secondary-foreground">{t("description")}</p>
           </div>
           <div className="justify-self-end-safe mt-2 md:mt-0">
-            <Tabs value={preferLayout} onValueChange={(value) => setPreferLayout(value as "two-column" | "single-column")}>
+            <Tabs value={preferLayout}
+                  onValueChange={(value) => setPreferLayout(value as "two-column" | "single-column")}>
               <TabsList>
                 <TabsTrigger value="two-column"><LayoutDashboard/></TabsTrigger>
                 <TabsTrigger value="single-column"><List/></TabsTrigger>
@@ -1224,7 +1235,7 @@ export default function ImagemapEditorPage() {
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
                 <Eye/>
-                <span>预览区</span>
+                <span>{t("common:section.preview")}</span>
               </h2>
               <div className="flex items-center gap-2">
                 {uploadedImage && (
@@ -1239,12 +1250,12 @@ export default function ImagemapEditorPage() {
                       <>
                         <span
                           className="w-4 h-4 animate-spin border-2 border-current border-t-transparent rounded-full"/>
-                        保存中…
+                        {t("toolbar.save")}中…
                       </>
                     ) : (
                       <>
                         <Download className="w-4 h-4"/>
-                        保存
+                        {t("toolbar.save")}
                       </>
                     )}
                   </Button>
@@ -1254,7 +1265,7 @@ export default function ImagemapEditorPage() {
                   <Button asChild>
                     <span className="flex items-center gap-2">
                       <FolderOpen className="w-4 h-4"/>
-                      选择图片
+                      {t("toolbar.selectImage")}
                     </span>
                   </Button>
                 </label>
@@ -1275,7 +1286,7 @@ export default function ImagemapEditorPage() {
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {tool.name}{" "}
+                      {t(`tools.${tool.name}`)}{" "}
                       <KbdGroup>
                         <Kbd>Alt</Kbd>
                         <span>+</span>
@@ -1442,21 +1453,21 @@ export default function ImagemapEditorPage() {
                       {contextTargetId ? (
                         <>
                           <ContextMenuItem onSelect={() => duplicateRectangle(contextTargetId!)}>
-                            <Copy className="w-4 h-4 mr-2"/> 创建副本
+                            <Copy className="w-4 h-4 mr-2"/> {t("common:duplicate")}
                           </ContextMenuItem>
                           <ContextMenuItem className="text-destructive"
                                            onSelect={() => deleteRectangle(contextTargetId!)}>
-                            <Trash className="w-4 h-4 mr-2"/> 删除区域
+                            <Trash className="w-4 h-4 mr-2"/> {t("common:delete")}
                           </ContextMenuItem>
                         </>
                       ) : (
                         <>
                           <ContextMenuItem onSelect={() => setCurrentTool("create")}>
-                            <Square className="w-4 h-4 mr-2"/> 创建新区域
+                            <Square className="w-4 h-4 mr-2"/> {t("tools.create")}
                           </ContextMenuItem>
                           <ContextMenuSeparator/>
                           <ContextMenuItem>
-                            <X className="w-4 h-4 mr-2"/> 取消
+                            <X className="w-4 h-4 mr-2"/> {t("common:cancel")}
                           </ContextMenuItem>
                         </>
                       )}
@@ -1470,11 +1481,16 @@ export default function ImagemapEditorPage() {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                   >
-                    <div className="text-center">
-                      <FolderOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4"/>
-                      <p className="text-muted-foreground">先选择一张图片</p>
-                      <p className="text-sm text-muted-foreground">拖拽到此区域亦可</p>
-                    </div>
+                    <Empty>
+                      <EmptyHeader>
+                        <EmptyMedia>
+                          <FolderOpen className="w-12 h-12 text-muted-foreground"/>
+                        </EmptyMedia>
+                        <EmptyTitle className="text-muted-foreground">{t("placeholder.noImage.title")}</EmptyTitle>
+                        <EmptyDescription
+                          className="text-muted-foreground">{t("placeholder.noImage.description")}</EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
 
                     {/* 拖放状态显示 */}
                     {isDraggingOver && (
@@ -1494,7 +1510,7 @@ export default function ImagemapEditorPage() {
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
                 <Settings/>
-                <span>设置区</span>
+                <span>{t("common:section.settings")}</span>
               </h2>
 
               {/* Import and export */}
@@ -1507,7 +1523,7 @@ export default function ImagemapEditorPage() {
                   className="gap-2"
                 >
                   <Upload className="w-4 h-4"/>
-                  导出
+                  {t("common:export")}
                 </Button>
                 <Button
                   onClick={() => setImportDialogOpen(true)}
@@ -1517,7 +1533,7 @@ export default function ImagemapEditorPage() {
                   className="gap-2"
                 >
                   <Download className="w-4 h-4"/>
-                  导入
+                  {t("common:import")}
                 </Button>
               </div>
             </div>
@@ -1527,9 +1543,9 @@ export default function ImagemapEditorPage() {
               <Card>
                 <CardContent className="p-4">
                   <div className="items-center space-y-3">
-                    <h3 className="font-medium">图像属性</h3>
+                    <h3 className="font-medium">{t("imgAttrs.title")}</h3>
                     <div>
-                      <Label htmlFor="imageUrl">图片地址</Label>
+                      <Label htmlFor="imageUrl">{t("imgAttrs.imgLink")}</Label>
                       <Input
                         id="imageUrl"
                         type="url"
@@ -1542,7 +1558,7 @@ export default function ImagemapEditorPage() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="mapName">ImageMap 名称</Label>
+                      <Label htmlFor="mapName">{t("imgAttrs.mapName")}</Label>
                       <Input
                         id="mapName"
                         value={mapName ?? ""}
@@ -1562,7 +1578,7 @@ export default function ImagemapEditorPage() {
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">区域列表</h3>
+                    <h3 className="font-medium">{t("rectAttrs.listTitle")}</h3>
                   </div>
 
                   {rectangles.length === 0 ? (
@@ -1571,8 +1587,8 @@ export default function ImagemapEditorPage() {
                         <EmptyMedia variant="icon">
                           <MousePointerClick/>
                         </EmptyMedia>
-                        <EmptyTitle>暂无区域</EmptyTitle>
-                        <EmptyDescription>先在预览区创建</EmptyDescription>
+                        <EmptyTitle>{t("placeholder.noRectangle.title")}</EmptyTitle>
+                        <EmptyDescription>{t("placeholder.noRectangle.description")}</EmptyDescription>
                       </EmptyHeader>
                     </Empty>
                   ) : (
@@ -1605,7 +1621,7 @@ export default function ImagemapEditorPage() {
                               onDragStart={(e) => handleDragStartRow(e, rect.id)}
                               onDragEnd={handleDragEndRow}
                               draggable
-                              aria-label="拖动以调整顺序"
+                              aria-label={t("rectAttrs.dragPrompt")}
                               tabIndex={-1}
                               onTouchStart={(e) => {
                                 e.preventDefault();
@@ -1628,12 +1644,12 @@ export default function ImagemapEditorPage() {
 
                             <div className="flex flex-col min-w-0 flex-1">
                               <span className={`text-sm font-medium text-left truncate ${rect.alt || "italic"}`}>
-                                {rect.alt || `区域 ${index + 1}`}
+                                {rect.alt || t("rectAttrs.defaultName", {index: index + 1})}
                               </span>
                               <span
                                 className={`text-xs text-muted-foreground text-left truncate ${rect.href || "italic"}`}
                               >
-                                {rect.href || "未设置链接"}
+                                {rect.href || t("rectAttrs.unsetLink")}
                               </span>
                             </div>
 
@@ -1658,7 +1674,7 @@ export default function ImagemapEditorPage() {
                                 }}
                               >
                                 <Copy className="w-4 h-4 shrink-0"/>
-                                <span className="truncate">创建副本</span>
+                                <span className="truncate">{t("common:duplicate")}</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive"
@@ -1668,7 +1684,7 @@ export default function ImagemapEditorPage() {
                                 }}
                               >
                                 <Trash className="w-4 h-4 shrink-0"/>
-                                <span className="truncate">删除</span>
+                                <span className="truncate">{t("common:delete")}</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -1685,7 +1701,7 @@ export default function ImagemapEditorPage() {
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium">区域属性</h3>
+                    <h3 className="font-medium">{t("rectAttrs.title")}</h3>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
@@ -1694,7 +1710,7 @@ export default function ImagemapEditorPage() {
                         className="flex items-center gap-1"
                       >
                         <Copy className="w-4 h-4"/>
-                        复制
+                        {t("common:duplicate")}
                       </Button>
                       <Button
                         variant="destructive"
@@ -1703,7 +1719,7 @@ export default function ImagemapEditorPage() {
                         className="flex items-center gap-1"
                       >
                         <Trash2 className="w-4 h-4"/>
-                        删除
+                        {t("common:delete")}
                       </Button>
                     </div>
                   </div>
@@ -1711,7 +1727,7 @@ export default function ImagemapEditorPage() {
                     <div className="space-y-2">
                       {/* 区域类型选择 */}
                       <div className="space-y-1">
-                        <Label htmlFor="rectType">区域类型</Label>
+                        <Label htmlFor="rectType">{t("rectAttrs.rectType")}</Label>
                         <Select
                           value={selectedRectData.type}
                           onValueChange={(e) => updateRectangleType(selectedRect, e as RectangleType)}
@@ -1720,8 +1736,10 @@ export default function ImagemapEditorPage() {
                             <SelectValue/>
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem key="mapArea" value={RectangleType.MapArea}>一般区域</SelectItem>
-                            <SelectItem key="avatar" value={RectangleType.Avatar}>头像区域</SelectItem>
+                            <SelectItem key="mapArea"
+                                        value={RectangleType.MapArea}>{t("rectAttrs.types.mapArea")}</SelectItem>
+                            <SelectItem key="avatar"
+                                        value={RectangleType.Avatar}>{t("rectAttrs.types.avatar")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -1730,7 +1748,7 @@ export default function ImagemapEditorPage() {
                       {selectedRectData.type === RectangleType.Avatar && (
                         <>
                           <div className="space-y-1">
-                            <Label htmlFor="avatarStyle">头像样式</Label>
+                            <Label htmlFor="avatarStyle">{t("avatar:settings.avatarStyle")}</Label>
                             <Select
                               value={selectedRectData.avatar?.styleKey ?? "simple"}
                               onValueChange={(e) => updateAvatarField(selectedRect, "styleKey", e)}
@@ -1740,23 +1758,23 @@ export default function ImagemapEditorPage() {
                               </SelectTrigger>
                               <SelectContent>
                                 {STYLE_REGISTRY.map(({key, style}) => (
-                                  <SelectItem key={key} value={key}>{style.name}</SelectItem>
+                                  <SelectItem key={key} value={key}>{t(`avatar:styles.${style.key}.name`)}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
                           </div>
                           <div className="space-y-1">
-                            <Label htmlFor="avatarLink">头像图片链接</Label>
+                            <Label htmlFor="avatarLink">{t("avatar:settings.avatarLink")}</Label>
                             <Input
                               id="avatarLink"
-                              placeholder="https://a.ppy.sh/<用户 ID>"
+                              placeholder={`https://a.ppy.sh/${t("avatar:settings.userIdPlaceholder")}`}
                               value={selectedRectData.avatar?.imageUrl ?? ""}
                               onChange={(e) => updateAvatarField(selectedRect, "imageUrl", e.target.value)}
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
-                              <Label htmlFor="user">用户名</Label>
+                              <Label htmlFor="user">{t("avatar:settings.username")}</Label>
                               <Input
                                 id="user"
                                 placeholder="peppy"
@@ -1765,10 +1783,10 @@ export default function ImagemapEditorPage() {
                               />
                             </div>
                             <div className="space-y-1">
-                              <Label htmlFor="countryCode">国家/地区代码（可选）</Label>
+                              <Label htmlFor="countryCode">{t("avatar:settings.countryCode")}</Label>
                               <Input
                                 id="countryCode"
-                                placeholder="两位地区码"
+                                placeholder={t("avatar:settings.countryCodeDescription")}
                                 value={selectedRectData.avatar?.countryCode ?? ""}
                                 onChange={(e) => updateAvatarField(selectedRect, "countryCode", e.target.value)}
                               />
@@ -1777,7 +1795,7 @@ export default function ImagemapEditorPage() {
                         </>
                       )}
                       <div className="space-y-1">
-                        <Label htmlFor="link">链接地址</Label>
+                        <Label htmlFor="link">{t("rectAttrs.link")}</Label>
                         <Input
                           id="link"
                           type="url"
@@ -1787,17 +1805,17 @@ export default function ImagemapEditorPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="altText">替代文本</Label>
+                        <Label htmlFor="altText">{t("rectAttrs.alt")}</Label>
                         <Input
                           id="altText"
                           type="text"
                           value={selectedRectData.alt || ""}
                           onChange={(e) => updateRectangle(selectedRect, "alt", e.target.value)}
-                          placeholder="描述文本"
+                          placeholder={t("rectAttrs.altDescription")}
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="userInfo">用户信息</Label>
+                        <Label htmlFor="userInfo">{t("rectAttrs.userInfo")}</Label>
                         <InputGroup className="overflow-visible">
                           <InputGroupInput
                             id="userInfo"
@@ -1817,7 +1835,7 @@ export default function ImagemapEditorPage() {
                                   <Hash className="w-4 h-4"/>
                                 </InputGroupButton>
                               </TooltipTrigger>
-                              <TooltipContent>作为 ID 填入</TooltipContent>
+                              <TooltipContent>{t("rectAttrs.fillAsId")}</TooltipContent>
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -1828,14 +1846,14 @@ export default function ImagemapEditorPage() {
                                   <UserRound className="w-4 h-4"/>
                                 </InputGroupButton>
                               </TooltipTrigger>
-                              <TooltipContent>作为用户名填入</TooltipContent>
+                              <TooltipContent>{t("rectAttrs.fillAsUsername")}</TooltipContent>
                             </Tooltip>
                           </InputGroupAddon>
                         </InputGroup>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
-                          <Label htmlFor="posX">X 坐标</Label>
+                          <Label htmlFor="posX">{t("rectAttrs.x")}</Label>
                           <Input
                             id="posX"
                             type="number"
@@ -1855,7 +1873,7 @@ export default function ImagemapEditorPage() {
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label htmlFor="posY">Y 坐标</Label>
+                          <Label htmlFor="posY">{t("rectAttrs.y")}</Label>
                           <Input
                             id="posY"
                             type="number"
@@ -1875,7 +1893,7 @@ export default function ImagemapEditorPage() {
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label htmlFor="width">宽度</Label>
+                          <Label htmlFor="width">{t("rectAttrs.width")}</Label>
                           <Input
                             id="width"
                             type="number"
@@ -1892,7 +1910,7 @@ export default function ImagemapEditorPage() {
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label htmlFor="height">高度</Label>
+                          <Label htmlFor="height">{t("rectAttrs.height")}</Label>
                           <Input
                             id="height"
                             type="number"
@@ -1921,7 +1939,7 @@ export default function ImagemapEditorPage() {
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
                 <Code/>
-                <span>代码区</span>
+                <span>{t("common:section.generatedCode")}</span>
               </h2>
             </div>
 
@@ -1936,15 +1954,14 @@ export default function ImagemapEditorPage() {
                         onClick={() => {
                           navigator.clipboard.writeText(generateImageMapHtml(rectangles, imagePath ?? imageName, mapName))
                             .then(() => toast({
-                                title: "已复制",
-                                description: "HTML 代码已复制到剪贴板",
+                                title: t("common:copySuccess"),
                               }),
                             );
                         }}
                         size="sm"
                       >
                         <Copy className="w-4 h-4"/>
-                        复制代码
+                        {t("common:copy")}
                       </Button>
                     </div>
                     <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
@@ -1964,15 +1981,14 @@ export default function ImagemapEditorPage() {
                         onClick={() => {
                           navigator.clipboard.writeText(generateImageMapBBCode(rectangles, imageSize.width, imageSize.height, imagePath ?? imageName))
                             .then(() => toast({
-                                title: "已复制",
-                                description: "BBCode 代码已复制到剪贴板",
+                                title: t("common:copySuccess"),
                               }),
                             );
                         }}
                         size="sm"
                       >
                         <Copy className="w-4 h-4"/>
-                        复制代码
+                        {t("common:copy")}
                       </Button>
                     </div>
                     <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
@@ -1992,8 +2008,8 @@ export default function ImagemapEditorPage() {
                       <EmptyMedia variant="icon">
                         <Code/>
                       </EmptyMedia>
-                      <EmptyTitle>无可用的代码</EmptyTitle>
-                      <EmptyDescription>选择图片并创建区域后，ImageMap 代码将在这里显示</EmptyDescription>
+                      <EmptyTitle>{t("placeholder.noCode.title")}</EmptyTitle>
+                      <EmptyDescription>{t("placeholder.noCode.description")}</EmptyDescription>
                     </EmptyHeader>
                   </Empty>
                 )
@@ -2008,9 +2024,9 @@ export default function ImagemapEditorPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex flex-row items-center gap-2">
               <OctagonAlert/>
-              加载新图片？
+              {t("dialog.overwrite.title")}
             </AlertDialogTitle>
-            <AlertDialogDescription>当前编辑的图像与 ImageMap 将会被覆盖，此操作不可逆。</AlertDialogDescription>
+            <AlertDialogDescription>{t("dialog.overwrite.description")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
@@ -2018,19 +2034,20 @@ export default function ImagemapEditorPage() {
                 setPendingFile(null);
               }}
             >
-              取消
+              {t("common:cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive/50 hover:bg-destructive"
               onClick={() => {
                 if (pendingFile) {
-                  loadImageFile(pendingFile).then(_ => {});
+                  loadImageFile(pendingFile).then(_ => {
+                  });
                 }
                 setPendingFile(null);
                 setOverwriteDialogOpen(false);
               }}
             >
-              覆盖
+              {t("dialog.overwrite.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

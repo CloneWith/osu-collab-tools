@@ -1,0 +1,8 @@
+{
+  "hero": {
+    "title": "This is a Collab Toolbox",
+    "description": "Make it easier to create collab images",
+    "startButton": "Get Started",
+    "docsButton": "View Documentation"
+  }
+}

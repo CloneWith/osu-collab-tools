@@ -5,8 +5,7 @@ import { FlagTheme, getCountryFlagDataUrl, getProxiedImageUrl } from "@/lib/util
 import flagFallback from "@/public/flag-fallback.png";
 
 export class SimpleAvatarStyle implements IAvatarStyle {
-  name = "简洁";
-  description = "小巧简约的头像卡片。";
+  key = "simple";
   size = { width: 300, height: 300 };
   defaultFont = { family: "Torus", size: 24, weight: "700" };
 

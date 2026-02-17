@@ -3,27 +3,20 @@
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Map, Zap, Smartphone, ArrowRight } from "lucide-react";
-import { animate, createScope, createTimeline, cubicBezier, onScroll, Scope, splitText, stagger, utils } from "animejs";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { createScope, createTimeline, Scope, splitText, stagger } from "animejs";
 import { TrianglesBackground } from "@/components/triangles-background";
+import { useTranslation } from "react-i18next";
+import "../lib/i18n";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"; // 导入 i18n 配置
 
 export default function MainPage() {
+  const {t} = useTranslation("home");
   const root = useRef(null);
   const scope = useRef<Scope>(null);
 
   useEffect(() => {
     scope.current = createScope({root}).add(self => {
-      const container = utils.$(".hero");
-
-      animate(".feature-card", {
-        y: [50, 0],
-        opacity: 1,
-        duration: 750,
-        ease: cubicBezier(0.7, 0.1, 0.5, 0.9),
-        autoplay: onScroll({container}),
-      });
-
       const {words} = splitText(".hero-title", {
         words: {wrap: "clip"},
       });
@@ -58,23 +51,21 @@ export default function MainPage() {
         <div className="w-full px-4 sm:px-6 lg:px-8 py-24 relative z-10 bg-muted/50">
           <div className="text-center">
             <h1 className="hero-title text-4xl md:text-6xl font-bold text-card-foreground mb-6">
-              这是一个
-              <span className="text-primary"> Collab </span>
-              工具箱
+              {t("hero.title", {interpolation: {escapeValue: false}})}
             </h1>
             <p className="text-xl text-card-foreground mb-8 max-w-3xl mx-auto">
-              助力你做出还不错的 osu! 赛博合影
+              {t("hero.description")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/imagemap">
                 <Button size="lg" className="text-lg px-8 py-3">
-                  开始使用
+                  {t("hero.startButton")}
                   <ArrowRight className="ml-2 w-5 h-5"/>
                 </Button>
               </Link>
               <Link href="/docs">
                 <Button variant="outline" size="lg" className="text-lg px-8 py-3 bg-transparent">
-                  查看文档
+                  {t("hero.docsButton")}
                 </Button>
               </Link>
             </div>
@@ -83,69 +74,19 @@ export default function MainPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-primary/25">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-card-foreground mb-4">特性一览</h2>
-            <p className="text-xl text-card-foreground max-w-2xl mx-auto">
-              更多功能，正在添加中
-            </p>
-          </div>
-
-          <div className="feature-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Map,
-                title: "简洁易用",
-                description: "无需过多学习背后的基础知识",
-              },
-              {
-                icon: Smartphone,
-                title: "多端支持",
-                description: "前端赋能，随时随地，有浏览器就可以使用",
-              },
-              {
-                icon: Zap,
-                title: "全过程工具",
-                description: "流转快捷，简化制作过程",
-              },
-            ].map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <Card key={index}
-                      className="feature-card text-center hover:shadow-lg transition-shadow opacity-0">
-                  <CardHeader>
-                    <div
-                      className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                      <Icon className="w-6 h-6 text-primary"/>
-                    </div>
-                    <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription
-                      className="text-card-foreground">{feature.description}</CardDescription>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 bg-primary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">准备好开始了吗？</h2>
-          <p className="text-xl text-primary-foreground/85 mb-8 max-w-2xl mx-auto">
-            点击下面的按钮，试试感兴趣的功能吧╰(*°▽°*)╯
-          </p>
-          <Link href="/imagemap">
-            <Button size="lg" variant="secondary" className="text-lg px-8 py-3">
-              立即开始
-              <ArrowRight className="ml-2 w-5 h-5"/>
-            </Button>
-          </Link>
-        </div>
+      <section className="py-48 bg-primary/25">
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia>
+              <ArrowUpRight className="w-24 h-24"/>
+            </EmptyMedia>
+            <EmptyTitle>草</EmptyTitle>
+            <EmptyDescription>请稍后再来。</EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            使用导航栏选择工具
+          </EmptyContent>
+        </Empty>
       </section>
     </div>
   );

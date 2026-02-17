@@ -15,6 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
+import "../../lib/i18n";
 
 interface ExportDialogProps {
   open: boolean;
@@ -24,6 +26,8 @@ interface ExportDialogProps {
 
 export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
   const {toast} = useToast();
+  const {t} = useTranslation("imagemap");
+
   const jsonString = JSON.stringify(data, null, 2);
 
   hljs.registerLanguage("json", json);
@@ -32,13 +36,13 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
     try {
       await navigator.clipboard.writeText(jsonString);
       toast({
-        title: "已复制",
-        description: "JSON 配置已复制到剪贴板",
+        title: t("copySuccess"),
+        description: t("export.copySuccess"),
       });
     } catch (error) {
       toast({
-        title: "复制失败",
-        description: "无法复制到剪贴板",
+        title: t("export.copyError"),
+        description: t("export.copyErrorDescription"),
         variant: "destructive",
       });
     }
@@ -55,8 +59,8 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
     URL.revokeObjectURL(element.href);
 
     toast({
-      title: "已下载",
-      description: "配置文件已下载",
+      title: t("export.downloadSuccess"),
+      description: t("export.downloadSuccessDescription"),
     });
   };
 
@@ -66,10 +70,10 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex flex-row items-center gap-2">
             <Upload className="w-5 h-5"/>
-            导出配置
+            {t("export.title")}
           </DialogTitle>
           <DialogDescription>
-            以下是当前 Imagemap 的 JSON 配置，您可以复制或下载它以供后用。
+            {t("export.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -87,7 +91,7 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            关闭
+            {t("common:cancel")}
           </Button>
           <Button
             variant="default"
@@ -95,14 +99,14 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
             className="gap-2"
           >
             <Copy className="w-4 h-4"/>
-            复制到剪贴板
+            {t("common:copy")}
           </Button>
           <Button
             onClick={handleDownload}
             className="gap-2"
           >
             <DownloadCloud className="w-4 h-4"/>
-            下载 JSON
+            {t("export.downloadButton")}
           </Button>
         </DialogFooter>
       </DialogContent>

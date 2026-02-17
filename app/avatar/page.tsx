@@ -14,13 +14,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import type { IAvatarStyle, AvatarInputs } from "./styles/IAvatarStyle";
 import { ClassicAvatarStyle } from "./styles/ClassicAvatarStyle";
-import { Eye, Settings, Download } from "lucide-react";
+import { Eye, Settings, Download, UserRoundPen } from "lucide-react";
 import { HelpIconButton } from "@/components/help-icon-button";
 import { useToast } from "@/hooks/use-toast";
 import { snapdom } from "@zumer/snapdom";
 import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
 import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
 import { isNullOrWhitespace } from "@/lib/utils";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { useTranslation } from "react-i18next";
 
 // 注册所有可用样式
 const STYLE_REGISTRY = [
@@ -42,6 +44,7 @@ const SCALE_REGISTRY = [
 ] as const;
 
 export default function AvatarGeneratorPage() {
+  const {t} = useTranslation("avatar");
   const {toast} = useToast();
 
   const [styleKey, setStyleKey] = useState<StyleKey>(STYLE_REGISTRY[0].key);
@@ -69,12 +72,12 @@ export default function AvatarGeneratorPage() {
     try {
       if (isNullOrWhitespace(imageUrl) || isNullOrWhitespace(username)) return null;
       const AvatarComponent = selectedStyle?.generateAvatar(inputs);
-      return AvatarComponent ? <AvatarComponent /> : null;
+      return AvatarComponent ? <AvatarComponent/> : null;
     } catch (e) {
       console.error("Error in preview generation.", e);
 
       return (
-        <div className="text-destructive text-sm">生成预览时出现问题。</div>
+        <div className="text-destructive text-sm">{t("previewError")}</div>
       );
     }
   }, [selectedStyle, inputs, imageUrl, username]);
@@ -100,7 +103,6 @@ export default function AvatarGeneratorPage() {
     reloadTimerRef.current = setTimeout(() => {
       setImageUrl(inputImageUrl);
       setCountryCode(inputCountryCode);
-      console.log(`After timeout, reloadTimerRef is ${reloadTimerRef.current}`);
     }, 300);
   }, [inputImageUrl, inputCountryCode]);
 
@@ -120,8 +122,8 @@ export default function AvatarGeneratorPage() {
       });
     } catch (e) {
       toast({
-        title: "下载失败",
-        description: e instanceof Error ? e.message : "未知错误",
+        title: t("downloadError"),
+        description: e instanceof Error ? e.message : t("common:unknownError"),
         variant: "destructive",
       });
 
@@ -134,24 +136,23 @@ export default function AvatarGeneratorPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="flex-title text-3xl font-bold text-foreground mb-2">
-            <span><span className="text-primary">头像卡片</span>生成</span>
+            <span className="text-primary">{t("title")}</span>
             <HelpIconButton section="avatar"/>
           </h1>
-          <p className="text-secondary-foreground">生成各种样式的用户头像卡片</p>
+          <p className="text-secondary-foreground">{t("description")}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex-title gap-2"><Settings/>设置</CardTitle>
-              <CardDescription>填入资料并选择样式</CardDescription>
+              <CardTitle className="flex-title gap-2"><Settings/>{t("common:section.settings")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="imageUrl">头像图片链接</Label>
+                <Label htmlFor="imageUrl">{t("settings.avatarLink")}</Label>
                 <Input
                   id="imageUrl"
-                  placeholder="https://a.ppy.sh/<用户 ID>"
+                  placeholder={`https://a.ppy.sh/${t("settings.userIdPlaceholder")}`}
                   value={inputImageUrl}
                   onChange={(e) => setInputImageUrl(e.target.value)}
                   onBlur={_ => setImageUrl(inputImageUrl)}
@@ -159,7 +160,7 @@ export default function AvatarGeneratorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="user">用户名</Label>
+                <Label htmlFor="user">{t("settings.username")}</Label>
                 <Input
                   id="user"
                   placeholder="peppy"
@@ -169,10 +170,10 @@ export default function AvatarGeneratorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="countryCode">国家/地区代码（可选）</Label>
+                <Label htmlFor="countryCode">{t("settings.countryCode")}</Label>
                 <Input
                   id="countryCode"
-                  placeholder="两位地区码"
+                  placeholder={t("settings.countryCodeDescription")}
                   value={inputCountryCode}
                   onChange={(e) => setInputCountryCode(e.target.value)}
                   onBlur={_ => setCountryCode(inputCountryCode)}
@@ -180,25 +181,26 @@ export default function AvatarGeneratorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="avatarStyle">头像样式</Label>
+                <Label htmlFor="avatarStyle">{t("settings.avatarStyle")}</Label>
                 <Select value={styleKey} onValueChange={(v) => setStyleKey(v as StyleKey)}>
                   <SelectTrigger id="avatarStyle" className="w-full">
-                    <SelectValue placeholder="选择一种样式"/>
+                    <SelectValue/>
                   </SelectTrigger>
                   <SelectContent>
                     {STYLE_REGISTRY.map(({key, style}) => (
-                      <SelectItem key={key} value={key}>{style.name}</SelectItem>
+                      <SelectItem key={key} value={key}>{t(`styles.${style.key}.name`)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <div className="text-sm text-muted-foreground">{selectedStyle?.description ?? "<无描述>"}</div>
+                <div
+                  className="text-sm text-muted-foreground">{t(`styles.${selectedStyle?.key ?? "default"}.description`)}</div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="exportRes">导出分辨率</Label>
+                <Label htmlFor="exportRes">{t("settings.exportScale")}</Label>
                 <Select value={selectedExportScale} onValueChange={(v) => setSelectedExportScale(v)}>
                   <SelectTrigger id="exportRes" className="w-full">
-                    <SelectValue placeholder="选择导出分辨率"/>
+                    <SelectValue/>
                   </SelectTrigger>
                   <SelectContent>
                     {SCALE_REGISTRY.map(({key}) => (
@@ -213,14 +215,7 @@ export default function AvatarGeneratorPage() {
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="flex-title gap-2"><Eye/>预览</CardTitle>
-                  <CardDescription>
-                    {previewEl && previewSize
-                      ? `大小：${previewSize?.width} × ${previewSize?.height}`
-                      : "在这里查看生成的头像"}
-                  </CardDescription>
-                </div>
+                <CardTitle className="flex-title gap-2"><Eye/>{t("common:section.preview")}</CardTitle>
                 {previewEl && (
                   <Button
                     onClick={handleDownload}
@@ -229,17 +224,25 @@ export default function AvatarGeneratorPage() {
                     className="gap-2"
                   >
                     <Download className="w-4 h-4"/>
-                    下载
+                    {t("common:download")}
                   </Button>
                 )}
               </div>
+              {previewEl && previewSize &&
+                <CardDescription>{t("sizePrompt", {...previewSize})}</CardDescription>}
             </CardHeader>
             <CardContent>
               <div ref={previewRef} className="flex items-center justify-center select-none">
                 {previewEl ?? (
-                  <div className="text-muted-foreground text-sm">
-                    请先填写头像链接与用户名。
-                  </div>
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <UserRoundPen/>
+                      </EmptyMedia>
+                      <EmptyTitle>{t("infoRequired")}</EmptyTitle>
+                      <EmptyDescription>{t("infoRequiredDescription")}</EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
                 )}
               </div>
             </CardContent>

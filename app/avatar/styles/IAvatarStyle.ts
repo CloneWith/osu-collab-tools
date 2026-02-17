@@ -25,8 +25,7 @@ export interface AvatarInputs {
  * Represents a specific style of avatar.
  */
 export interface IAvatarStyle {
-    name: string;
-    description: string;
+    key: string;
 
     /**
      * The size of an avatar image.

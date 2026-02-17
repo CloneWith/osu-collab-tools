@@ -7,15 +7,18 @@ import { Map, Home, FileText, Menu, X, UserRound } from "lucide-react";
 import { useState } from "react";
 import { SettingsFlyout } from "@/components/ui/settings-flyout";
 import Logo from "@/components/logo";
+import { useTranslation } from "react-i18next";
+import "../lib/i18n";
 
 const navigation = [
-  {name: "首页", href: "/", icon: Home},
-  {name: "头像卡片", href: "/avatar", icon: UserRound},
-  {name: "ImageMap 编辑", href: "/imagemap", icon: Map},
-  {name: "文档", href: "/docs", icon: FileText},
+  {key: "home", href: "/", icon: Home},
+  {key: "avatar", href: "/avatar", icon: UserRound},
+  {key: "imagemap", href: "/imagemap", icon: Map},
+  {key: "docs", href: "/docs", icon: FileText},
 ];
 
 export function Navbar() {
+  const {t} = useTranslation("navbar");
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -38,7 +41,7 @@ export function Navbar() {
               const isActive = pathname === item.href;
               return (
                 <Link
-                  key={item.name}
+                  key={item.key}
                   href={item.href}
                   className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive
@@ -47,7 +50,7 @@ export function Navbar() {
                   }`}
                 >
                   <Icon className="w-4 h-4"/>
-                  <span>{item.name}</span>
+                  <span>{t(`nav.${item.key}`)}</span>
                 </Link>
               );
             })}
@@ -73,7 +76,7 @@ export function Navbar() {
                 const isActive = pathname === item.href;
                 return (
                   <Link
-                    key={item.name}
+                    key={item.key}
                     href={item.href}
                     className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
                       isActive ? "bg-primary/10 text-primary dark:bg-primary dark:text-primary-foreground" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
@@ -81,7 +84,7 @@ export function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Icon className="w-5 h-5"/>
-                    <span>{item.name}</span>
+                    <span>{t(`nav.${item.key}`)}</span>
                   </Link>
                 );
               })}

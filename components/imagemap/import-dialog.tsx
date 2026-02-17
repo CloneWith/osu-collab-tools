@@ -21,6 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ImportDialogProps {
   open: boolean;
@@ -30,14 +32,16 @@ interface ImportDialogProps {
   imageHeight: number;
 }
 
-type DataSource = "json-conf" | "bbcode";
+type DataSource = "json" | "bbcode";
 
 export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHeight}: ImportDialogProps) {
   const {toast} = useToast();
+  const {t} = useTranslation("imagemap");
+
   const [confInput, setConfInput] = useState<string>("");
   const [validationError, setValidationError] = useState<string>("");
   const [isValid, setIsValid] = useState<boolean>(false);
-  const [currentSource, setCurrentSource] = useState<DataSource>("json-conf");
+  const [currentSource, setCurrentSource] = useState<DataSource>("json");
   const [inputActive, setInputActive] = useState<boolean>();
   const currentTimerRef = useRef<Timeout>(null);
 
@@ -68,7 +72,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
     }
 
     switch (currentSource) {
-      case "json-conf": {
+      case "json": {
         // 验证 JSON 语法和数据结构
         try {
           const parsed = JSON.parse(confInput);
@@ -76,7 +80,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
 
           // 验证数据结构
           if (!result.success) {
-            setValidationError(result.message ?? "配置文件无效");
+            setValidationError(t(result.messageKey ?? "import.check.invalid", result.details));
             return;
           }
 
@@ -84,9 +88,9 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
           setValidationError("");
         } catch (error) {
           if (error instanceof SyntaxError) {
-            setValidationError(`JSON 语法错误: ${error.message}`);
+            setValidationError(t("import.check.jsonSyntaxError", {message: error.message}));
           } else {
-            setValidationError("无效的 JSON 格式");
+            setValidationError(t("import.check.invalidJsonFormat"));
           }
         }
         break;
@@ -96,7 +100,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
         const result = parseImageMapBBCode(confInput, imageWidth, imageHeight);
 
         if (!result.success) {
-          setValidationError(result.message ?? "配置文件无效");
+          setValidationError(t(result.messageKey ?? "import.check.invalid", result.details));
           return;
         }
 
@@ -112,7 +116,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
       let parsed, result;
 
       switch (currentSource) {
-        case "json-conf": {
+        case "json": {
           parsed = JSON.parse(confInput);
           result = validateImageMapJsonConfig(parsed, imageWidth, imageHeight);
           break;
@@ -127,8 +131,8 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
 
       if (!result.success) {
         toast({
-          title: "导入失败",
-          description: result.message,
+          title: t("import.failed"),
+          description: t(result.messageKey ?? "import.check.invalid", result.details),
           variant: "destructive",
         });
         return;
@@ -141,13 +145,13 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
       onOpenChange(false);
 
       toast({
-        title: "导入成功",
-        description: `已加载 ${parsed.rectangles.length} 个区域`,
+        title: t("import.success"),
+        description: t("import.importInfo", {count: parsed.rectangles.length}),
       });
     } catch (error) {
       toast({
-        title: "导入失败",
-        description: error instanceof Error ? error.message : "未知错误",
+        title: t("import.failed"),
+        description: error instanceof Error ? error.message : t("common:unknownError"),
         variant: "destructive",
       });
     }
@@ -159,8 +163,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
       setConfInput(text);
     } catch (error) {
       toast({
-        title: "无法读取剪贴板",
-        description: "请检查权限设置",
+        title: t("common:cannotReadClipboard"),
         variant: "destructive",
       });
     }
@@ -172,24 +175,24 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
         <DialogHeader>
           <DialogTitle className="flex flex-row items-center gap-2">
             <Upload className="w-5 h-5"/>
-            导入配置
+            {t("import.title")}
           </DialogTitle>
-          <DialogDescription>
-            <span>快速恢复之前的工作，在下方区域输入要导入的数据。</span>
-            <br/>
-            <span className="text-orange-400"><b>注意</b>：导入配置后，已定义的区域将被全部覆盖，配置中定义的内容将覆盖已有内容。</span>
-          </DialogDescription>
+          <DialogDescription><span>{t("import.description")}</span></DialogDescription>
         </DialogHeader>
 
+        <Alert variant="warning">
+          <AlertDescription>{t("import.overrideWarning")}</AlertDescription>
+        </Alert>
+
         <div className="space-y-3">
-          <Label>数据源</Label>
+          <Label htmlFor="dataSource">{t("import.dataSource")}</Label>
           <Select value={currentSource} onValueChange={(s) => setCurrentSource(s as DataSource)}>
-            <SelectTrigger>
+            <SelectTrigger id="dataSource">
               <SelectValue/>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="json-conf">JSON 配置文件</SelectItem>
-              <SelectItem value="bbcode">BBCode</SelectItem>
+              <SelectItem value="json">{t("import.sources.json")}</SelectItem>
+              <SelectItem value="bbcode">{t("import.sources.bbcode")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -206,7 +209,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
               className={`flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md ${inputActive && "opacity-30"}`}>
               <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5"/>
               <div>
-                <p className="text-sm font-medium text-red-800 dark:text-red-200">验证失败</p>
+                <p className="text-sm font-medium text-red-800 dark:text-red-200">{t("import.validationFailed")}</p>
                 <p className="text-sm text-red-700 dark:text-red-300">{validationError}</p>
               </div>
             </div>
@@ -214,14 +217,14 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
             <div
               className={`flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-md ${inputActive && "opacity-30"}`}>
               <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400"/>
-              <p className="text-sm font-medium text-green-800 dark:text-green-200">格式正确，可以导入</p>
+              <p className="text-sm font-medium text-green-800 dark:text-green-200">t{"import.validationPassed"}</p>
             </div>
           ) : null}
         </div>
 
         <DialogFooter className="flex flex-row gap-2 justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
+            {t("common:cancel")}
           </Button>
           <Button
             variant="outline"
@@ -229,7 +232,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
             className="gap-2"
           >
             <ClipboardPaste className="w-4 h-4"/>
-            从剪贴板粘贴
+            {t("import.fromClipboard")}
           </Button>
           <Button
             onClick={handleImport}
@@ -237,7 +240,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
             className="gap-2"
           >
             <Download className="w-4 h-4"/>
-            导入配置
+            {t("import.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

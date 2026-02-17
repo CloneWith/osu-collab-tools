@@ -1,0 +1,36 @@
+{
+  "title": "Avatar Card Generator",
+  "description": "Generate user avatar cards in multiple styles",
+  "settings": {
+    "avatarLink": "Avatar image link",
+    "userIdPlaceholder": "<User ID>",
+    "username": "Username",
+    "countryCode": "Country code",
+    "countryCodeDescription": "In format of two characters",
+    "avatarStyle": "Avatar style",
+    "exportScale": "Export scale"
+  },
+  "sizePrompt": "Size: {{width}} × {{height}}",
+  "previewError": "Something went wrong while generation preview.",
+  "downloadError": "Download Failed",
+  "infoRequired": "Information required",
+  "infoRequiredDescription": "Start with filling in the avatar link and username",
+  "styles": {
+    "default": {
+      "name": "Default",
+      "description": "<No description provided>"
+    },
+    "classic": {
+      "name": "Classic",
+      "description": "The old profile style. Feeling nostalgic?"
+    },
+    "modern": {
+      "name": "Modern",
+      "description": "The current user profile style used on the osu! forum."
+    },
+    "simple": {
+      "name": "Simple",
+      "description": "Simple and elegant."
+    }
+  }
+}

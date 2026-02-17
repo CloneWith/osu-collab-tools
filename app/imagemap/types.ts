@@ -62,15 +62,15 @@ export interface ImageMapConfig {
  * @returns `true` 为有效，否则为 `false`
  */
 export function validateImageMapJsonConfig(data: unknown, width: number, height: number): ValidationResult {
-    if (!data || typeof data !== "object") return { success: false };
+    if (!data || typeof data !== "object") return {success: false};
 
     const obj = data as Record<string, unknown>;
 
     // 验证 rectangles 数组
-    if (!Array.isArray(obj.rectangles)) return { success: false, message: "区域列表必须是数组" };
+    if (!Array.isArray(obj.rectangles)) return {success: false, messageKey: "import.check.expectsArrayForAreas"};
 
     for (const rect of obj.rectangles) {
-        if (!rect || typeof rect !== "object") return { success: false, message: "什么东西混进去了" };
+        if (!rect || typeof rect !== "object") return {success: false, messageKey: "import.check.invalidAreaEntry"};
 
         const r = rect as Record<string, unknown>;
 
@@ -85,16 +85,20 @@ export function validateImageMapJsonConfig(data: unknown, width: number, height:
             typeof r.href !== "string" ||
             typeof r.alt !== "string"
         ) {
-            return { success: false, message: `矩形字段缺失或类型不正确：${String(r.id)}` };
+            return {success: false, messageKey: "import.check.invalidAttrInArea", details: {id: String(r.id)}};
         }
 
         if (r.type !== RectangleType.MapArea && r.type !== RectangleType.Avatar) {
-            return { success: false, message: `不支持的区域类型：${String(r.id)} 的类型为 ${String(r.type)}` };
+            return {
+                success: false,
+                messageKey: "import.check.invalidAreaType",
+                details: {id: String(r.id), type: String(r.type)},
+            };
         }
 
         // 基本数值范围
         if ((r.x as number) < 0 || (r.y as number) < 0 || (r.width as number) < 0 || (r.height as number) < 0) {
-            return { success: false, message: `区域位置信息不合理：${String(r.id)}` };
+            return {success: false, messageKey: "import.check.invalidAreaPosition", details: {id: String(r.id)}};
         }
 
         if (r.x + r.width > width || r.y + r.height > height) {
@@ -102,7 +106,11 @@ export function validateImageMapJsonConfig(data: unknown, width: number, height:
 
             if (r.x + r.width > width) sizePrompt.push(`${r.x} + ${r.width} > ${width}`);
             if (r.y + r.height > height) sizePrompt.push(`${r.y} + ${r.height} > ${height}`);
-            return { success: false, message: `区域尺寸不可超出图像范围：对于 ${String(r.id)}，${sizePrompt.join(", ")}` };
+            return {
+                success: false,
+                messageKey: "import.check.areaSizeOutOfRange",
+                details: {id: String(r.id), details: sizePrompt.join(", ")},
+            };
         }
     }
 
@@ -111,10 +119,10 @@ export function validateImageMapJsonConfig(data: unknown, width: number, height:
     if ((obj.imagePath !== undefined && typeof obj.imagePath !== "string")
         || (obj.imageName !== undefined && typeof obj.imageName !== "string")
         || (obj.mapName !== undefined && typeof obj.mapName !== "string")) {
-        return { success: false, message: "缺少 ImageMap 属性数据，或类型不正确" };
+        return {success: false, messageKey: "import.check.invalidImagemapAttr"};
     }
 
-    return { success: true };
+    return {success: true};
 }
 
 export interface ImageMapBBCodeParseResult extends ValidationResult {
@@ -125,28 +133,28 @@ export interface ImageMapBBCodeParseResult extends ValidationResult {
  * 解析并验证 imagemap BBCode 内容，使用图像宽高将区域信息标准化。
  */
 export function parseImageMapBBCode(bbcode: string, width: number, height: number): ImageMapBBCodeParseResult {
-    let parseError: string | undefined;
+    let parseError: { line: number, col: number } | undefined;
 
     let ast;
     try {
         ast = parse(bbcode, {
             onlyAllowTags: ["imagemap"],
             onError: (err) => {
-                parseError = `解析 BBCode 时出现错误于 (${err.lineNumber}, ${err.columnNumber})`;
+                parseError = {line: err.lineNumber, col: err.columnNumber};
             },
         });
     } catch (error) {
-        return { success: false, message: error instanceof Error ? error.message : "无法解析 BBCode" };
+        return {success: false, messageKey: error instanceof Error ? error.message : "无法解析 BBCode"};
     }
 
-    if (parseError) return { success: false, message: parseError };
+    if (parseError) return {success: false, messageKey: "import.check.bbcodeParsingError", details: parseError};
 
     if (!ast.some((n) => n.tag === "imagemap")) {
-        return { success: false, message: "需要使用 [imagemap] 标签" };
+        return {success: false, messageKey: "import.check.imagemapTagRequired"};
     }
 
     if (ast.length !== 1) {
-        return { success: false, message: "只能包含一个 [imagemap] 标签" };
+        return {success: false, messageKey: "import.check.multipleTagsPresent"};
     }
 
     const root = ast[0];
@@ -162,7 +170,7 @@ export function parseImageMapBBCode(bbcode: string, width: number, height: numbe
         .filter((line) => line.length > 0);
 
     if (lines.length === 0) {
-        return { success: false, message: "[imagemap] 标签缺少内容" };
+        return {success: false, messageKey: "import.check.imagemapContentRequired"};
     }
 
     const imagePath = lines[0];
@@ -170,7 +178,7 @@ export function parseImageMapBBCode(bbcode: string, width: number, height: numbe
         // 验证为合法链接
         new URL(imagePath);
     } catch {
-        return { success: false, message: "标签内首行必须是有效的链接" };
+        return {success: false, messageKey: "import.check.topLinkRequired"};
     }
 
     const rectangles: ImageMapConfig["rectangles"] = [];
@@ -180,14 +188,14 @@ export function parseImageMapBBCode(bbcode: string, width: number, height: numbe
         const parts = line.split(/\s+/);
 
         if (parts.length < 5 || parts.length > 6) {
-            return { success: false, message: `第 ${i} 行格式错误：不是有效的区域定义` };
+            return {success: false, messageKey: "import.check.invalidAreaDefinition", details: {line: i}};
         }
 
         const [xStr, yStr, wStr, hStr, href, alt] = parts;
         const numbers = [xStr, yStr, wStr, hStr].map((n) => Number.parseFloat(n));
 
         if (numbers.some((n) => Number.isNaN(n))) {
-            return { success: false, message: `第 ${i} 行格式错误：坐标或尺寸不是数字` };
+            return {success: false, messageKey: "import.check.invalidSizeDefinition", details: {line: i}};
         }
 
         rectangles.push({
