@@ -18,10 +18,11 @@ interface LanguageInfo {
     name: string;
 }
 
-// TODO: Consider cimode debug language support
 export const supportedLanguages: LanguageInfo[] = [
     {code: "en", name: "English"},
     {code: "zh", name: "简体中文"},
+    ...(process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test"
+        ? [{code: "cimode", name: "Debug (Show keys)"}] as LanguageInfo[] : []),
 ];
 
 // 配置 i18next
@@ -47,6 +48,7 @@ i18n
                 settings: enSettings,
             },
         },
+        ...(process.env.NODE_ENV === "test" ? {lng: "cimode"} : {}),
         fallbackLng: "en",
         ns: ["common", "home", "navbar", "avatar", "imagemap", "settings"],
         defaultNS: "common",
