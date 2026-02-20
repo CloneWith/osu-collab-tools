@@ -36,7 +36,7 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
     try {
       await navigator.clipboard.writeText(jsonString);
       toast({
-        title: t("copySuccess"),
+        title: tc("copySuccess"),
         description: t("export.copySuccess"),
       });
     } catch (error) {

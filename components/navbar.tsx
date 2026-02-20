@@ -14,7 +14,7 @@ const navigation = [
   {key: "avatar", href: "/avatar", icon: UserRound},
   {key: "imagemap", href: "/imagemap", icon: Map},
   {key: "docs", href: "/docs", icon: FileText},
-];
+] as const;
 
 export function Navbar() {
   const t = useTranslations("navbar");
