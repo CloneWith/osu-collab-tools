@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { createScope, createTimeline, Scope, splitText, stagger } from "animejs";
+import { createScope, createTimeline, Scope, splitText, stagger, utils } from "animejs";
 import { TrianglesBackground } from "@/components/triangles-background";
 import { useTranslations } from "next-intl";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
@@ -16,16 +16,10 @@ export default function MainPage() {
 
   useEffect(() => {
     scope.current = createScope({root}).add(self => {
-      const {words} = splitText(".hero-title", {
-        words: {wrap: "clip"},
-      });
+      const {words} = splitText(".hero-title", {words: {wrap: "clip"}});
 
-      createTimeline({
-        defaults: {ease: "inOut(3)", duration: 650},
-      })
-        .add(words, {
-          y: [$el => +$el.dataset.line % 2 ? "100%" : "-150%", "0%"],
-        }, stagger(125))
+      createTimeline({defaults: {ease: "inOut(3)", duration: 650}})
+        .add(words, {y: ["100%", "0%"]}, stagger(125))
         .init();
     });
 
