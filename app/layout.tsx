@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Footer from "@/app/footer";
+import { IntlProvider } from "@/components/providers/intl-provider";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -16,22 +17,24 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-                                     children,
-                                   }: {
+                                           children,
+                                         }: {
   children: React.ReactNode
 }) {
   // Suppressing hydration warning due to dark mode class
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
     <body className={inter.className}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <TooltipProvider delayDuration={300}>
-        <Navbar/>
-        <main>{children}</main>
-        <Toaster/>
-        <Footer/>
-      </TooltipProvider>
-    </ThemeProvider>
+    <IntlProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <TooltipProvider delayDuration={300}>
+          <Navbar/>
+          <main>{children}</main>
+          <Toaster/>
+          <Footer/>
+        </TooltipProvider>
+      </ThemeProvider>
+    </IntlProvider>
     </body>
     </html>
   );

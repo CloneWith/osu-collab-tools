@@ -1,18 +1,15 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
+import { Locale } from "next-intl";
+import { useIntlContext } from "@/components/providers/intl-provider";
 import { supportedLanguages } from "@/lib/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function LanguageSwitcher() {
-  const { i18n } = useTranslation();
-
-  const changeLanguage = (lng: string) => {
-    void i18n.changeLanguage(lng);
-  };
+  const { locale, setLocale } = useIntlContext();
 
   return (
-    <Select value={i18n.language} onValueChange={lang => changeLanguage(lang)}>
+    <Select value={locale} onValueChange={lang => setLocale(lang as Locale)}>
       <SelectTrigger>
         <SelectValue/>
       </SelectTrigger>

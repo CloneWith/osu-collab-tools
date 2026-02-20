@@ -15,8 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useTranslation } from "react-i18next";
-import "../../lib/i18n";
+import { useTranslations } from "next-intl";
 
 interface ExportDialogProps {
   open: boolean;
@@ -26,7 +25,8 @@ interface ExportDialogProps {
 
 export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
   const {toast} = useToast();
-  const {t} = useTranslation("imagemap");
+  const t = useTranslations("imagemap");
+  const tc = useTranslations("common");
 
   const jsonString = JSON.stringify(data, null, 2);
 
@@ -91,7 +91,7 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            {t("common:cancel")}
+            {tc("cancel")}
           </Button>
           <Button
             variant="default"
@@ -99,7 +99,7 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
             className="gap-2"
           >
             <Copy className="w-4 h-4"/>
-            {t("common:copy")}
+            {tc("copy")}
           </Button>
           <Button
             onClick={handleDownload}

@@ -7,8 +7,7 @@ import { Map, Home, FileText, Menu, X, UserRound } from "lucide-react";
 import { useState } from "react";
 import { SettingsFlyout } from "@/components/ui/settings-flyout";
 import Logo from "@/components/logo";
-import { useTranslation } from "react-i18next";
-import "../lib/i18n";
+import { useTranslations } from "next-intl";
 
 const navigation = [
   {key: "home", href: "/", icon: Home},
@@ -18,7 +17,7 @@ const navigation = [
 ];
 
 export function Navbar() {
-  const {t} = useTranslation("navbar");
+  const t = useTranslations("navbar");
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 

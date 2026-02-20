@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useTranslation } from "react-i18next";
+import { useTranslations } from "next-intl";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ImportDialogProps {
@@ -36,7 +36,8 @@ type DataSource = "json" | "bbcode";
 
 export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHeight}: ImportDialogProps) {
   const {toast} = useToast();
-  const {t} = useTranslation("imagemap");
+  const t = useTranslations("imagemap.import");
+  const tc = useTranslations("common");
 
   const [confInput, setConfInput] = useState<string>("");
   const [validationError, setValidationError] = useState<string>("");
@@ -80,7 +81,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
 
           // 验证数据结构
           if (!result.success) {
-            setValidationError(t(result.messageKey ?? "import.check.invalid", result.details));
+            setValidationError(t(result.messageKey ?? "check.invalid", result.details));
             return;
           }
 
@@ -88,9 +89,9 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
           setValidationError("");
         } catch (error) {
           if (error instanceof SyntaxError) {
-            setValidationError(t("import.check.jsonSyntaxError", {message: error.message}));
+            setValidationError(t("check.jsonSyntaxError", {message: error.message}));
           } else {
-            setValidationError(t("import.check.invalidJsonFormat"));
+            setValidationError(t("check.invalidJsonFormat"));
           }
         }
         break;
@@ -100,7 +101,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
         const result = parseImageMapBBCode(confInput, imageWidth, imageHeight);
 
         if (!result.success) {
-          setValidationError(t(result.messageKey ?? "import.check.invalid", result.details));
+          setValidationError(t(result.messageKey ?? "check.invalid", result.details));
           return;
         }
 
@@ -131,8 +132,8 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
 
       if (!result.success) {
         toast({
-          title: t("import.failed"),
-          description: t(result.messageKey ?? "import.check.invalid", result.details),
+          title: t("failed"),
+          description: t(result.messageKey ?? "check.invalid", result.details),
           variant: "destructive",
         });
         return;
@@ -145,13 +146,13 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
       onOpenChange(false);
 
       toast({
-        title: t("import.success"),
-        description: t("import.importInfo", {count: parsed.rectangles.length}),
+        title: t("success"),
+        description: t("importInfo", {count: parsed.rectangles.length}),
       });
     } catch (error) {
       toast({
-        title: t("import.failed"),
-        description: error instanceof Error ? error.message : t("common:unknownError"),
+        title: t("failed"),
+        description: error instanceof Error ? error.message : tc("unknownError"),
         variant: "destructive",
       });
     }
@@ -163,7 +164,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
       setConfInput(text);
     } catch (error) {
       toast({
-        title: t("common:cannotReadClipboard"),
+        title: tc("cannotReadClipboard"),
         variant: "destructive",
       });
     }
@@ -175,24 +176,24 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
         <DialogHeader>
           <DialogTitle className="flex flex-row items-center gap-2">
             <Upload className="w-5 h-5"/>
-            {t("import.title")}
+            {t("title")}
           </DialogTitle>
-          <DialogDescription><span>{t("import.description")}</span></DialogDescription>
+          <DialogDescription><span>{t("description")}</span></DialogDescription>
         </DialogHeader>
 
         <Alert variant="warning">
-          <AlertDescription>{t("import.overrideWarning")}</AlertDescription>
+          <AlertDescription>{t("overrideWarning")}</AlertDescription>
         </Alert>
 
         <div className="space-y-3">
-          <Label htmlFor="dataSource">{t("import.dataSource")}</Label>
+          <Label htmlFor="dataSource">{t("dataSource")}</Label>
           <Select value={currentSource} onValueChange={(s) => setCurrentSource(s as DataSource)}>
             <SelectTrigger id="dataSource">
               <SelectValue/>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="json">{t("import.sources.json")}</SelectItem>
-              <SelectItem value="bbcode">{t("import.sources.bbcode")}</SelectItem>
+              <SelectItem value="json">{t("sources.json")}</SelectItem>
+              <SelectItem value="bbcode">{t("sources.bbcode")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -209,7 +210,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
               className={`flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md ${inputActive && "opacity-30"}`}>
               <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5"/>
               <div>
-                <p className="text-sm font-medium text-red-800 dark:text-red-200">{t("import.validationFailed")}</p>
+                <p className="text-sm font-medium text-red-800 dark:text-red-200">{t("validationFailed")}</p>
                 <p className="text-sm text-red-700 dark:text-red-300">{validationError}</p>
               </div>
             </div>
@@ -217,14 +218,14 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
             <div
               className={`flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-md ${inputActive && "opacity-30"}`}>
               <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400"/>
-              <p className="text-sm font-medium text-green-800 dark:text-green-200">t{"import.validationPassed"}</p>
+              <p className="text-sm font-medium text-green-800 dark:text-green-200">{t("validationPassed")}</p>
             </div>
           ) : null}
         </div>
 
         <DialogFooter className="flex flex-row gap-2 justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("common:cancel")}
+            {tc("cancel")}
           </Button>
           <Button
             variant="outline"
@@ -232,7 +233,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
             className="gap-2"
           >
             <ClipboardPaste className="w-4 h-4"/>
-            {t("import.fromClipboard")}
+            {t("fromClipboard")}
           </Button>
           <Button
             onClick={handleImport}
@@ -240,7 +241,7 @@ export function ImportDialog({open, onOpenChange, onImport, imageWidth, imageHei
             className="gap-2"
           >
             <Download className="w-4 h-4"/>
-            {t("import.confirm")}
+            {t("confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

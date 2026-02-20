@@ -6,11 +6,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { common } from "@/app/common";
-import { useTranslation } from "react-i18next";
-import "../lib/i18n";
+import { useTranslations } from "next-intl";
 
 export default function WorkingPlaceholder() {
-  const {t} = useTranslation("common");
+  const t = useTranslations("common");
   return (
     <Card className="h-96 lg:h-125">
       <CardContent className="p-4 h-full flex flex-col items-center justify-center space-y-2">

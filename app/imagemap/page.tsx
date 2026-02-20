@@ -45,8 +45,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import "../../lib/i18n";
+import { useTranslations } from "next-intl";
 import {
   clamp,
   cn,
@@ -114,7 +113,9 @@ const STYLE_REGISTRY = [
 ] as const;
 
 export default function ImagemapEditorPage() {
-  const {t} = useTranslation("imagemap");
+  const t = useTranslations("imagemap");
+  const ta = useTranslations("avatar");
+  const tc = useTranslations("common");
 
   // Image states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -705,7 +706,7 @@ export default function ImagemapEditorPage() {
         id: generateId(),
         x: rectToDuplicate.x + 20,
         y: rectToDuplicate.y + 20,
-        alt: `${rectToDuplicate.alt} ${t("common:duplicateSuffix")}`,
+        alt: `${rectToDuplicate.alt} ${tc("duplicateSuffix")}`,
       };
       setRectangles((prev) => [newRect, ...prev]);
       setSelectedRect(newRect.id);
@@ -1235,7 +1236,7 @@ export default function ImagemapEditorPage() {
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
                 <Eye/>
-                <span>{t("common:section.preview")}</span>
+                <span>{tc("section.preview")}</span>
               </h2>
               <div className="flex items-center gap-2">
                 {uploadedImage && (
@@ -1453,11 +1454,11 @@ export default function ImagemapEditorPage() {
                       {contextTargetId ? (
                         <>
                           <ContextMenuItem onSelect={() => duplicateRectangle(contextTargetId!)}>
-                            <Copy className="w-4 h-4 mr-2"/> {t("common:duplicate")}
+                            <Copy className="w-4 h-4 mr-2"/> {tc("duplicate")}
                           </ContextMenuItem>
                           <ContextMenuItem className="text-destructive"
                                            onSelect={() => deleteRectangle(contextTargetId!)}>
-                            <Trash className="w-4 h-4 mr-2"/> {t("common:delete")}
+                            <Trash className="w-4 h-4 mr-2"/> {tc("delete")}
                           </ContextMenuItem>
                         </>
                       ) : (
@@ -1467,7 +1468,7 @@ export default function ImagemapEditorPage() {
                           </ContextMenuItem>
                           <ContextMenuSeparator/>
                           <ContextMenuItem>
-                            <X className="w-4 h-4 mr-2"/> {t("common:cancel")}
+                            <X className="w-4 h-4 mr-2"/> {tc("cancel")}
                           </ContextMenuItem>
                         </>
                       )}
@@ -1510,7 +1511,7 @@ export default function ImagemapEditorPage() {
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
                 <Settings/>
-                <span>{t("common:section.settings")}</span>
+                <span>{tc("section.settings")}</span>
               </h2>
 
               {/* Import and export */}
@@ -1523,7 +1524,7 @@ export default function ImagemapEditorPage() {
                   className="gap-2"
                 >
                   <Upload className="w-4 h-4"/>
-                  {t("common:export")}
+                  {tc("export")}
                 </Button>
                 <Button
                   onClick={() => setImportDialogOpen(true)}
@@ -1533,7 +1534,7 @@ export default function ImagemapEditorPage() {
                   className="gap-2"
                 >
                   <Download className="w-4 h-4"/>
-                  {t("common:import")}
+                  {tc("import")}
                 </Button>
               </div>
             </div>
@@ -1674,7 +1675,7 @@ export default function ImagemapEditorPage() {
                                 }}
                               >
                                 <Copy className="w-4 h-4 shrink-0"/>
-                                <span className="truncate">{t("common:duplicate")}</span>
+                                <span className="truncate">{tc("duplicate")}</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive"
@@ -1684,7 +1685,7 @@ export default function ImagemapEditorPage() {
                                 }}
                               >
                                 <Trash className="w-4 h-4 shrink-0"/>
-                                <span className="truncate">{t("common:delete")}</span>
+                                <span className="truncate">{tc("delete")}</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -1710,7 +1711,7 @@ export default function ImagemapEditorPage() {
                         className="flex items-center gap-1"
                       >
                         <Copy className="w-4 h-4"/>
-                        {t("common:duplicate")}
+                        {tc("duplicate")}
                       </Button>
                       <Button
                         variant="destructive"
@@ -1719,7 +1720,7 @@ export default function ImagemapEditorPage() {
                         className="flex items-center gap-1"
                       >
                         <Trash2 className="w-4 h-4"/>
-                        {t("common:delete")}
+                        {tc("delete")}
                       </Button>
                     </div>
                   </div>
@@ -1748,7 +1749,7 @@ export default function ImagemapEditorPage() {
                       {selectedRectData.type === RectangleType.Avatar && (
                         <>
                           <div className="space-y-1">
-                            <Label htmlFor="avatarStyle">{t("avatar:settings.avatarStyle")}</Label>
+                            <Label htmlFor="avatarStyle">{ta("settings.avatarStyle")}</Label>
                             <Select
                               value={selectedRectData.avatar?.styleKey ?? "simple"}
                               onValueChange={(e) => updateAvatarField(selectedRect, "styleKey", e)}
@@ -1758,23 +1759,23 @@ export default function ImagemapEditorPage() {
                               </SelectTrigger>
                               <SelectContent>
                                 {STYLE_REGISTRY.map(({key, style}) => (
-                                  <SelectItem key={key} value={key}>{t(`avatar:styles.${style.key}.name`)}</SelectItem>
+                                  <SelectItem key={key} value={key}>{ta(`styles.${style.key}.name`)}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
                           </div>
                           <div className="space-y-1">
-                            <Label htmlFor="avatarLink">{t("avatar:settings.avatarLink")}</Label>
+                            <Label htmlFor="avatarLink">{ta("settings.avatarLink")}</Label>
                             <Input
                               id="avatarLink"
-                              placeholder={`https://a.ppy.sh/${t("avatar:settings.userIdPlaceholder")}`}
+                              placeholder={`https://a.ppy.sh/${ta("settings.userIdPlaceholder")}`}
                               value={selectedRectData.avatar?.imageUrl ?? ""}
                               onChange={(e) => updateAvatarField(selectedRect, "imageUrl", e.target.value)}
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
-                              <Label htmlFor="user">{t("avatar:settings.username")}</Label>
+                              <Label htmlFor="user">{ta("settings.username")}</Label>
                               <Input
                                 id="user"
                                 placeholder="peppy"
@@ -1783,10 +1784,10 @@ export default function ImagemapEditorPage() {
                               />
                             </div>
                             <div className="space-y-1">
-                              <Label htmlFor="countryCode">{t("avatar:settings.countryCode")}</Label>
+                              <Label htmlFor="countryCode">{ta("settings.countryCode")}</Label>
                               <Input
                                 id="countryCode"
-                                placeholder={t("avatar:settings.countryCodeDescription")}
+                                placeholder={ta("settings.countryCodeDescription")}
                                 value={selectedRectData.avatar?.countryCode ?? ""}
                                 onChange={(e) => updateAvatarField(selectedRect, "countryCode", e.target.value)}
                               />
@@ -1939,7 +1940,7 @@ export default function ImagemapEditorPage() {
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
                 <Code/>
-                <span>{t("common:section.generatedCode")}</span>
+                <span>{tc("section.generatedCode")}</span>
               </h2>
             </div>
 
@@ -1954,14 +1955,14 @@ export default function ImagemapEditorPage() {
                         onClick={() => {
                           navigator.clipboard.writeText(generateImageMapHtml(rectangles, imagePath ?? imageName, mapName))
                             .then(() => toast({
-                                title: t("common:copySuccess"),
+                                title: tc("copySuccess"),
                               }),
                             );
                         }}
                         size="sm"
                       >
                         <Copy className="w-4 h-4"/>
-                        {t("common:copy")}
+                        {tc("copy")}
                       </Button>
                     </div>
                     <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
@@ -1981,14 +1982,14 @@ export default function ImagemapEditorPage() {
                         onClick={() => {
                           navigator.clipboard.writeText(generateImageMapBBCode(rectangles, imageSize.width, imageSize.height, imagePath ?? imageName))
                             .then(() => toast({
-                                title: t("common:copySuccess"),
+                                title: tc("copySuccess"),
                               }),
                             );
                         }}
                         size="sm"
                       >
                         <Copy className="w-4 h-4"/>
-                        {t("common:copy")}
+                        {tc("copy")}
                       </Button>
                     </div>
                     <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
@@ -2034,7 +2035,7 @@ export default function ImagemapEditorPage() {
                 setPendingFile(null);
               }}
             >
-              {t("common:cancel")}
+              {tc("cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive/50 hover:bg-destructive"

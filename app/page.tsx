@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { createScope, createTimeline, Scope, splitText, stagger } from "animejs";
 import { TrianglesBackground } from "@/components/triangles-background";
-import { useTranslation } from "react-i18next";
-import "../lib/i18n";
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"; // 导入 i18n 配置
+import { useTranslations } from "next-intl";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 
 export default function MainPage() {
-  const {t} = useTranslation("home");
+  const t = useTranslations("home");
   const root = useRef(null);
   const scope = useRef<Scope>(null);
 
@@ -51,7 +50,7 @@ export default function MainPage() {
         <div className="w-full px-4 sm:px-6 lg:px-8 py-24 relative z-10 bg-muted/50">
           <div className="text-center">
             <h1 className="hero-title text-4xl md:text-6xl font-bold text-card-foreground mb-6">
-              {t("hero.title", {interpolation: {escapeValue: false}})}
+              {t("hero.title")}
             </h1>
             <p className="text-xl text-card-foreground mb-8 max-w-3xl mx-auto">
               {t("hero.description")}

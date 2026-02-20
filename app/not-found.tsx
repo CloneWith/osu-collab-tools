@@ -6,11 +6,10 @@ import { Unlink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { TrianglesBackground } from "@/components/triangles-background";
-import { useTranslation } from "react-i18next";
-import "../lib/i18n";
+import { useTranslations } from "next-intl";
 
 export default function NotFound() {
-  const {t} = useTranslation("common");
+  const t = useTranslations("common");
   return (
     <div className="relative h-screen">
       {/* 三角形背景 */}

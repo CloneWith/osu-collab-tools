@@ -22,7 +22,7 @@ import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
 import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
 import { isNullOrWhitespace } from "@/lib/utils";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { useTranslation } from "react-i18next";
+import { useTranslations } from "next-intl";
 
 // 注册所有可用样式
 const STYLE_REGISTRY = [
@@ -44,7 +44,8 @@ const SCALE_REGISTRY = [
 ] as const;
 
 export default function AvatarGeneratorPage() {
-  const {t} = useTranslation("avatar");
+  const t = useTranslations("avatar");
+  const tc = useTranslations("common");
   const {toast} = useToast();
 
   const [styleKey, setStyleKey] = useState<StyleKey>(STYLE_REGISTRY[0].key);
@@ -123,7 +124,7 @@ export default function AvatarGeneratorPage() {
     } catch (e) {
       toast({
         title: t("downloadError"),
-        description: e instanceof Error ? e.message : t("common:unknownError"),
+        description: e instanceof Error ? e.message : tc("unknownError"),
         variant: "destructive",
       });
 
@@ -145,7 +146,7 @@ export default function AvatarGeneratorPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex-title gap-2"><Settings/>{t("common:section.settings")}</CardTitle>
+              <CardTitle className="flex-title gap-2"><Settings/>{tc("section.settings")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -215,7 +216,7 @@ export default function AvatarGeneratorPage() {
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between">
-                <CardTitle className="flex-title gap-2"><Eye/>{t("common:section.preview")}</CardTitle>
+                <CardTitle className="flex-title gap-2"><Eye/>{tc("section.preview")}</CardTitle>
                 {previewEl && (
                   <Button
                     onClick={handleDownload}
@@ -224,7 +225,7 @@ export default function AvatarGeneratorPage() {
                     className="gap-2"
                   >
                     <Download className="w-4 h-4"/>
-                    {t("common:download")}
+                    {tc("download")}
                   </Button>
                 )}
               </div>

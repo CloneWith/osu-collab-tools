@@ -1,0 +1,418 @@
+{
+  "common": {
+    "language": "语言",
+    "save": "保存",
+    "cancel": "取消",
+    "duplicate": "创建副本",
+    "delete": "删除",
+    "confirm": "确认",
+    "back": "返回",
+    "next": "下一步",
+    "loading": "加载中...",
+    "success": "成功",
+    "error": "错误",
+    "warning": "警告",
+    "info": "信息",
+    "copy": "复制",
+    "copySuccess": "复制成功",
+    "download": "下载",
+    "upload": "上传",
+    "select": "选择",
+    "create": "创建",
+    "edit": "编辑",
+    "preview": "预览",
+    "export": "导出",
+    "import": "导入",
+    "duplicateSuffix": "(副本)",
+    "unknownError": "未知错误",
+    "cannotReadClipboard": "无法读取剪贴板",
+    "section": {
+      "settings": "设置",
+      "preview": "预览",
+      "generatedCode": "代码"
+    },
+    "wip": {
+      "description": "该功能还在开发中",
+      "hurry": "等不及？",
+      "checkProgress": "查询进度"
+    },
+    "notFound": {
+      "description": "你要找的或不在这里",
+      "backHome": "回到主页"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "这是一个 Collab 工具箱",
+      "description": "助力你做出还不错的 osu! 赛博合影",
+      "startButton": "开始使用",
+      "docsButton": "查看文档"
+    }
+  },
+  "settings": {
+    "language": "语言",
+    "colorScheme": "颜色主题",
+    "themes": {
+      "light": "浅色",
+      "system": "跟随系统",
+      "dark": "深色"
+    },
+    "serverEndpoint": "服务器地址",
+    "serverEndpointDescription": "用户资料等链接的前缀"
+  },
+  "avatar": {
+    "title": "头像卡片生成",
+    "description": "生成各种样式的用户头像卡片",
+    "settings": {
+      "avatarLink": "头像图片链接",
+      "userIdPlaceholder": "<用户 ID>",
+      "username": "用户名",
+      "countryCode": "国家/地区代码",
+      "countryCodeDescription": "使用两位地区码",
+      "avatarStyle": "头像样式",
+      "exportScale": "导出分辨率"
+    },
+    "sizePrompt": "大小：{width} × {height}",
+    "previewError": "生成预览时出现问题。",
+    "downloadError": "下载失败",
+    "infoRequired": "需要信息",
+    "infoRequiredDescription": "填写头像链接与用户名以生成卡片",
+    "styles": {
+      "default": {
+        "name": "默认",
+        "description": "<暂无描述>"
+      },
+      "classic": {
+        "name": "经典",
+        "description": "旧版 osu! 论坛使用的头像样式，或许是你最熟悉的...？"
+      },
+      "modern": {
+        "name": "现代",
+        "description": "目前 osu! 论坛使用的用户头像样式。"
+      },
+      "simple": {
+        "name": "简洁",
+        "description": "小巧简约的头像卡片。"
+      }
+    }
+  },
+  "imagemap": {
+    "title": "Imagemap 编辑器",
+    "description": "划定可点击区域，以便在个人资料等中使用",
+    "tools": {
+      "select": "选择",
+      "create": "创建区域",
+      "createAvatar": "创建头像区域",
+      "delete": "删除"
+    },
+    "toolbar": {
+      "selectImage": "选择图片",
+      "save": "保存"
+    },
+    "imgAttrs": {
+      "title": "图像属性",
+      "imgLink": "图片地址",
+      "mapName": "Imagemap 名称"
+    },
+    "rectAttrs": {
+      "title": "区域属性",
+      "listTitle": "区域列表",
+      "defaultName": "区域 {index}",
+      "unsetLink": "未设置链接",
+      "dragPrompt": "拖动以调整顺序",
+      "rectType": "区域类型",
+      "types": {
+        "mapArea": "一般区域",
+        "avatar": "头像卡片区域"
+      },
+      "link": "链接地址",
+      "alt": "替代文本",
+      "altDescription": "用来描述的文本",
+      "userInfo": "用户信息",
+      "fillAsId": "作为 ID 填入",
+      "fillAsUsername": "作为用户名填入",
+      "x": "X 坐标",
+      "y": "Y 坐标",
+      "width": "宽度",
+      "height": "高度"
+    },
+    "placeholder": {
+      "noImage": {
+        "title": "先选择一张图片",
+        "description": "亦可拖拽到此区域"
+      },
+      "noRectangle": {
+        "title": "暂无区域",
+        "description": "在预览区划几个吧"
+      },
+      "noCode": {
+        "title": "无可用的代码",
+        "description": "选择图片并创建区域后，Imagemap 代码将在这里显示"
+      }
+    },
+    "dnd": {
+      "dropAccepted": "释放以使用图片",
+      "unsupportedType": "不支持的格式",
+      "supportedTypeHint": "拖拽图像进行编辑",
+      "tooManyEntries": "文件过多",
+      "entriesHint": "只允许拖放单个图像文件",
+      "disallowed": "不允许该操作"
+    },
+    "dialog": {
+      "overwrite": {
+        "title": "加载新图片？",
+        "description": "当前编辑的图像与 imagemap 将会被覆盖，此操作不可逆。",
+        "confirm": "覆盖"
+      },
+      "export": {
+        "title": "导出",
+        "description": "选择导出格式"
+      },
+      "import": {
+        "title": "导入",
+        "description": "从文件导入配置"
+      }
+    },
+    "export": {
+      "title": "导出配置",
+      "description": "以下是当前 Imagemap 的 JSON 配置，您可以复制或下载它以供后用。",
+      "downloadButton": "下载 JSON",
+      "copySuccess": "JSON 配置已复制到剪贴板",
+      "copyError": "复制失败",
+      "copyErrorDescription": "无法复制到剪贴板",
+      "downloadSuccess": "已下载",
+      "downloadSuccessDescription": "配置文件已下载"
+    },
+    "import": {
+      "title": "导入配置",
+      "description": "选择数据源，从中快速恢复之前的工作",
+      "overrideWarning": "导入配置后，已定义的区域将被全部覆盖，配置中定义的内容将覆盖已有内容。",
+      "dataSource": "数据源",
+      "sources": {
+        "json": "JSON 配置文件",
+        "bbcode": "[imagemap] BBCode 代码块"
+      },
+      "check": {
+        "invalid": "配置文件无效",
+        "jsonSyntaxError": "JSON 语法错误：{message}",
+        "invalidJsonFormat": "无效的 JSON 格式",
+        "expectsArrayForAreas": "区域列表必须是数组",
+        "invalidAreaEntry": "存在无效区域记录",
+        "invalidAttrInArea": "区域字段缺失或类型不正确：{id}",
+        "invalidAreaType": "不支持的区域类型：{id} 的类型为 {type}",
+        "invalidAreaPosition": "区域位置信息不合理：{id}",
+        "areaSizeOutOfRange": "区域尺寸不可超出图像范围：对于 {id}，{details}",
+        "invalidImagemapAttr": "缺失 Imagemap 属性数据，或类型不正确",
+        "bbcodeParsingError": "解析 BBCode 时出现错误于 ({line}, {col})",
+        "imagemapTagRequired": "需要使用 [imagemap] 标签",
+        "multipleTagsPresent": "只能包含一个 [imagemap] 标签",
+        "imagemapContentRequired": "[imagemap] 标签缺少内容",
+        "topLinkRequired": "标签内首行必须是有效的链接",
+        "invalidAreaDefinition": "第 {line} 行格式错误：不是有效的区域定义",
+        "invalidSizeDefinition": "第 {line} 行格式错误：坐标或尺寸不是数字"
+      },
+      "validationFailed": "验证失败",
+      "validationPassed": "未发现问题",
+      "fromClipboard": "从剪贴板粘贴",
+      "confirm": "确认导入",
+      "success": "导入成功",
+      "failed": "导入失败",
+      "importInfo": "已加载 {count} 个区域"
+    },
+    "error": {
+      "loadImage": "无法加载文件",
+      "imageFormat": "图像文件格式不支持或已损坏",
+      "exportFailed": "导出失败"
+    },
+    "success": {
+      "exported": "导出成功"
+    }
+  },
+  "navbar": {
+    "viewOnGitHub": "在 GitHub 查看",
+    "hostedByNetlify": "使用 Netlify 托管",
+    "toolsTitle": "工具",
+    "externalProjects": "友情链接",
+    "nav": {
+      "home": "首页",
+      "avatar": "头像卡片",
+      "imagemap": "Imagemap 编辑",
+      "docs": "使用文档"
+    },
+    "external": {
+      "colorcode": "Exsper 的渐变颜色生成器",
+      "mobe": "BBCode 编辑器 (MOBE)"
+    }
+  },
+  "docs": {
+    "title": "使用文档",
+    "description": "了解如何使用 Collab Tools",
+    "sections": {
+      "intro": "站点简介"
+    },
+    "intro": {
+      "description": "Collab Tools 是一个专门为 osu! 好友面基 / Collab（实际上用途会更广泛）制作的工具集网站。",
+      "motivation": "其实在这之前，有很多相关的功能已有其他工具或项目实现了，但我依然选择去尝试做一下，原因如下：",
+      "features": {
+        "flexible": "灵活：作为 Next.js 构建的前端项目，各平台只需浏览器访问即可使用，同时也支持自部署，简单快速；",
+        "secure": "安全：不想让除 Collab 成员以外的其他人知道？没问题！",
+        "integrated": "集成：从小功能开始，逐步实现覆盖 Collab 流程的各步骤；"
+      },
+      "github": "该项目的源代码可在 <repoLink>GitHub</repoLink> 上查看，在此期待各位的反馈或贡献~"
+    },
+    "avatar": {
+      "title": "头像卡片生成工具",
+      "description": "生成各种样式的用户头像卡片",
+      "content": [
+        "该功能受到众多 osu! 机器人的启发，所在群用户可以使用一条短小精悍的命令生成用户卡片。不过如果恰巧没法接触到部署这个功能的实例，或者单纯不想让群里的其他人知道这事...可能会有些麻烦。",
+        "为了避免如此尴尬，你可以试试用此工具<del>偷偷</del>生成点 Collab 成员的小卡片——欸嘿嘿，不要告诉他们哦。"
+      ],
+      "alerts": {
+        "experimental": {
+          "title": "实验性功能",
+          "description": "该工具尚处于活跃开发阶段，可能会出现意料之外的大变动，敬请留意。"
+        },
+        "tip": {
+          "title": "小提示",
+          "description": [
+            "该工具生成的卡片样式未必与 osu! 机器人的输出完全相同，因为二者在代码上没有任何关系。",
+            "如果你想对现有样式做些改善，或者有新的想法，欢迎到项目仓库页提交 Issue 或 PR 做出贡献。"
+          ]
+        }
+      },
+      "steps": {
+        "title": "为了生成头像卡片，你需要：",
+        "items": [
+          "用户的头像链接，对于 osu! 官服应该类似于 <linkCode></linkCode>；",
+          "用户名；",
+          "如有需要，可以填写两位国家/地区码，在卡片中显示国家/地区旗；",
+          "选择样式、预览生成的卡片、下载图像——大功告成！"
+        ]
+      }
+    },
+    "imagemap": {
+      "title": "ImageMap 编辑器",
+      "description": "快速制作映射图",
+      "intro": [
+        "osu! 的个人资料有对 imagemap（图片映射）的 <bbcodeLink>BBCode (osu! wiki)</bbcodeLink> 支持，但图像中各个区域的位置与大小依然需要手动定义。",
+        "目前在制作 imagemap 时，多数用户会选择使用图像编辑器，结合区域四角的坐标进行计算；或者用浏览器的开发者工具辅助定位映射区域，在区域较多的情况下会比较困难，同时需要相当一段时间精确调节各种参数。",
+        "你可以使用本工具提供的交互界面，在短时间内以\"所见即所得\"的方式轻松制作 imagemap。"
+      ],
+      "steps": {
+        "upload": {
+          "title": "1. 上传图片",
+          "description": "点击\"上传图片\"按钮，选择需要使用的图片文件。"
+        },
+        "manage": {
+          "title": "2. 管理区域",
+          "description": "使用以下工具在图片上创建、更改或删除矩形区域：",
+          "tools": {
+            "select": {
+              "title": "选择工具",
+              "description": "点击选中现有区域，查看并编辑其对应属性，并进行移动、大小调整。"
+            },
+            "create": {
+              "title": "创建工具",
+              "description": "在预览区拖动创建新的区域。"
+            },
+            "avatar": {
+              "title": "头像区域工具",
+              "description": "在预览区拖动，创建新的头像组件区域。"
+            },
+            "delete": {
+              "title": "删除工具",
+              "description": "点击删除已定义的区域。"
+            }
+          }
+        },
+        "properties": {
+          "title": "3. 设置属性",
+          "description": [
+            "为每个区域设置链接地址、描述文本与区域类型，也可继续调整位置与大小。",
+            "目前支持将区域设置为头像区域，以在该区域显示指定用户的头像卡片，设置与头像卡片生成工具相似。"
+          ],
+          "tip": {
+            "title": "小提示",
+            "description": [
+              "你可以利用<b>用户信息</b>字段快速填入链接。在填入用户的 ID 或用户名后：",
+              "使用 <button></button> 填入对应 UID 的资料链接；",
+              "使用 <button></button> 填入对应用户名的资料链接。"
+            ]
+          },
+          "layers": "所有区域在<b>区域列表</b>中统一显示，可以拖动左侧的控制柄调整所在层级。",
+          "imageProps": "与此同时，你可以在<b>图像属性</b>中修改要使用的图像地址与 ImageMap 名称（这个名称只会在 HTML 代码中用到），以便生成的代码直接使用这些属性。"
+        },
+        "code": {
+          "title": "4. 复制代码",
+          "description": "点击\"复制代码\"按钮，按需获取生成的 HTML 或 BBCode 代码。"
+        },
+        "export": {
+          "title": "5. 导出图像",
+          "description": "如果为图像添加了头像区域，可以点击预览区的\"保存\"按钮，将叠加了头像卡片的图像保存到本地。"
+        }
+      },
+      "usage": {
+        "title": "使用生成的代码",
+        "description": "在个人资料或其他地方使用",
+        "preview": {
+          "title": "新功能预告",
+          "description": "我们正在规划向 ImageMap 编辑器添加便捷上传到主流图床平台的功能，敬请期待。"
+        },
+        "hosting": "在其他网站使用 ImageMap 前，需要先将图像上传到支持的平台（图床）。",
+        "bbcode": {
+          "title": "使用 BBCode",
+          "steps": [
+            "粘贴代码到资料编辑区；",
+            "将生成代码中的图像链接占位文本替换为实际上传图像的链接；",
+            "预览资料，测试 ImageMap 是否正常显示，各区域是否对应正确——大功告成！"
+          ]
+        },
+        "html": {
+          "title": "使用 HTML",
+          "steps": [
+            "粘贴 HTML 代码，其应包含 <imgTag></imgTag> 与 <mapTag></mapTag> 两个标签；",
+            "按需修改 <srcAttr></srcAttr>（图像链接）与 <altAttr></altAttr>（图像备注）属性；",
+            "预览页面并进行测试——大功告成！"
+          ]
+        }
+      },
+      "importExport": {
+        "title": "导入与导出配置",
+        "description": "保存或恢复工作",
+        "warning": {
+          "title": "注意",
+          "description": [
+            "导出编辑器配置时，编辑的图像<b>不会</b>随之导出，导入时也是如此。因此在导入配置前，请确保加载了适合的图像。",
+            "从配置导入更改时，已有区域<b>会被覆盖</b>，配置文件中已有的设置会<b>覆盖</b>现有值。",
+            "从 BBCode 导入的区域<b>不会</b>包含区域类型信息。"
+          ]
+        },
+        "content": [
+          "支持将当前的编辑器配置导出为 JSON，或从 JSON 导入。导出的 JSON 含有 Imagemap 的所有基本信息，以及已定义的区域信息。",
+          "与此同时，你也可以从 BBCode 源码导入 Imagemap 的图像链接与区域信息。可以使用导入提示框的\"数据源\"来调整数据类型。"
+        ]
+      },
+      "shortcuts": {
+        "title": "快捷键",
+        "description": "ImageMap 编辑器支持使用键盘按键快速进行一些操作。",
+        "global": {
+          "title": "全局",
+          "items": [
+            "<altKey></altKey> + 数字键：切换编辑模式（按从 1 开始的对应数字序）"
+          ]
+        },
+        "selected": {
+          "title": "选定区域时",
+          "items": [
+            "删除选定区域",
+            "创建副本",
+            "移至下层/上层",
+            "方向键 - 移动选定区域",
+            "同时按下 <shiftKey></shiftKey> - 精细移动（每次 1 像素）",
+            "同时按下 <ctrlKey></ctrlKey> - 快速移动（每次 20 像素）"
+          ]
+        }
+      }
+    }
+  }
+}

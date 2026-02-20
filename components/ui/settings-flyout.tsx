@@ -10,10 +10,10 @@ import { useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
-import { useTranslation } from "react-i18next";
+import { useTranslations } from "next-intl";
 
 export function SettingsFlyout() {
-  const {t} = useTranslation("settings");
+  const t = useTranslations("settings");
   const endpointKey = "custom_endpoint";
   const [currentEndpoint, setCurrentEndpoint] = React.useState<string>(typeof window !== "undefined"
     ? (localStorage.getItem("custom_endpoint") ?? "")

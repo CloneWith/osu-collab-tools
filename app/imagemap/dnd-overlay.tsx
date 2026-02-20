@@ -1,5 +1,5 @@
 import { Ban, Inbox } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useTranslations } from "next-intl";
 
 interface DragAndDropOverlayProps {
   isRounded?: boolean;
@@ -25,7 +25,7 @@ export default function DragAndDropOverlay({
                                              isRounded = false,
                                              rejectReason = undefined,
                                            }: DragAndDropOverlayProps) {
-  const {t} = useTranslation("imagemap");
+  const t = useTranslations("imagemap");
   const isDragAccepted = rejectReason === undefined;
   let reasonPrompt = t("dnd.dropAccepted");
   let subPrompt: string | null = null;

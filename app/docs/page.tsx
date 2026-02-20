@@ -3,11 +3,10 @@
 import InfoDocCard from "@/app/docs/info-card";
 import ImagemapDocCard from "@/app/docs/imagemap-card";
 import AvatarDocCard from "@/app/docs/avatar-card";
-import { useTranslation } from "react-i18next";
-import "../../lib/i18n";
+import { useTranslations } from "next-intl";
 
 export default function DocsPage() {
-  const {t} = useTranslation("docs");
+  const t = useTranslations("docs");
 
   return (
     <div className="min-h-screen bg-background">

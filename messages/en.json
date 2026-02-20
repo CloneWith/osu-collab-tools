@@ -1,0 +1,410 @@
+{
+  "common": {
+    "language": "Language",
+    "save": "Save",
+    "cancel": "Cancel",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "copy": "Copy",
+    "copySuccess": "Copied",
+    "download": "Download",
+    "upload": "Upload",
+    "select": "Select",
+    "create": "Create",
+    "edit": "Edit",
+    "preview": "Preview",
+    "export": "Export",
+    "import": "Import",
+    "duplicateSuffix": "(copy)",
+    "unknownError": "Unknown error",
+    "cannotReadClipboard": "Unable to read from the clipboard",
+    "section": {
+      "settings": "Settings",
+      "preview": "Preview",
+      "generatedCode": "Code"
+    },
+    "wip": {
+      "description": "This feature is still under development",
+      "hurry": "Can't wait?",
+      "checkProgress": "Check progress"
+    },
+    "notFound": {
+      "description": "What you're looking for might not be here",
+      "backHome": "Back to Home"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "This is a Collab Toolbox",
+      "description": "Make it easier to create collab images",
+      "startButton": "Get Started",
+      "docsButton": "View Documentation"
+    }
+  },
+  "settings": {
+    "language": "Language",
+    "colorScheme": "Color scheme",
+    "themes": {
+      "light": "Light",
+      "system": "Follow system settings",
+      "dark": "Dark"
+    },
+    "serverEndpoint": "Server Endpoint",
+    "serverEndpointDescription": "Used as prefixes of profile links etc."
+  },
+  "avatar": {
+    "title": "Avatar Card Generator",
+    "description": "Generate user avatar cards in multiple styles",
+    "settings": {
+      "avatarLink": "Avatar image link",
+      "userIdPlaceholder": "<User ID>",
+      "username": "Username",
+      "countryCode": "Country code",
+      "countryCodeDescription": "In format of two characters",
+      "avatarStyle": "Avatar style",
+      "exportScale": "Export scale"
+    },
+    "sizePrompt": "Size: {width} × {height}",
+    "previewError": "Something went wrong while generation preview.",
+    "downloadError": "Download Failed",
+    "infoRequired": "Information required",
+    "infoRequiredDescription": "Start with filling in the avatar link and username",
+    "styles": {
+      "default": {
+        "name": "Default",
+        "description": "<No description provided>"
+      },
+      "classic": {
+        "name": "Classic",
+        "description": "The old profile style. Feeling nostalgic?"
+      },
+      "modern": {
+        "name": "Modern",
+        "description": "The current user profile style used on the osu! forum."
+      },
+      "simple": {
+        "name": "Simple",
+        "description": "Simple and elegant."
+      }
+    }
+  },
+  "imagemap": {
+    "title": "Imagemap Editor",
+    "description": "Define clickable areas for use in profiles, etc.",
+    "tools": {
+      "select": "Select",
+      "create": "New Area",
+      "createAvatar": "New Avatar Area",
+      "delete": "Delete"
+    },
+    "toolbar": {
+      "selectImage": "Select Image",
+      "save": "Save"
+    },
+    "imgAttrs": {
+      "title": "Image attributes",
+      "imgLink": "Image link",
+      "mapName": "Imagemap name"
+    },
+    "rectAttrs": {
+      "title": "Area attributes",
+      "listTitle": "Areas",
+      "defaultName": "Area {index}",
+      "unsetLink": "Link unset",
+      "dragPrompt": "Drag to reorder",
+      "rectType": "Area type",
+      "types": {
+        "mapArea": "Normal",
+        "avatar": "Avatar card"
+      },
+      "link": "Link",
+      "alt": "Alternative text",
+      "altDescription": "Some descriptive text",
+      "userInfo": "User information",
+      "fillAsId": "Fill as ID",
+      "fillAsUsername": "Fill as username",
+      "x": "X position",
+      "y": "Y position",
+      "width": "Width",
+      "height": "Height"
+    },
+    "placeholder": {
+      "noImage": {
+        "title": "Select an image first",
+        "description": "Drag-and-drop also supported"
+      },
+      "noRectangle": {
+        "title": "No existing areas",
+        "description": "Try creating some in the preview area"
+      },
+      "noCode": {
+        "title": "No code available",
+        "description": "Once an image is selected and any area is present, the Imagemap code would be displayed here"
+      }
+    },
+    "dnd": {
+      "dropAccepted": "Release to use this image",
+      "unsupportedType": "Unsupported file type",
+      "supportedTypeHint": "Drag an image for editing",
+      "tooManyEntries": "Too many entries",
+      "entriesHint": "Only one image at a time",
+      "disallowed": "Action not allowed"
+    },
+    "dialog": {
+      "overwrite": {
+        "title": "Load a new image?",
+        "description": "The current image and imagemap would be overwritten. This cannot be undone.",
+        "confirm": "Overwrite"
+      }
+    },
+    "export": {
+      "title": "Export Configuration",
+      "description": "Below is the JSON configuration for the current Imagemap. You can copy or download it for later use.",
+      "downloadButton": "Download JSON",
+      "copySuccess": "JSON configuration copied to clipboard",
+      "copyError": "Copy Failed",
+      "copyErrorDescription": "Cannot copy to clipboard",
+      "downloadSuccess": "Downloaded",
+      "downloadSuccessDescription": "Configuration file downloaded"
+    },
+    "import": {
+      "title": "Import configuration",
+      "description": "Select the data source and quickly restore the previous work from it.",
+      "overrideWarning": "After the import, currently defined areas would be overwritten, and settings in the configuration would override existing ones.",
+      "dataSource": "Data source",
+      "sources": {
+        "json": "JSON configuration",
+        "bbcode": "[imagemap] BBCode code block"
+      },
+      "check": {
+        "invalid": "Invalid configuration",
+        "jsonSyntaxError": "JSON syntax error: {message}",
+        "invalidJsonFormat": "Invalid JSON format",
+        "expectsArrayForAreas": "The area list must be an array",
+        "invalidAreaEntry": "存在无效区域记录",
+        "invalidAttrInArea": "区域字段缺失或类型不正确：{id}",
+        "invalidAreaType": "不支持的区域类型：{id} 的类型为 {type}",
+        "invalidAreaPosition": "区域位置信息不合理：{id}",
+        "areaSizeOutOfRange": "区域尺寸不可超出图像范围：对于 {id}，{details}",
+        "invalidImagemapAttr": "One or more imagemap attributes are missing, or have wrong types",
+        "bbcodeParsingError": "BBCode parsing error at ({line}}, {col})",
+        "imagemapTagRequired": "[imagemap] tag required",
+        "multipleTagsPresent": "Only one [imagemap] tag is allowed",
+        "imagemapContentRequired": "The [imagemap] tag is missing content",
+        "topLinkRequired": "The first line inside the tag must be a valid link",
+        "invalidAreaDefinition": "Formatting error on line {line}: Invalid area definition",
+        "invalidSizeDefinition": "Formatting error on line {line}: Incorrect types for position and size"
+      },
+      "validationFailed": "Validation failed",
+      "validationPassed": "No issue found",
+      "fromClipboard": "Paste from clipboard",
+      "confirm": "Confirm import",
+      "success": "Imported successfully",
+      "failed": "Unable to import",
+      "importInfo": "{count, plural, =1 {# area is} other {# areas are}} loaded"
+    },
+    "error": {
+      "loadImage": "Cannot load file",
+      "imageFormat": "Image file format not supported or corrupted",
+      "exportFailed": "Export failed"
+    },
+    "success": {
+      "exported": "Exported successfully"
+    }
+  },
+  "navbar": {
+    "viewOnGitHub": "View on GitHub",
+    "hostedByNetlify": "Hosted on Netlify",
+    "toolsTitle": "Tools",
+    "externalProjects": "More Awesome Projects",
+    "nav": {
+      "home": "Home",
+      "avatar": "Avatar Card",
+      "imagemap": "Imagemap Editor",
+      "docs": "Documentation"
+    },
+    "external": {
+      "colorcode": "Exsper's gradient text BBCode generator",
+      "mobe": "BBCode Editor (MOBE)"
+    }
+  },
+  "docs": {
+    "title": "Usage Documentation",
+    "description": "Learn how to use Collab Tools",
+    "sections": {
+      "intro": "About This Site"
+    },
+    "intro": {
+      "description": "Collab Tools is a toolset website specifically designed for osu! meetups / Collabs (though its uses are actually broader).",
+      "motivation": "Before this, many related features had already been implemented by other tools or projects, but I still chose to try making this for the following reasons:",
+      "features": {
+        "flexible": "Flexible: As a frontend project built with Next.js, it can be used on any platform with just a browser, and it also supports self-deployment, which is simple and fast;",
+        "secure": "Secure: Don't want anyone other than Collab members to know? No problem!",
+        "integrated": "Integrated: Starting from small features, gradually covering all steps of the Collab process;"
+      },
+      "github": "The source code of this project can be viewed on <repoLink>GitHub</repoLink>, and we look forward to your feedback or contributions!"
+    },
+    "avatar": {
+      "title": "Avatar Card Generator",
+      "description": "Generate various styles of user avatar cards",
+      "content": [
+        "This feature is inspired by many osu! bots, where group users can generate user cards with a short command. However, if you happen to not have access to an instance with this feature deployed, or simply don't want others in the group to know about it... it could be a bit troublesome.",
+        "To avoid such awkwardness, you can try using this tool to <del>secretly</del> generate small cards for Collab members——heh heh, don't tell them!"
+      ],
+      "alerts": {
+        "experimental": {
+          "title": "Experimental Feature",
+          "description": "This tool is still in active development and may undergo unexpected major changes. Please stay tuned."
+        },
+        "tip": {
+          "title": "Tip",
+          "description": [
+            "The card styles generated by this tool may not be identical to those output by osu! bots, as the two have no code relationship.",
+            "If you want to improve existing styles or have new ideas, welcome to submit Issues or PRs to the project repository to contribute."
+          ]
+        }
+      },
+      "steps": {
+        "title": "To generate an avatar card, you need:",
+        "items": [
+          "User's avatar link, for osu! official servers it should be similar to <linkCode></linkCode>;",
+          "Username;",
+          "If needed, you can fill in a two-letter country/region code to display the country/region flag on the card;",
+          "Select style, preview the generated card, download the image——done!"
+        ]
+      }
+    },
+    "imagemap": {
+      "title": "ImageMap Editor",
+      "description": "Quickly create image maps",
+      "intro": [
+        "osu! profiles have <bbcodeLink>BBCode (osu! wiki)</bbcodeLink> support for imagemaps, but the positions and sizes of various areas in the image still need to be defined manually.",
+        "Currently, when creating imagemaps, most users choose to use image editors and calculate based on the coordinates of the area's four corners; or use browser developer tools to assist in locating mapped areas, which can be difficult when there are many areas and requires a considerable amount of time to precisely adjust various parameters.",
+        "You can use the interactive interface provided by this tool to easily create imagemaps in a \"WYSIWYG\" manner in a short time."
+      ],
+      "steps": {
+        "upload": {
+          "title": "1. Upload Image",
+          "description": "Click the \"Upload Image\" button and select the image file you need to use."
+        },
+        "manage": {
+          "title": "2. Manage Areas",
+          "description": "Use the following tools to create, modify, or delete rectangular areas on the image:",
+          "tools": {
+            "select": {
+              "title": "Selection Tool",
+              "description": "Click to select existing areas, view and edit their corresponding properties, and move or resize them."
+            },
+            "create": {
+              "title": "Creation Tool",
+              "description": "Drag in the preview area to create new areas."
+            },
+            "avatar": {
+              "title": "Avatar Area Tool",
+              "description": "Drag in the preview area to create new avatar component areas."
+            },
+            "delete": {
+              "title": "Deletion Tool",
+              "description": "Click to delete defined areas."
+            }
+          }
+        },
+        "properties": {
+          "title": "3. Set Properties",
+          "description": [
+            "Set link addresses, description text, and area types for each area, and continue to adjust positions and sizes.",
+            "Currently, areas can be set as avatar areas to display specified users' avatar cards in those areas, with settings similar to the avatar card generation tool."
+          ],
+          "tip": {
+            "title": "Tip",
+            "description": [
+              "You can use the <b>User Information</b> field to quickly fill in links. After entering the user's ID or username:",
+              "Use <button></button> to fill in the profile link for the corresponding UID;",
+              "Use <button></button> to fill in the profile link for the corresponding username."
+            ]
+          },
+          "layers": "All areas are displayed uniformly in the <b>Area List</b>, and you can drag the control handle on the left to adjust their layer order.",
+          "imageProps": "At the same time, you can modify the image address to be used and the ImageMap name (this name is only used in HTML code) in the <b>Image Properties</b> so that the generated code directly uses these properties."
+        },
+        "code": {
+          "title": "4. Copy Code",
+          "description": "Click the \"Copy Code\" button to obtain the generated HTML or BBCode code as needed."
+        },
+        "export": {
+          "title": "5. Export Image",
+          "description": "If you have added avatar areas to the image, you can click the \"Save\" button in the preview area to save the image with the avatar cards overlaid to your local device."
+        }
+      },
+      "usage": {
+        "title": "Using Generated Code",
+        "description": "Use it in profiles or other places",
+        "preview": {
+          "title": "New Feature Preview",
+          "description": "We are planning to add a feature to the ImageMap editor for easy uploading to mainstream image hosting platforms. Stay tuned."
+        },
+        "hosting": "Before using ImageMap on other websites, you need to upload the image to a supported platform (image hosting).",
+        "bbcode": {
+          "title": "Using BBCode",
+          "steps": [
+            "Paste the code into the profile editor;",
+            "Replace the image link placeholder in the generated code with the actual uploaded image link;",
+            "Preview the profile, test if the ImageMap displays correctly, and if each area corresponds properly——done!"
+          ]
+        },
+        "html": {
+          "title": "Using HTML",
+          "steps": [
+            "Paste the HTML code, which should contain <imgTag></imgTag>and <mapTag></mapTag> tags;",
+            "Modify the <srcAttr></srcAttr> (image link) and <altAttr></altAttr> (image description) attributes as needed;",
+            "Preview the page and test——done!"
+          ]
+        }
+      },
+      "importExport": {
+        "title": "Import and Export Configuration",
+        "description": "Save or restore work",
+        "warning": {
+          "title": "Note",
+          "description": [
+            "When exporting editor configuration, the edited image <b>will not</b> be exported with it, and the same applies when importing. Therefore, before importing configuration, please ensure you have loaded a suitable image.",
+            "When importing changes from configuration, existing areas <b>will be overwritten</b>, and settings already in the configuration file <b>will overwrite</b> existing values.",
+            "Areas imported from BBCode <b>will not</b> contain area type information."
+          ]
+        },
+        "content": [
+          "Supports exporting the current editor configuration as JSON, or importing from JSON. The exported JSON contains all basic information of the Imagemap, as well as information about defined areas.",
+          "At the same time, you can also import Imagemap image links and area information from BBCode source code. You can use the \"Data Source\" in the import prompt to adjust the data type."
+        ]
+      },
+      "shortcuts": {
+        "title": "Keyboard Shortcuts",
+        "description": "The ImageMap editor supports using keyboard keys to quickly perform some operations.",
+        "global": {
+          "title": "Global",
+          "items": [
+            "<altKey></altKey> + number keys: Switch edit mode (in order starting from 1)"
+          ]
+        },
+        "selected": {
+          "title": "When Area is Selected",
+          "items": [
+            "Delete selected area",
+            "Create copy",
+            "Move to lower/upper layer",
+            "Arrow keys - Move selected area",
+            "While holding <shiftKey></shiftKey> - Fine movement (1 pixel each time)",
+            "While holding <ctrlKey></ctrlKey> - Quick movement (20 pixels each time)"
+          ]
+        }
+      }
+    }
+  }
+}
