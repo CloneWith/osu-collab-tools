@@ -7,7 +7,7 @@ interface LanguageInfo {
 
 export const supportedLanguages: LanguageInfo[] = [
     {code: "en", name: "English"},
-    {code: "zh", name: "简体中文"},
+    {code: "zh-CN", name: "简体中文"},
 ];
 
 
