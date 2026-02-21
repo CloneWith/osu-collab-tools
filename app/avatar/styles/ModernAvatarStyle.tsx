@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import type { AvatarInputs, IAvatarStyle } from "./IAvatarStyle";
 import { FlagTheme, getCountryFlagDataUrl, getProxiedImageUrl } from "@/lib/utils";
 import flagFallback from "@/public/flag-fallback.png";
+import { torus } from "@/lib/fonts";
 
 export class ModernAvatarStyle implements IAvatarStyle {
   key = "modern";
@@ -45,11 +46,10 @@ export class ModernAvatarStyle implements IAvatarStyle {
 
           <div
             style={{
-              fontFamily: font.family,
               fontWeight: font.weight,
               fontSize: font.size,
             }}
-            className="text-white"
+            className={`text-white ${torus.className}`}
           >
             {inputs.username}
           </div>

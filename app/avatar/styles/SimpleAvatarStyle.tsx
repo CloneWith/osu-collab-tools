@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import type { AvatarInputs, IAvatarStyle } from "./IAvatarStyle";
 import { FlagTheme, getCountryFlagDataUrl, getProxiedImageUrl } from "@/lib/utils";
 import flagFallback from "@/public/flag-fallback.png";
+import { torus } from "@/lib/fonts";
 
 export class SimpleAvatarStyle implements IAvatarStyle {
   key = "simple";
@@ -48,11 +49,10 @@ export class SimpleAvatarStyle implements IAvatarStyle {
           <div
             style={{
               background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.85) 100%)",
-              fontFamily: font.family,
               fontWeight: font.weight,
               fontSize: font.size,
             }}
-            className="absolute bottom-0 left-0 right-0 p-3 text-white flex items-center gap-2.5"
+            className={`absolute bottom-0 left-0 right-0 p-3 text-white flex items-center gap-2.5 ${torus.className}`}
           >
             {inputs.countryCode ? (
               <img
