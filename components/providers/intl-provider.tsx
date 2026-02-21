@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { Locale, NextIntlClientProvider } from "next-intl";
-import { defaultLocale, getMessages } from "@/lib/i18n";
+import { defaultLocale, getMessages, isLocale } from "@/lib/i18n";
 
 interface IntlContextType {
   locale: Locale;
@@ -24,21 +24,24 @@ interface IntlProviderProps {
 }
 
 export function IntlProvider({ children }: IntlProviderProps) {
-  const [locale, setLocale] = useState<Locale>(() => {
-    if (typeof window !== "undefined") {
-      const storedLocale = localStorage.getItem("locale");
-      return storedLocale as Locale || defaultLocale;
-    }
-    return defaultLocale;
-  });
-
-  const messages = getMessages(locale);
+  const [locale, setLocale] = useState<Locale>(defaultLocale);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    setMounted(true);
+    const storedLocale = localStorage.getItem("locale");
+    if (storedLocale && isLocale(storedLocale)) {
+      setLocale(storedLocale as Locale);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
       localStorage.setItem("locale", locale);
     }
-  }, [locale]);
+  }, [locale, mounted]);
+
+  const messages = getMessages(locale);
 
   return (
     <IntlContext.Provider value={{ locale, setLocale }}>
