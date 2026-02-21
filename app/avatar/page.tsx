@@ -153,7 +153,7 @@ export default function AvatarGeneratorPage() {
                 <Label htmlFor="imageUrl">{t("settings.avatarLink")}</Label>
                 <Input
                   id="imageUrl"
-                  placeholder={`https://a.ppy.sh/${t("settings.userIdPlaceholder")}`}
+                  placeholder="https://a.ppy.sh/user_id"
                   value={inputImageUrl}
                   onChange={(e) => setInputImageUrl(e.target.value)}
                   onBlur={_ => setImageUrl(inputImageUrl)}

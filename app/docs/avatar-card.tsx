@@ -40,7 +40,7 @@ export default function AvatarDocCard() {
         <p>{t("steps.title")}</p>
         <ul className="list-decimal list-inside space-y-1 text-secondary-foreground">
           <li>{t.rich("steps.items.0", {
-            linkCode: () => <code className="inline-code">https://a.ppy.sh/&lt;用户 ID&gt;</code>,
+            linkCode: () => <code className="inline-code">https://a.ppy.sh/user_id</code>,
           })}</li>
           <li>{t("steps.items.1")}</li>
           <li>{t("steps.items.2")}</li>

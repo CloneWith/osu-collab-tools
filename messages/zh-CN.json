@@ -65,7 +65,6 @@
     "description": "生成各种样式的用户头像卡片",
     "settings": {
       "avatarLink": "头像图片链接",
-      "userIdPlaceholder": "<用户 ID>",
       "username": "用户名",
       "countryCode": "国家/地区代码",
       "countryCodeDescription": "使用两位地区码",

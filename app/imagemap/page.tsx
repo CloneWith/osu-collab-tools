@@ -1768,7 +1768,7 @@ export default function ImagemapEditorPage() {
                             <Label htmlFor="avatarLink">{ta("settings.avatarLink")}</Label>
                             <Input
                               id="avatarLink"
-                              placeholder={`https://a.ppy.sh/${ta("settings.userIdPlaceholder")}`}
+                              placeholder="https://a.ppy.sh/user_id"
                               value={selectedRectData.avatar?.imageUrl ?? ""}
                               onChange={(e) => updateAvatarField(selectedRect, "imageUrl", e.target.value)}
                             />

@@ -65,7 +65,6 @@
     "description": "Generate user avatar cards in multiple styles",
     "settings": {
       "avatarLink": "Avatar image link",
-      "userIdPlaceholder": "<User ID>",
       "username": "Username",
       "countryCode": "Country code",
       "countryCodeDescription": "In format of two characters",
