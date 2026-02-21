@@ -5,9 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, AlertCircle, CheckCircle, ClipboardPaste, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
-  ImageMapConfig,
-  parseImageMapBBCode,
-  validateImageMapJsonConfig,
+  ImageMapConfig, parseImageMapBBCode, validateImageMapJsonConfig,
 } from "@/app/imagemap/types";
 import { CodeMirrorEditor } from "../codemirror-editor";
 import { Label } from "@/components/ui/label";

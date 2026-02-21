@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Monitor, Settings, Globe, Languages, SunMoon } from "lucide-react";
+import { Moon, Sun, Settings, Languages, SunMoon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { common } from "@/app/common";
 import { useEffect } from "react";

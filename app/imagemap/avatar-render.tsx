@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useRef } from "react";
 import type { Rectangle } from "@/app/imagemap/types";
 import { RectangleType } from "@/app/imagemap/types";

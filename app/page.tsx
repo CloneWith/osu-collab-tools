@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { createScope, createTimeline, Scope, splitText, stagger, utils } from "animejs";
+import { createScope, createTimeline, Scope, splitText, stagger } from "animejs";
 import { TrianglesBackground } from "@/components/triangles-background";
 import { useTranslations } from "next-intl";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";

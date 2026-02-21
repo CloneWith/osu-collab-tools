@@ -29,15 +29,15 @@ const EQUILATERAL_TRIANGLE_RATIO = Math.sqrt(3) / 2;
 const BASE_VELOCITY = 50;
 
 export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
-  color = '#ffffff',
-  opacity = 1,
-  velocity = 1,
-  spawnRatio = 1,
-  triangleSize = 100 * 4,
-  thickness = 0.02,
+                                                                          color = "#ffffff",
+                                                                          opacity = 1,
+                                                                          velocity = 1,
+                                                                          spawnRatio = 1,
+                                                                          triangleSize = 100 * 4,
+                                                                          thickness = 0.02,
 
-  className = '',
-}) => {
+                                                                          className = "",
+                                                                        }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const trianglesRef = useRef<Triangle[]>([]);
   const animationFrameRef = useRef<number>(0);
@@ -77,7 +77,7 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     x: number,
     y: number,
     size: number,
-    lineWidth: number
+    lineWidth: number,
   ) => {
     const height = size * EQUILATERAL_TRIANGLE_RATIO;
 
@@ -113,7 +113,7 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     // 计算目标数量
     const aimCount = Math.min(
       Math.max(1, Math.floor(canvas.width * 0.02 * spawnRatio)),
-      1000 // 限制最大数量以保证性能
+      1000, // 限制最大数量以保证性能
     );
 
     // 添加新三角形
@@ -130,8 +130,8 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     // 设置绘制样式
     ctx.strokeStyle = color;
     ctx.globalAlpha = opacity;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     const lineWidth = triangleSize * thickness;
 
@@ -146,19 +146,19 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // 计算时间差
     let deltaTime = lastTimeRef.current === 0 ? 0 : currentTime - lastTimeRef.current;
-    
+
     // 限制最大deltaTime，防止页面从后台返回时时间跳跃过大
     // 限制为最多3帧的时间（假设60fps，即约50ms）
     const maxDeltaTime = 50;
     if (deltaTime > maxDeltaTime) {
       deltaTime = maxDeltaTime;
     }
-    
+
     lastTimeRef.current = currentTime;
 
     updateTriangles(canvas, deltaTime);
@@ -177,7 +177,7 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     // 初始填充三角形
     const aimCount = Math.min(
       Math.max(1, Math.floor(canvas.width * 0.02 * spawnRatio)),
-      1000
+      1000,
     );
 
     for (let i = 0; i < aimCount; i++) {
@@ -213,23 +213,23 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
   // 初始化
   useEffect(() => {
     handleResize();
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     lastTimeRef.current = 0;
     animationFrameRef.current = requestAnimationFrame(animate);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
