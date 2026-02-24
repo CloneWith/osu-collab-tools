@@ -2,6 +2,8 @@
 @import 'highlight.js/styles/github-dark.css' layer(base);
 
 @import 'tailwindcss';
+@import '../components/styles/confetti.css';
+
 @plugin 'tailwindcss-animate';
 
 @source '../*.{js,ts,jsx,tsx,mdx}';

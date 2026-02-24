@@ -1,0 +1,93 @@
+.confetti-button {
+  position: relative;
+  --confetti-color: hsl(var(--primary));
+  --confetti-text-color: hsl(var(--primary-foreground));
+}
+
+.confetti-button::before,
+.confetti-button::after {
+  position: absolute;
+  content: "";
+  display: block;
+  width: 140%;
+  max-width: 160px;
+  height: 100%;
+  left: -20%;
+  z-index: -1;
+  transition: all ease-in-out 0.5s;
+  background-repeat: no-repeat;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.confetti-button::before {
+  content: "";
+  letter-spacing: 1px;
+  font-weight: 700;
+  transform: rotate(-8deg);
+  color: var(--confetti-text-color);
+  display: none;
+  top: -85%;
+  background-image: radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, transparent 20%, var(--confetti-color) 20%, transparent 30%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, transparent 10%, var(--confetti-color) 15%, transparent 20%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%);
+  background-size: 20% 20%, 40% 40%, 30% 30%, 40% 40%, 36% 36%, 20% 20%, 30% 30%, 20% 20%, 36% 36%;
+}
+
+.confetti-button::after {
+  display: none;
+  bottom: -75%;
+  background-image: radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, transparent 10%, var(--confetti-color) 15%, transparent 20%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%), radial-gradient(circle, var(--confetti-color) 20%, transparent 20%);
+  background-size: 30% 30%, 40% 40%, 36% 36%, 40% 40%, 30% 30%, 20% 20%, 40% 40%;
+}
+
+.confetti-button.is-confetti-animating::before {
+  display: block;
+  animation: confettiTopBubbles ease-in-out 1s forwards;
+}
+
+.confetti-button.is-confetti-animating::after {
+  display: block;
+  animation: confettiBottomBubbles ease-in-out 1s forwards;
+}
+
+@keyframes confettiTopBubbles {
+  0% {
+    color: color-mix(in oklab, var(--confetti-text-color) 0%, transparent);
+    background-position: 5% 90%, 10% 90%, 10% 90%, 15% 90%, 25% 90%, 25% 90%, 40% 90%, 55% 90%, 70% 90%;
+    opacity: 0;
+  }
+  30% {
+    color: var(--confetti-text-color);
+    opacity: 1;
+  }
+  50% {
+    background-position: 0 80%, 0 20%, 10% 40%, 20% 0, 30% 30%, 22% 50%, 50% 50%, 65% 20%, 90% 30%;
+  }
+  100% {
+    background-position: 0 70%, 0 10%, 10% 30%, 20% -10%, 30% 20%, 22% 40%, 50% 40%, 65% 10%, 90% 20%;
+    background-size: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+    color: color-mix(in oklab, var(--confetti-text-color) 0%, transparent);
+  }
+}
+
+@keyframes confettiBottomBubbles {
+  0% {
+    background-position: 10% -10%, 30% 10%, 55% -10%, 70% -10%, 85% -10%, 70% -10%, 70% 0;
+    opacity: 0;
+  }
+  50% {
+    background-position: 0 80%, 20% 80%, 45% 60%, 60% 100%, 75% 70%, 95% 60%, 105% 0;
+    opacity: 1;
+  }
+  100% {
+    background-position: 0 90%, 20% 90%, 45% 70%, 60% 110%, 75% 80%, 95% 70%, 110% 10%;
+    background-size: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti-button.is-confetti-animating::before,
+  .confetti-button.is-confetti-animating::after {
+    animation: none;
+    display: none;
+  }
+}
