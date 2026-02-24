@@ -147,3 +147,44 @@ export function getProxiedImageUrl(url?: string): string {
         return "";
     }
 }
+
+/**
+ * Delays function execution until a specified time period has passed
+ * without any new calls. If called again within the wait period, the timer resets.
+ * @param func the source function
+ * @param wait duration in milliseconds
+ * @returns the debounced function
+ */
+export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+    let timeout: NodeJS.Timeout | null = null;
+    
+    return (...args: Parameters<T>) => {
+        if (timeout) clearTimeout(timeout);
+        
+        timeout = setTimeout(() => {
+            func(...args);
+            timeout = null;
+        }, wait);
+    };
+}
+
+/**
+ * Ensure a function is invoked only once during a time period.
+ * @param func the source function
+ * @param limit time limitation in milliseconds
+ * @returns the throttled function
+ */
+export function throttle<T extends (...args: any[]) => any>(func: T, limit: number): (...args: Parameters<T>) => void {
+    let inThrottle: boolean = false;
+    
+    return (...args: Parameters<T>) => {
+        if (!inThrottle) {
+            func(...args);
+            inThrottle = true;
+            
+            setTimeout(() => {
+                inThrottle = false;
+            }, limit);
+        }
+    };
+}

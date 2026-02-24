@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { clamp, toRoundedPercent, isNullOrWhitespace } from "@/lib/utils";
+import { clamp, toRoundedPercent, isNullOrWhitespace, debounce, throttle } from "@/lib/utils";
 
 describe("clamp", () => {
     it("should clamp value within range", () => {
@@ -36,5 +36,54 @@ describe("isNullOrWhitespace", () => {
         expect(isNullOrWhitespace("")).toBe(true);
         expect(isNullOrWhitespace("   ")).toBe(true);
         expect(isNullOrWhitespace("hello")).toBe(false);
+    });
+});
+
+describe("debounce", () => {
+    it("should delay function execution", async () => {
+        let called = false;
+        const debounced = debounce(() => {
+            called = true;
+        }, 50);
+        
+        debounced();
+        expect(called).toBe(false);
+        
+        await new Promise(resolve => setTimeout(resolve, 60));
+        expect(called).toBe(true);
+    });
+    
+    it("should reset timer when called repeatedly", async () => {
+        let callCount = 0;
+        const debounced = debounce(() => {
+            callCount++;
+        }, 50);
+        
+        debounced();
+        await new Promise(resolve => setTimeout(resolve, 30));
+        debounced();
+        await new Promise(resolve => setTimeout(resolve, 30));
+        debounced();
+        await new Promise(resolve => setTimeout(resolve, 60));
+        
+        expect(callCount).toBe(1);
+    });
+});
+
+describe("throttle", () => {
+    it("should limit function execution to once per interval", async () => {
+        let callCount = 0;
+        const throttled = throttle(() => {
+            callCount++;
+        }, 50);
+        
+        throttled();
+        throttled();
+        throttled();
+        expect(callCount).toBe(1);
+        
+        await new Promise(resolve => setTimeout(resolve, 60));
+        throttled();
+        expect(callCount).toBe(2);
     });
 });
