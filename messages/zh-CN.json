@@ -26,6 +26,8 @@
     "duplicateSuffix": "(副本)",
     "unknownError": "未知错误",
     "cannotReadClipboard": "无法读取剪贴板",
+    "copyError": "复制失败",
+    "copyErrorDescription": "无法复制到剪贴板",
     "section": {
       "settings": "设置",
       "preview": "预览",
@@ -162,25 +164,12 @@
         "title": "加载新图片？",
         "description": "当前编辑的图像与 imagemap 将会被覆盖，此操作不可逆。",
         "confirm": "覆盖"
-      },
-      "export": {
-        "title": "导出",
-        "description": "选择导出格式"
-      },
-      "import": {
-        "title": "导入",
-        "description": "从文件导入配置"
       }
     },
     "export": {
       "title": "导出配置",
       "description": "以下是当前 Imagemap 的 JSON 配置，您可以复制或下载它以供后用。",
-      "downloadButton": "下载 JSON",
-      "copySuccess": "JSON 配置已复制到剪贴板",
-      "copyError": "复制失败",
-      "copyErrorDescription": "无法复制到剪贴板",
-      "downloadSuccess": "已下载",
-      "downloadSuccessDescription": "配置文件已下载"
+      "downloadButton": "下载 JSON"
     },
     "import": {
       "title": "导入配置",
@@ -222,9 +211,6 @@
       "loadImage": "无法加载文件",
       "imageFormat": "图像文件格式不支持或已损坏",
       "exportFailed": "导出失败"
-    },
-    "success": {
-      "exported": "导出成功"
     }
   },
   "navbar": {

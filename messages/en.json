@@ -26,6 +26,8 @@
     "duplicateSuffix": "(copy)",
     "unknownError": "Unknown error",
     "cannotReadClipboard": "Unable to read from the clipboard",
+    "copyError": "Copy Failed",
+    "copyErrorDescription": "Cannot copy to clipboard",
     "section": {
       "settings": "Settings",
       "preview": "Preview",
@@ -167,12 +169,7 @@
     "export": {
       "title": "Export Configuration",
       "description": "Below is the JSON configuration for the current Imagemap. You can copy or download it for later use.",
-      "downloadButton": "Download JSON",
-      "copySuccess": "JSON configuration copied to clipboard",
-      "copyError": "Copy Failed",
-      "copyErrorDescription": "Cannot copy to clipboard",
-      "downloadSuccess": "Downloaded",
-      "downloadSuccessDescription": "Configuration file downloaded"
+      "downloadButton": "Download JSON"
     },
     "import": {
       "title": "Import configuration",
@@ -214,9 +211,6 @@
       "loadImage": "Cannot load file",
       "imageFormat": "Image file format not supported or corrupted",
       "exportFailed": "Export failed"
-    },
-    "success": {
-      "exported": "Exported successfully"
     }
   },
   "navbar": {
