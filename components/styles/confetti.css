@@ -13,7 +13,7 @@
   max-width: 160px;
   height: 100%;
   left: -20%;
-  z-index: -1;
+  z-index: 9999;
   transition: all ease-in-out 0.5s;
   background-repeat: no-repeat;
   font-size: 14px;
@@ -21,7 +21,7 @@
 }
 
 .confetti-button::before {
-  content: "";
+  content: attr(data-confetti-text, "");
   letter-spacing: 1px;
   font-weight: 700;
   transform: rotate(-8deg);
@@ -41,12 +41,12 @@
 
 .confetti-button.is-confetti-animating::before {
   display: block;
-  animation: confettiTopBubbles ease-in-out 1s forwards;
+  animation: confettiTopBubbles ease-in-out 0.75s forwards;
 }
 
 .confetti-button.is-confetti-animating::after {
   display: block;
-  animation: confettiBottomBubbles ease-in-out 1s forwards;
+  animation: confettiBottomBubbles ease-in-out 0.75s forwards;
 }
 
 @keyframes confettiTopBubbles {
