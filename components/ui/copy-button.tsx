@@ -1,21 +1,19 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Button } from "./button";
+import { Button, ButtonProps } from "./button";
 import { Check, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useConfetti } from "@/hooks/use-confetti";
 import { useTranslations } from "next-intl";
 import { cn, debounce } from "@/lib/utils";
 
-interface CopyButtonProps {
+interface CopyButtonProps extends Omit<ButtonProps, "children"> {
   /**
    * The text to write to the clipboard.
    */
   text: string;
   children?: React.ReactNode;
-  variant?: "default" | "outline" | "secondary" | "ghost" | "link";
-  className?: string;
 
   /**
    * Called when the specified content is successfully copied.
@@ -33,6 +31,7 @@ export function CopyButton({
                              variant = "default",
                              className = "",
                              onCopySuccess,
+                             ...props
                            }: CopyButtonProps) {
   const t = useTranslations("common");
   const triggerConfetti = useConfetti();
@@ -72,6 +71,7 @@ export function CopyButton({
       variant={variant}
       onClick={handleCopy}
       className={cn("gap-2 confetti-button", className)}
+      {...props}
     >
       <div
         className={`relative transition-all duration-300 ${copySuccess ? "scale-125 opacity-100" : "scale-100 opacity-100"}`}>
