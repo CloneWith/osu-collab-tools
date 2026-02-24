@@ -85,6 +85,7 @@ import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { fileTypeFromBlob } from "file-type";
+import { CopyButton } from "@/components/ui/copy-button";
 
 // 大小调整的八个点
 type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -1950,20 +1951,8 @@ export default function ImagemapEditorPage() {
                 (<>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium">HTML 代码</h3>
-                      <Button
-                        onClick={() => {
-                          navigator.clipboard.writeText(generateImageMapHtml(rectangles, imagePath ?? imageName, mapName))
-                            .then(() => toast({
-                                title: tc("copySuccess"),
-                              }),
-                            );
-                        }}
-                        size="sm"
-                      >
-                        <Copy className="w-4 h-4"/>
-                        {tc("copy")}
-                      </Button>
+                      <h3 className="font-medium">HTML</h3>
+                      <CopyButton text={generateImageMapHtml(rectangles, imagePath ?? imageName, mapName)} size="sm"/>
                     </div>
                     <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
                     <pre>
@@ -1977,20 +1966,11 @@ export default function ImagemapEditorPage() {
                   </CardContent>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium">BBCode 代码</h3>
-                      <Button
-                        onClick={() => {
-                          navigator.clipboard.writeText(generateImageMapBBCode(rectangles, imageSize.width, imageSize.height, imagePath ?? imageName))
-                            .then(() => toast({
-                                title: tc("copySuccess"),
-                              }),
-                            );
-                        }}
+                      <h3 className="font-medium">BBCode</h3>
+                      <CopyButton
+                        text={generateImageMapBBCode(rectangles, imageSize.width, imageSize.height, imagePath ?? imageName)}
                         size="sm"
-                      >
-                        <Copy className="w-4 h-4"/>
-                        {tc("copy")}
-                      </Button>
+                      />
                     </div>
                     <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
                       <pre>

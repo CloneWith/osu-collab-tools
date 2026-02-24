@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, DownloadCloud, Upload } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { CopyButton } from "@/components/ui/copy-button";
+import { DownloadCloud, Upload } from "lucide-react";
 import { ImageMapConfig } from "@/app/imagemap/types";
 import hljs from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useTranslations } from "next-intl";
+import { useConfetti } from "@/hooks/use-confetti";
 
 interface ExportDialogProps {
   open: boolean;
@@ -24,31 +25,19 @@ interface ExportDialogProps {
 }
 
 export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
-  const {toast} = useToast();
+  const triggerConfetti = useConfetti();
   const t = useTranslations("imagemap");
   const tc = useTranslations("common");
+
+  const downloadBtnRef = useRef<HTMLButtonElement>(null);
 
   const jsonString = JSON.stringify(data, null, 2);
 
   hljs.registerLanguage("json", json);
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(jsonString);
-      toast({
-        title: tc("copySuccess"),
-        description: t("export.copySuccess"),
-      });
-    } catch (error) {
-      toast({
-        title: t("export.copyError"),
-        description: t("export.copyErrorDescription"),
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleDownload = () => {
+    if (downloadBtnRef.current) triggerConfetti(downloadBtnRef.current);
+
     const element = document.createElement("a");
     const file = new Blob([jsonString], {type: "application/json"});
     element.href = URL.createObjectURL(file);
@@ -57,11 +46,6 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
     element.click();
     document.body.removeChild(element);
     URL.revokeObjectURL(element.href);
-
-    toast({
-      title: t("export.downloadSuccess"),
-      description: t("export.downloadSuccessDescription"),
-    });
   };
 
   return (
@@ -93,17 +77,11 @@ export function ExportDialog({open, onOpenChange, data}: ExportDialogProps) {
           >
             {tc("cancel")}
           </Button>
+          <CopyButton text={jsonString} variant="default"/>
           <Button
-            variant="default"
-            onClick={handleCopy}
-            className="gap-2"
-          >
-            <Copy className="w-4 h-4"/>
-            {tc("copy")}
-          </Button>
-          <Button
+            ref={downloadBtnRef}
             onClick={handleDownload}
-            className="gap-2"
+            className="gap-2 confetti-button"
           >
             <DownloadCloud className="w-4 h-4"/>
             {t("export.downloadButton")}
