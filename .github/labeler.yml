@@ -1,0 +1,44 @@
+"@components":
+  - changed-files:
+    - any-glob-to-any-file: components/**
+
+"@utils":
+  - changed-files:
+    - any-glob-to-any-file:
+      - hooks/**
+      - lib/**
+
+"@i18n":
+  - head-branch: ["l10n*", "l10n"]
+  - changed-files:
+    - any-glob-to-any-file:
+      - messages/**
+      - lib/i18n/**
+
+"@meta":
+  - changed-files:
+    - any-glob-to-any-file: "*"
+
+"@tests":
+  - changed-files:
+    - any-glob-to-any-file:
+      - tests/**
+      - "*.test*"
+
+"#avatar":
+  - changed-files:
+    - any-glob-to-any-file: app/avatar/**
+
+"#imagemap":
+  - changed-files:
+    - any-glob-to-any-file: "**/imagemap/**"
+
+"#docs":
+  - changed-files:
+    - any-glob-to-any-file: app/docs/**
+
+"dependencies":
+  - changed-files:
+    - any-glob-to-any-file:
+      - "**/package.json"
+      - "**/pnpm-lock.yaml"
