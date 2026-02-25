@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { IAvatarStyle, AvatarInputs } from "./styles/IAvatarStyle";
 import { ClassicAvatarStyle } from "./styles/ClassicAvatarStyle";
@@ -215,8 +215,8 @@ export default function AvatarGeneratorPage() {
 
           <Card>
             <CardHeader>
-              <div className="flex items-start justify-between">
-                <CardTitle className="flex-title gap-2"><Eye/>{tc("section.preview")}</CardTitle>
+              <CardTitle className="flex-title gap-2"><Eye/>{tc("section.preview")}</CardTitle>
+              <CardAction>
                 {previewEl && (
                   <Button
                     onClick={handleDownload}
@@ -228,7 +228,7 @@ export default function AvatarGeneratorPage() {
                     {tc("download")}
                   </Button>
                 )}
-              </div>
+              </CardAction>
               {previewEl && previewSize &&
                 <CardDescription>{t("sizePrompt", {...previewSize})}</CardDescription>}
             </CardHeader>

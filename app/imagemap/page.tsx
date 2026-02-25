@@ -4,7 +4,7 @@ import type React from "react";
 import type { ReactElement } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1301,7 +1301,7 @@ export default function ImagemapEditorPage() {
             )}
 
             <Card className={`${uploadedImage ? "h-auto" : "h-96"} lg:min-h-125`}>
-              <CardContent className={`p-4 ${uploadedImage ? "h-auto" : "h-full"}`}>
+              <CardContent className={uploadedImage ? "h-auto" : "h-full"}>
                 {uploadedImage ? (
                   <ContextMenu onOpenChange={(open) => {
                     if (!open) setContextTargetId(null);
@@ -1543,9 +1543,11 @@ export default function ImagemapEditorPage() {
             {/* Image Properties */}
             {uploadedImage && (
               <Card>
-                <CardContent className="p-4">
+                <CardHeader>
+                  <CardTitle className="text-lg">{t("imgAttrs.title")}</CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="items-center space-y-3">
-                    <h3 className="font-medium">{t("imgAttrs.title")}</h3>
                     <div>
                       <Label htmlFor="imageUrl">{t("imgAttrs.imgLink")}</Label>
                       <Input
@@ -1578,11 +1580,10 @@ export default function ImagemapEditorPage() {
 
             {uploadedImage && (
               <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">{t("rectAttrs.listTitle")}</h3>
-                  </div>
-
+                <CardHeader>
+                  <CardTitle className="text-lg">{t("rectAttrs.listTitle")}</CardTitle>
+                </CardHeader>
+                <CardContent>
                   {rectangles.length === 0 ? (
                     <Empty>
                       <EmptyHeader>
@@ -1654,7 +1655,6 @@ export default function ImagemapEditorPage() {
                                 {rect.href || t("rectAttrs.unsetLink")}
                               </span>
                             </div>
-
                           </div>
 
                           <DropdownMenu>
@@ -1701,30 +1701,30 @@ export default function ImagemapEditorPage() {
             {/* Rectangle Properties */}
             {selectedRect && selectedRectData && (
               <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium">{t("rectAttrs.title")}</h3>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => duplicateRectangle(selectedRect)}
-                        className="flex items-center gap-1"
-                      >
-                        <Copy className="w-4 h-4"/>
-                        {tc("duplicate")}
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteRectangle(selectedRect)}
-                        className="flex items-center gap-1"
-                      >
-                        <Trash2 className="w-4 h-4"/>
-                        {tc("delete")}
-                      </Button>
-                    </div>
-                  </div>
+                <CardHeader>
+                  <CardTitle className="text-lg">{t("rectAttrs.title")}</CardTitle>
+                  <CardAction>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => duplicateRectangle(selectedRect)}
+                      className="flex items-center gap-1"
+                    >
+                      <Copy className="w-4 h-4"/>
+                      {tc("duplicate")}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteRectangle(selectedRect)}
+                      className="flex items-center gap-1"
+                    >
+                      <Trash2 className="w-4 h-4"/>
+                      {tc("delete")}
+                    </Button>
+                  </CardAction>
+                </CardHeader>
+                <CardContent>
                   {selectedRectData && (
                     <div className="space-y-2">
                       {/* 区域类型选择 */}
@@ -1949,11 +1949,13 @@ export default function ImagemapEditorPage() {
             <Card className="flex-1">
               {uploadedImage && rectangles.length !== 0 ?
                 (<>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium">HTML</h3>
+                  <CardHeader>
+                    <CardTitle className="text-lg">HTML</CardTitle>
+                    <CardAction>
                       <CopyButton text={generateImageMapHtml(rectangles, imagePath ?? imageName, mapName)} size="sm"/>
-                    </div>
+                    </CardAction>
+                  </CardHeader>
+                  <CardContent>
                     <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
                     <pre>
                     <code
@@ -1964,14 +1966,16 @@ export default function ImagemapEditorPage() {
                     </pre>
                     </div>
                   </CardContent>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium">BBCode</h3>
+                  <CardHeader>
+                    <CardTitle className="text-lg">BBCode</CardTitle>
+                    <CardAction>
                       <CopyButton
                         text={generateImageMapBBCode(rectangles, imageSize.width, imageSize.height, imagePath ?? imageName)}
                         size="sm"
                       />
-                    </div>
+                    </CardAction>
+                  </CardHeader>
+                  <CardContent>
                     <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
                       <pre>
                         <code
