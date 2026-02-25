@@ -1,0 +1,58 @@
+name: Feature Request
+description: Request a new feature.
+title: "feat: [summarize your request]"
+labels: ["enhancement"]
+
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to improve this project!
+  - type: dropdown
+    id: relationship
+    attributes:
+      label: Is your feature request related to existing tools?
+      options:
+        - Yes, it's about adding a new feature to an existing part.
+        - No, it's about writing a tool from scratch.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Is your feature request related to a problem? Please describe.
+      description: A clear and concise description of what the problem is.
+      placeholder: "Example: When doing..., I am unable to..."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe the solution you'd like
+      description: A clear and concise description of what you want to happen.
+      placeholder: "Example: It would be good if the tool supports..."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe alternatives you've considered
+      description: A clear and concise description of any alternative solutions or features you've considered.
+      placeholder: "Example: Without this feature, I could also use..."
+    validations:
+      required: true
+  - type: dropdown
+    id: contributing
+    attributes:
+      label: Would you like to implement this feature by yourself?
+      options:
+        - Yes, and it is almost done or in progress.
+        - Yes, and I hope to do this after some time.
+        - No, but it would be awesome if implemented in the future.
+    validations:
+      required: true
+  - type: checkboxes
+    id: verify
+    attributes:
+      label: Finally, please check the following items twice.
+      options:
+        - The requested feature hasn't been discussed in other issues or discussions of this repository.
+        - There isn't any pull request about the feature yet.
+    validations:
+      required: true

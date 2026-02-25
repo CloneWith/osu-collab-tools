@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Forum thread of this project on osu! forum
+    url: https://osu.ppy.sh/community/forums
+    about: Talk about minor issues and anything else
+  - name: osu! 论坛项目中文帖
+    url: https://osu.ppy.sh/community/forums/topics/2164592
+    about: 小问题和其他内容可在那里交流
+  - name: Translation fixes and updates
+    url: https://crowdin.com/project/osu-collab-tools
+    about: It's recommended to use Crowdin to translate strings instead of directly modifying message JSONs.

@@ -1,0 +1,53 @@
+name: Bug Report
+description: File a bug report.
+title: "bug: [summarize your report]"
+labels: ["bug"]
+type: bug
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report!
+  - type: textarea
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction description
+      description: Describe how the issue can be observed based on your provided reproduction.
+      value: |
+        Steps to reproduce:
+        1. Open reproduction
+        2. Click on …
+        3. See error: …
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected behaviour
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: dropdown
+    id: contributing
+    attributes:
+      label: Would you like to fix this bug by yourself?
+      options:
+        - Yes, and it is almost done or in progress.
+        - Yes, and I hope to do this after some time.
+        - No, hope it could be fixed.
+    validations:
+      required: true
+  - type: checkboxes
+    id: verify
+    attributes:
+      label: Finally, please check the following items twice.
+      options:
+        - The bug hasn't been discussed in other issues or discussions of this repository.
+        - There isn't any pull request fixing the bug yet.
+    validations:
+      required: true
