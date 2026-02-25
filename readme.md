@@ -23,7 +23,6 @@ https://clonewith.github.io/osu-collab-tools/), where You can always use the **l
 
 If network conditions don't allow for access, you can try the following sites:
 
-- [Cloudflare](https://osu-collab-tools.clonewith.workers.dev)
 - [Netlify](https://amaz1ng-c0llab-cw.netlify.app/) (Will not always be up to date with latest changes)
 
 ### Run Locally
@@ -31,7 +30,7 @@ If network conditions don't allow for access, you can try the following sites:
 You need to clone this repository first. After that, turn to the repository directory and install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 Then start the Next.js server:
@@ -40,10 +39,10 @@ Then start the Next.js server:
 next dev
 ```
 
-Here's an alternative if the command above won't work:
+Here's an alternative if the command above doesn't work:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 The website should be available shortly at the specified address given in the console output.
