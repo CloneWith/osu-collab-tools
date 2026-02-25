@@ -46,7 +46,7 @@ body:
     attributes:
       label: Finally, please check the following items twice.
       options:
-        - "The bug hasn't been discussed in other issues or discussions of this repository."
-        - "There isn't any pull request fixing the bug yet."
+        - label: "The bug hasn't been discussed in other issues or discussions of this repository."
+        - label: "There isn't any pull request fixing the bug yet."
     validations:
       required: true

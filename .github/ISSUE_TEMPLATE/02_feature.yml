@@ -52,7 +52,7 @@ body:
     attributes:
       label: Finally, please check the following items twice.
       options:
-        - "The requested feature hasn't been discussed in other issues or discussions of this repository."
-        - "There isn't any pull request about the feature yet."
+        - label: "The requested feature hasn't been discussed in other issues or discussions of this repository."
+        - label: "There isn't any pull request about the feature yet."
     validations:
       required: true
