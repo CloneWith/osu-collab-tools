@@ -25,9 +25,9 @@ body:
     attributes:
       label: Are you the native speaker of the requested language?
       options:
-        - Yes, and I would like to translate the project by myself.
-        - No, but I am able to translate the project into this language.
-        - No, I just want to see the project in the specified language.
+        - "Yes, and I would like to translate the project by myself."
+        - "No, but I am able to translate the project into this language."
+        - "No, I just want to see the project in the specified language."
     validations:
       required: true
   - type: checkboxes
@@ -35,7 +35,7 @@ body:
     attributes:
       label: Finally, please check the following items twice.
       options:
-        - The requested language isn't included in the project's language list.
-        - I am unable to find the language on the project's language page on Crowdin.
+        - "The requested language isn't included in the project's language list."
+        - "I am unable to find the language on the project's language page on Crowdin."
     validations:
       required: true

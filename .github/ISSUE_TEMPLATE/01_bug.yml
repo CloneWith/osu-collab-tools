@@ -2,7 +2,6 @@ name: Bug Report
 description: File a bug report.
 title: "bug: [summarize your report]"
 labels: ["bug"]
-type: bug
 
 body:
   - type: markdown
@@ -37,9 +36,9 @@ body:
     attributes:
       label: Would you like to fix this bug by yourself?
       options:
-        - Yes, and it is almost done or in progress.
-        - Yes, and I hope to do this after some time.
-        - No, hope it could be fixed.
+        - "Yes, and it is almost done or in progress."
+        - "Yes, and I hope to do this after some time."
+        - "No, hope it could be fixed."
     validations:
       required: true
   - type: checkboxes
@@ -47,7 +46,7 @@ body:
     attributes:
       label: Finally, please check the following items twice.
       options:
-        - The bug hasn't been discussed in other issues or discussions of this repository.
-        - There isn't any pull request fixing the bug yet.
+        - "The bug hasn't been discussed in other issues or discussions of this repository."
+        - "There isn't any pull request fixing the bug yet."
     validations:
       required: true

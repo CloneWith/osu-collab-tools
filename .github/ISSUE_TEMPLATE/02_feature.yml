@@ -12,8 +12,8 @@ body:
     attributes:
       label: Is your feature request related to existing tools?
       options:
-        - Yes, it's about adding a new feature to an existing part.
-        - No, it's about writing a tool from scratch.
+        - "Yes, it's about adding a new feature to an existing part."
+        - "No, it's about writing a tool from scratch."
     validations:
       required: true
   - type: textarea
@@ -42,9 +42,9 @@ body:
     attributes:
       label: Would you like to implement this feature by yourself?
       options:
-        - Yes, and it is almost done or in progress.
-        - Yes, and I hope to do this after some time.
-        - No, but it would be awesome if implemented in the future.
+        - "Yes, and it is almost done or in progress."
+        - "Yes, and I hope to do this after some time."
+        - "No, but it would be awesome if implemented in the future."
     validations:
       required: true
   - type: checkboxes
@@ -52,7 +52,7 @@ body:
     attributes:
       label: Finally, please check the following items twice.
       options:
-        - The requested feature hasn't been discussed in other issues or discussions of this repository.
-        - There isn't any pull request about the feature yet.
+        - "The requested feature hasn't been discussed in other issues or discussions of this repository."
+        - "There isn't any pull request about the feature yet."
     validations:
       required: true
