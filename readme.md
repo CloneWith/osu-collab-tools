@@ -23,6 +23,7 @@ https://clonewith.github.io/osu-collab-tools/), where You can always use the **l
 
 If network conditions don't allow for access, you can try the following sites:
 
+- [Vercel](https://amaz1ng-c0llab.vercel.app)
 - [Netlify](https://amaz1ng-c0llab-cw.netlify.app/) (Will not always be up to date with latest changes)
 
 ### Run Locally
