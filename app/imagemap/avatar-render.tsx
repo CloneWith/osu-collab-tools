@@ -275,11 +275,15 @@ export async function getAvatarDataURL(
  * 使用原生 Canvas 方式，生成带有头像组件的合成图像
  * @param backgroundDataURL 背景图像的 dataURL
  * @param avatars 所有需要合成到背景的头像
+ * @param format 合成图像格式，如 image/png
+ * @param quality 导出图像的质量
  * @returns 合成图像的 dataURL，失败则返回 null
  */
 export async function generateCompositeImage(
   backgroundDataURL: string,
   avatars: Array<RenderableAvatar>,
+  format: string,
+  quality: number
 ): Promise<string | null> {
   return new Promise<string | null>((resolve) => {
     try {
@@ -339,8 +343,7 @@ export async function generateCompositeImage(
 
           // 等待所有头像绘制完成
           Promise.all(avatarPromises).then(() => {
-            // 导出为高质量 PNG（PNG 为无损格式，quality 参数无效）
-            const dataURL = canvas.toDataURL("image/png");
+            const dataURL = canvas.toDataURL(format, quality);
             resolve(dataURL);
           }).catch(() => {
             resolve(null);

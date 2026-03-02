@@ -86,6 +86,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { fileTypeFromBlob } from "file-type";
 import { CopyButton } from "@/components/ui/copy-button";
+import SaveDialog from "@/components/imagemap/save-dialog";
 
 // 大小调整的八个点
 type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -98,19 +99,19 @@ interface Tool {
 
 // 工具栏中可用工具
 const tools: Tool[] = [
-  {key: "select", name: "select", icon: <MousePointer className="w-5 h-5"/>},
-  {key: "create", name: "create", icon: <Square className="w-5 h-5"/>},
-  {key: "create-avatar", name: "createAvatar", icon: <CircleUserRound className="w-5 h-5"/>},
-  {key: "delete", name: "delete", icon: <Trash2 className="w-5 h-5"/>},
+  { key: "select", name: "select", icon: <MousePointer className="w-5 h-5" /> },
+  { key: "create", name: "create", icon: <Square className="w-5 h-5" /> },
+  { key: "create-avatar", name: "createAvatar", icon: <CircleUserRound className="w-5 h-5" /> },
+  { key: "delete", name: "delete", icon: <Trash2 className="w-5 h-5" /> },
 ];
 
 type EditorTool = Tool["key"];
 
 // 注册所有可用头像样式（与 avatar/page.tsx 保持一致）
 const STYLE_REGISTRY = [
-  {key: "classic", style: new ClassicAvatarStyle() as IAvatarStyle},
-  {key: "modern", style: new ModernAvatarStyle() as IAvatarStyle},
-  {key: "simple", style: new SimpleAvatarStyle() as IAvatarStyle},
+  { key: "classic", style: new ClassicAvatarStyle() as IAvatarStyle },
+  { key: "modern", style: new ModernAvatarStyle() as IAvatarStyle },
+  { key: "simple", style: new SimpleAvatarStyle() as IAvatarStyle },
 ] as const;
 
 export default function ImagemapEditorPage() {
@@ -121,7 +122,7 @@ export default function ImagemapEditorPage() {
   // Image states
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageName, setImageName] = useState<string | undefined>(undefined);
-  const [imageSize, setImageSize] = useState({width: 0, height: 0});
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
   // Custom image properties
   const [imagePath, setImagePath] = useState<string | undefined>(undefined);
@@ -130,18 +131,18 @@ export default function ImagemapEditorPage() {
   // Rectangle and drawing states
   const [rectangles, setRectangles] = useState<Rectangle[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [startPoint, setStartPoint] = useState({x: 0, y: 0});
+  const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [currentRect, setCurrentRect] = useState<Rectangle | null>(null);
   const [selectedRect, setSelectedRectId] = useState<string | null>(null);
   const [movingRect, setMovingRect] = useState<string | null>(null);
-  const [moveOffset, setMoveOffset] = useState({x: 0, y: 0});
+  const [moveOffset, setMoveOffset] = useState({ x: 0, y: 0 });
   const [resizingRect, setResizingRect] = useState<string | null>(null);
   const [resizeHandle, setResizeHandle] = useState<ResizeHandle | null>(null);
-  const [resizeStartPoint, setResizeStartPoint] = useState({x: 0, y: 0});
+  const [resizeStartPoint, setResizeStartPoint] = useState({ x: 0, y: 0 });
   const [resizeStartRect, setResizeStartRect] = useState<Rectangle | null>(null);
   const [draggingRectId, setDraggingRectId] = useState<string | null>(null);
-  const [lastPositionInput, setLastPositionInput] = useState({x: "0", y: "0"});
-  const [lastSizeInput, setLastSizeInput] = useState({width: "50", height: "50"});
+  const [lastPositionInput, setLastPositionInput] = useState({ x: "0", y: "0" });
+  const [lastSizeInput, setLastSizeInput] = useState({ width: "50", height: "50" });
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [_, setWindowResizeCounter] = useState(0);
@@ -162,11 +163,12 @@ export default function ImagemapEditorPage() {
   // Export & Import dialog states
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
   // Layout state
   const [preferLayout, setPreferLayout] = useState<"two-column" | "single-column">("two-column");
 
-  const {toast} = useToast();
+  const { toast } = useToast();
 
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -175,7 +177,6 @@ export default function ImagemapEditorPage() {
   const selectedRectRef = useRef<string | null>(null);
   const avatarCacheRef = useRef<Map<string, { comp: React.FC; signature: string }>>(new Map());
   const [avatarNaturalSizes, setAvatarNaturalSizes] = useState<Record<string, { width: number; height: number }>>({});
-  const [isExporting, setIsExporting] = useState(false);
 
   const handleSize = isTouchDevice ? 16 : 10;
   const handleOffset = handleSize / 2;
@@ -184,36 +185,36 @@ export default function ImagemapEditorPage() {
     style: React.CSSProperties;
     cursor: string;
   }> = [
-    {handle: "top-left", style: {top: -handleOffset, left: -handleOffset}, cursor: "nwse-resize"},
+    { handle: "top-left", style: { top: -handleOffset, left: -handleOffset }, cursor: "nwse-resize" },
     {
       handle: "top",
-      style: {top: -handleOffset, left: "50%", transform: "translateX(-50%)"},
+      style: { top: -handleOffset, left: "50%", transform: "translateX(-50%)" },
       cursor: "ns-resize",
     },
-    {handle: "top-right", style: {top: -handleOffset, right: -handleOffset}, cursor: "nesw-resize"},
+    { handle: "top-right", style: { top: -handleOffset, right: -handleOffset }, cursor: "nesw-resize" },
     {
       handle: "right",
-      style: {top: "50%", right: -handleOffset, transform: "translateY(-50%)"},
+      style: { top: "50%", right: -handleOffset, transform: "translateY(-50%)" },
       cursor: "ew-resize",
     },
     {
       handle: "bottom-right",
-      style: {bottom: -handleOffset, right: -handleOffset},
+      style: { bottom: -handleOffset, right: -handleOffset },
       cursor: "nwse-resize",
     },
     {
       handle: "bottom",
-      style: {bottom: -handleOffset, left: "50%", transform: "translateX(-50%)"},
+      style: { bottom: -handleOffset, left: "50%", transform: "translateX(-50%)" },
       cursor: "ns-resize",
     },
     {
       handle: "bottom-left",
-      style: {bottom: -handleOffset, left: -handleOffset},
+      style: { bottom: -handleOffset, left: -handleOffset },
       cursor: "nesw-resize",
     },
     {
       handle: "left",
-      style: {top: "50%", left: -handleOffset, transform: "translateY(-50%)"},
+      style: { top: "50%", left: -handleOffset, transform: "translateY(-50%)" },
       cursor: "ew-resize",
     },
   ];
@@ -287,8 +288,7 @@ export default function ImagemapEditorPage() {
     const file = event.target.files?.[0];
 
     if (file) {
-      loadImageFile(file).then(_ => {
-      });
+      loadImageFile(file).then((_) => {});
     }
   };
 
@@ -311,8 +311,8 @@ export default function ImagemapEditorPage() {
       const img = document.createElement("img");
 
       img.onload = () => {
-        const {naturalWidth, naturalHeight} = img;
-        setImageSize({width: naturalWidth, height: naturalHeight});
+        const { naturalWidth, naturalHeight } = img;
+        setImageSize({ width: naturalWidth, height: naturalHeight });
       };
 
       img.src = source;
@@ -393,13 +393,12 @@ export default function ImagemapEditorPage() {
       return;
     }
 
-    if (file) loadImageFile(file).then(_ => {
-    });
+    if (file) loadImageFile(file).then((_) => {});
   };
 
   // 获取缩放比例
   const getImageScale = () => {
-    if (!imageRef.current) return {scaleX: 1, scaleY: 1};
+    if (!imageRef.current) return { scaleX: 1, scaleY: 1 };
     const displayWidth = imageRef.current.clientWidth;
     const displayHeight = imageRef.current.clientHeight;
     return {
@@ -410,9 +409,9 @@ export default function ImagemapEditorPage() {
 
   // 预览区坐标 => 原图像坐标
   const getRelativeCoordinates = (event: React.MouseEvent) => {
-    if (!imageRef.current || !containerRef.current) return {x: 0, y: 0};
+    if (!imageRef.current || !containerRef.current) return { x: 0, y: 0 };
     const rect = imageRef.current.getBoundingClientRect();
-    const {scaleX, scaleY} = getImageScale();
+    const { scaleX, scaleY } = getImageScale();
     return {
       x: (event.clientX - rect.left) * scaleX,
       y: (event.clientY - rect.top) * scaleY,
@@ -420,10 +419,10 @@ export default function ImagemapEditorPage() {
   };
 
   const getTouchCoordinates = (event: React.TouchEvent) => {
-    if (!imageRef.current || !containerRef.current) return {x: 0, y: 0};
+    if (!imageRef.current || !containerRef.current) return { x: 0, y: 0 };
     const rect = imageRef.current.getBoundingClientRect();
     const touch = event.touches[0] || event.changedTouches[0];
-    const {scaleX, scaleY} = getImageScale();
+    const { scaleX, scaleY } = getImageScale();
     return {
       x: (touch.clientX - rect.left) * scaleX,
       y: (touch.clientY - rect.top) * scaleY,
@@ -435,16 +434,16 @@ export default function ImagemapEditorPage() {
 
     // Restore input values to a sane default
     if (id === null) {
-      setLastPositionInput({x: "0", y: "0"});
-      setLastSizeInput({width: "50", height: "50"});
+      setLastPositionInput({ x: "0", y: "0" });
+      setLastSizeInput({ width: "50", height: "50" });
       return;
     }
 
     const target = rectangles.find((r) => r.id === id);
 
     if (target) {
-      setLastPositionInput({x: target.x.toString(), y: target.y.toString()});
-      setLastSizeInput({width: target.width.toString(), height: target.height.toString()});
+      setLastPositionInput({ x: target.x.toString(), y: target.y.toString() });
+      setLastSizeInput({ width: target.width.toString(), height: target.height.toString() });
     } else {
       console.warn(`Cannot find a rectangle with selected id ${id}. Got:`, rectangles);
     }
@@ -453,23 +452,23 @@ export default function ImagemapEditorPage() {
   const MIN_RECT_SIZE = 20;
 
   const selectedRectData = useMemo(
-    () => (selectedRect ? rectangles.find((r) => r.id === selectedRect) ?? null : null),
+    () => (selectedRect ? (rectangles.find((r) => r.id === selectedRect) ?? null) : null),
     [selectedRect, rectangles],
   );
 
   const positionBounds = selectedRectData
     ? {
-      maxX: Math.max(0, imageSize.width - selectedRectData.width),
-      maxY: Math.max(0, imageSize.height - selectedRectData.height),
-    }
-    : {maxX: imageSize.width, maxY: imageSize.height};
+        maxX: Math.max(0, imageSize.width - selectedRectData.width),
+        maxY: Math.max(0, imageSize.height - selectedRectData.height),
+      }
+    : { maxX: imageSize.width, maxY: imageSize.height };
 
   const sizeBounds = selectedRectData
     ? {
-      maxWidth: Math.max(MIN_RECT_SIZE, imageSize.width - selectedRectData.x),
-      maxHeight: Math.max(MIN_RECT_SIZE, imageSize.height - selectedRectData.y),
-    }
-    : {maxWidth: imageSize.width, maxHeight: imageSize.height};
+        maxWidth: Math.max(MIN_RECT_SIZE, imageSize.width - selectedRectData.x),
+        maxHeight: Math.max(MIN_RECT_SIZE, imageSize.height - selectedRectData.y),
+      }
+    : { maxWidth: imageSize.width, maxHeight: imageSize.height };
 
   const clampPositionInput = (field: "x" | "y", value: string) => {
     if (!selectedRectData || value.trim() === "") return null;
@@ -570,7 +569,7 @@ export default function ImagemapEditorPage() {
         return;
       }
 
-      setRectangles((prev) => prev.map((r) => (r.id === selectedId ? {...r, x: newX, y: newY} : r)));
+      setRectangles((prev) => prev.map((r) => (r.id === selectedId ? { ...r, x: newX, y: newY } : r)));
       // Input fields will be updated automatically via useEffect when rectangles change
 
       event.preventDefault();
@@ -580,7 +579,7 @@ export default function ImagemapEditorPage() {
       // Update input fields after arrow key release
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
         if (selectedRectData && selectedRectRef.current === selectedRectData.id) {
-          setLastPositionInput({x: selectedRectData.x.toString(), y: selectedRectData.y.toString()});
+          setLastPositionInput({ x: selectedRectData.x.toString(), y: selectedRectData.y.toString() });
         }
       }
     };
@@ -594,7 +593,7 @@ export default function ImagemapEditorPage() {
   }, [imageSize.height, imageSize.width, selectedRectData]);
 
   const calculateResizedRect = (rect: Rectangle, handle: ResizeHandle, deltaX: number, deltaY: number) => {
-    let {x, y, width, height} = rect;
+    let { x, y, width, height } = rect;
 
     const clampWidth = (w: number, left: number) =>
       clamp(w, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.width - left));
@@ -789,7 +788,7 @@ export default function ImagemapEditorPage() {
 
         if (coords.x <= imageSize.width && coords.y <= imageSize.height) {
           setIsDrawing(true);
-          setStartPoint({x: Math.round(coords.x), y: Math.round(coords.y)});
+          setStartPoint({ x: Math.round(coords.x), y: Math.round(coords.y) });
         }
         break;
 
@@ -821,12 +820,12 @@ export default function ImagemapEditorPage() {
         prev.map((rect) =>
           rect.id === resizingRect
             ? {
-              ...rect,
-              x: resized.x,
-              y: resized.y,
-              width: resized.width,
-              height: resized.height,
-            }
+                ...rect,
+                x: resized.x,
+                y: resized.y,
+                width: resized.width,
+                height: resized.height,
+              }
             : rect,
         ),
       );
@@ -925,8 +924,8 @@ export default function ImagemapEditorPage() {
       setRectangles((prev) => [newRect, ...prev]);
 
       setSelectedRectId(newRect.id);
-      setLastPositionInput({x: newRect.x.toString(), y: newRect.y.toString()});
-      setLastSizeInput({width: newRect.width.toString(), height: newRect.height.toString()});
+      setLastPositionInput({ x: newRect.x.toString(), y: newRect.y.toString() });
+      setLastSizeInput({ width: newRect.width.toString(), height: newRect.height.toString() });
 
       // Upon calling of this method, we cannot get the newly added rectangle. Why?
       // setSelectedRect(newRect.id)
@@ -941,7 +940,7 @@ export default function ImagemapEditorPage() {
       // Update input fields after movement is complete
       const movedRect = rectangles.find((r) => r.id === movingRect);
       if (movedRect && selectedRect === movingRect) {
-        setLastPositionInput({x: movedRect.x.toString(), y: movedRect.y.toString()});
+        setLastPositionInput({ x: movedRect.x.toString(), y: movedRect.y.toString() });
       }
     }
 
@@ -952,8 +951,8 @@ export default function ImagemapEditorPage() {
       setResizeStartRect(null);
       // Update input fields after resize completes
       if (selectedRectData) {
-        setLastPositionInput({x: selectedRectData.x.toString(), y: selectedRectData.y.toString()});
-        setLastSizeInput({width: selectedRectData.width.toString(), height: selectedRectData.height.toString()});
+        setLastPositionInput({ x: selectedRectData.x.toString(), y: selectedRectData.y.toString() });
+        setLastSizeInput({ width: selectedRectData.width.toString(), height: selectedRectData.height.toString() });
       }
     }
   };
@@ -964,7 +963,7 @@ export default function ImagemapEditorPage() {
 
     console.log("updateRectangle", id, field, value);
     setRectangles((prev) =>
-      prev.map((rect) => (rect.id === id ? {...rect, [field]: castToNumber ? Number(value) : value} : rect)),
+      prev.map((rect) => (rect.id === id ? { ...rect, [field]: castToNumber ? Number(value) : value } : rect)),
     );
   };
 
@@ -972,7 +971,7 @@ export default function ImagemapEditorPage() {
     setRectangles((prev) =>
       prev.map((rect) => {
         if (rect.id !== id) return rect;
-        const base: Rectangle = {...rect, type: nextType};
+        const base: Rectangle = { ...rect, type: nextType };
         if (nextType === RectangleType.Avatar) {
           return {
             ...base,
@@ -984,12 +983,12 @@ export default function ImagemapEditorPage() {
             },
           };
         } else {
-          const {avatar, ...rest} = base as any;
+          const { avatar, ...rest } = base as any;
           // 清理缓存，避免残留的头像组件
           avatarCacheRef.current.delete(id);
           // 清理测量尺寸缓存
           setAvatarNaturalSizes((prev) => {
-            const {[id]: _omit, ...restSizes} = prev;
+            const { [id]: _omit, ...restSizes } = prev;
             return restSizes;
           });
           return rest as Rectangle;
@@ -1007,8 +1006,8 @@ export default function ImagemapEditorPage() {
       prev.map((rect) => {
         if (rect.id !== id) return rect;
         if (rect.type !== RectangleType.Avatar) return rect;
-        const avatar = rect.avatar ?? {styleKey: "simple", imageUrl: "", username: "", countryCode: ""};
-        return {...rect, avatar: {...avatar, [field]: value}};
+        const avatar = rect.avatar ?? { styleKey: "simple", imageUrl: "", username: "", countryCode: "" };
+        return { ...rect, avatar: { ...avatar, [field]: value } };
       }),
     );
   };
@@ -1021,7 +1020,7 @@ export default function ImagemapEditorPage() {
     avatarCacheRef.current.delete(id);
     // 清理测量尺寸缓存
     setAvatarNaturalSizes((prev) => {
-      const {[id]: _omit, ...rest} = prev;
+      const { [id]: _omit, ...rest } = prev;
       return rest;
     });
   };
@@ -1139,72 +1138,45 @@ export default function ImagemapEditorPage() {
   };
 
   // 导出高质量图像，使用与预览区相同的渲染逻辑
-  const handleExportAvatars = async () => {
-    if (!uploadedImage || isExporting) return;
-    setIsExporting(true);
+  const handleExportImage = async (options: { format: string; quality: number }): Promise<string> => {
+    if (!uploadedImage) throw new Error();
 
-    const base = (mapName && mapName.trim()) || (imageName && imageName.split(".")[0]) || "imagemap";
+    // 获取预览使用的当前缩放比例
+    const { scaleX, scaleY } = getImageScale();
 
-    try {
-      // 获取预览使用的当前缩放比例
-      const {scaleX, scaleY} = getImageScale();
-
-      // 生成所有头像的 dataURL，传递缩放信息
-      const avatarPromises = rectangles
-        .filter(isRenderableAvatar)
-        .map(async (rect) => {
-          const avatarDataURL = await getAvatarDataURL(
-            rect,
-            STYLE_REGISTRY,
-            avatarCacheRef,
-            avatarNaturalSizes[rect.id],
-            // Keep previous measured sizes as the preview uses them
-            (() => {
-            }),
-            scaleX,
-            scaleY,
-          );
-          return {
-            data: avatarDataURL,
-            attrs: rect,
-          };
-        });
-
-      // 等待所有头像生成完成
-      const avatarsWithData = await Promise.all(avatarPromises);
-
-      // 过滤掉生成失败的头像
-      const validAvatars = avatarsWithData
-        .filter((avatar): avatar is { data: string; attrs: typeof avatar.attrs } => {
-          return avatar.data !== null;
-        });
-
-      // 生成合成图像
-      const compositeDataURL = await generateCompositeImage(
-        uploadedImage,
-        validAvatars,
+    // 生成所有头像的 dataURL，传递缩放信息
+    const avatarPromises = rectangles.filter(isRenderableAvatar).map(async (rect) => {
+      const avatarDataURL = await getAvatarDataURL(
+        rect,
+        STYLE_REGISTRY,
+        avatarCacheRef,
+        avatarNaturalSizes[rect.id],
+        // Keep previous measured sizes as the preview uses them
+        () => {},
+        scaleX,
+        scaleY,
       );
+      return {
+        data: avatarDataURL,
+        attrs: rect,
+      };
+    });
 
-      if (compositeDataURL) {
-        // 创建下载链接
-        const link = document.createElement("a");
-        link.href = compositeDataURL;
-        link.download = `exported-${base}-${Date.now()}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        throw new Error("无法生成合成图像");
-      }
-    } catch (error) {
-      console.error("导出失败:", error);
-      toast({
-        title: t("error.exportFailed"),
-        description: error instanceof Error ? error.message : "未知错误",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExporting(false);
+    // 等待所有头像生成完成
+    const avatarsWithData = await Promise.all(avatarPromises);
+
+    // 过滤掉生成失败的头像
+    const validAvatars = avatarsWithData.filter((avatar): avatar is { data: string; attrs: typeof avatar.attrs } => {
+      return avatar.data !== null;
+    });
+
+    // 生成合成图像
+    const compositeDataURL = await generateCompositeImage(uploadedImage, validAvatars, options.format, options.quality);
+
+    if (compositeDataURL) {
+      return compositeDataURL;
+    } else {
+      throw new Error("无法生成合成图像");
     }
   };
 
@@ -1215,58 +1187,49 @@ export default function ImagemapEditorPage() {
           <div>
             <h1 className="flex-title text-3xl font-bold text-foreground mb-2">
               <span className="text-primary">{t("title")}</span>
-              <HelpIconButton section="imagemap"/>
+              <HelpIconButton section="imagemap" />
             </h1>
             <p className="text-secondary-foreground">{t("description")}</p>
           </div>
           <div className="justify-self-end-safe mt-2 md:mt-0">
-            <Tabs value={preferLayout}
-                  onValueChange={(value) => setPreferLayout(value as "two-column" | "single-column")}>
+            <Tabs
+              value={preferLayout}
+              onValueChange={(value) => setPreferLayout(value as "two-column" | "single-column")}
+            >
               <TabsList>
-                <TabsTrigger value="two-column"><LayoutDashboard/></TabsTrigger>
-                <TabsTrigger value="single-column"><List/></TabsTrigger>
+                <TabsTrigger value="two-column">
+                  <LayoutDashboard />
+                </TabsTrigger>
+                <TabsTrigger value="single-column">
+                  <List />
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
         </div>
 
         <div
-          className={`grid gap-8 h-full transition-all duration-300 ease-in-out ${preferLayout === "two-column" ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}>
+          className={`grid gap-8 h-full transition-all duration-300 ease-in-out ${preferLayout === "two-column" ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}
+        >
           {/* Preview Area */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
-                <Eye/>
+                <Eye />
                 <span>{tc("section.preview")}</span>
               </h2>
               <div className="flex items-center gap-2">
                 {uploadedImage && (
-                  <Button
-                    onClick={handleExportAvatars}
-                    size="sm"
-                    variant="outline"
-                    className="gap-2"
-                    disabled={isExporting}
-                  >
-                    {isExporting ? (
-                      <>
-                        <span
-                          className="w-4 h-4 animate-spin border-2 border-current border-t-transparent rounded-full"/>
-                        {t("toolbar.save")}中…
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-4 h-4"/>
-                        {t("toolbar.save")}
-                      </>
-                    )}
+                  <Button onClick={() => setSaveDialogOpen(true)} size="sm" variant="outline" className="gap-2">
+                    <Download className="w-4 h-4" />
+                    {t("toolbar.save")}
                   </Button>
                 )}
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="image-upload"/>
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="image-upload" />
                 <label htmlFor="image-upload">
                   <Button asChild>
                     <span className="flex items-center gap-2">
-                      <FolderOpen className="w-4 h-4"/>
+                      <FolderOpen className="w-4 h-4" />
                       {t("toolbar.selectImage")}
                     </span>
                   </Button>
@@ -1280,10 +1243,7 @@ export default function ImagemapEditorPage() {
                 {tools.map((tool, index) => (
                   <Tooltip key={tool.key}>
                     <TooltipTrigger asChild>
-                      <button
-                        className={getToolButtonClass(tool.key)}
-                        onClick={() => setCurrentTool(tool.key)}
-                      >
+                      <button className={getToolButtonClass(tool.key)} onClick={() => setCurrentTool(tool.key)}>
                         {tool.icon}
                       </button>
                     </TooltipTrigger>
@@ -1303,9 +1263,11 @@ export default function ImagemapEditorPage() {
             <Card className={`${uploadedImage ? "h-auto" : "h-96"} lg:min-h-125`}>
               <CardContent className={uploadedImage ? "h-auto" : "h-full"}>
                 {uploadedImage ? (
-                  <ContextMenu onOpenChange={(open) => {
-                    if (!open) setContextTargetId(null);
-                  }}>
+                  <ContextMenu
+                    onOpenChange={(open) => {
+                      if (!open) setContextTargetId(null);
+                    }}
+                  >
                     <ContextMenuTrigger asChild>
                       <div
                         ref={containerRef}
@@ -1335,16 +1297,13 @@ export default function ImagemapEditorPage() {
 
                         {/* 拖放状态显示 */}
                         {isDraggingOver && (
-                          <DragAndDropOverlay
-                            isRounded={!uploadedImage}
-                            rejectReason={rejectReason}
-                          />
+                          <DragAndDropOverlay isRounded={!uploadedImage} rejectReason={rejectReason} />
                         )}
 
                         {/* Existing rectangles */}
                         {/* 显示时将原图像坐标缩放到预览区 */}
                         {rectangles.map((rect, index) => {
-                          const {scaleX, scaleY} = getImageScale();
+                          const { scaleX, scaleY } = getImageScale();
 
                           // 十字光标较为特殊（画框），在此处先处理
                           return (
@@ -1376,8 +1335,12 @@ export default function ImagemapEditorPage() {
                             >
                               {/* Avatar 区域渲染：在矩形中显示头像卡片 */}
                               {(() => {
-                                const displayW = isTouchDevice ? Math.max(rect.width / scaleX, 44) : rect.width / scaleX;
-                                const displayH = isTouchDevice ? Math.max(rect.height / scaleY, 44) : rect.height / scaleY;
+                                const displayW = isTouchDevice
+                                  ? Math.max(rect.width / scaleX, 44)
+                                  : rect.width / scaleX;
+                                const displayH = isTouchDevice
+                                  ? Math.max(rect.height / scaleY, 44)
+                                  : rect.height / scaleY;
 
                                 return isRenderableAvatar(rect) ? (
                                   <AvatarBox
@@ -1391,7 +1354,7 @@ export default function ImagemapEditorPage() {
                                       setAvatarNaturalSizes((prev) => {
                                         const current = prev[rect.id];
                                         if (current && current.width === w && current.height === h) return prev;
-                                        return {...prev, [rect.id]: {width: w, height: h}};
+                                        return { ...prev, [rect.id]: { width: w, height: h } };
                                       });
                                     }}
                                   />
@@ -1408,11 +1371,12 @@ export default function ImagemapEditorPage() {
                                 </div>
                               )}
 
-                              {selectedRect === rect.id && currentTool === "select" &&
+                              {selectedRect === rect.id &&
+                                currentTool === "select" &&
                                 // 对于头像区域，限制右下角调节
                                 (rect.type === RectangleType.Avatar
-                                    ? handleConfigs.filter((h) => h.handle === "bottom-right")
-                                    : handleConfigs
+                                  ? handleConfigs.filter((h) => h.handle === "bottom-right")
+                                  : handleConfigs
                                 ).map((item) => (
                                   <div
                                     key={item.handle}
@@ -1436,7 +1400,7 @@ export default function ImagemapEditorPage() {
                         {/* Current drawing rectangle */}
                         {currentRect &&
                           (() => {
-                            const {scaleX, scaleY} = getImageScale();
+                            const { scaleX, scaleY } = getImageScale();
                             return (
                               <div
                                 className="absolute border-2 border-red-400 bg-red-500/10 select-none"
@@ -1455,21 +1419,23 @@ export default function ImagemapEditorPage() {
                       {contextTargetId ? (
                         <>
                           <ContextMenuItem onSelect={() => duplicateRectangle(contextTargetId!)}>
-                            <Copy className="w-4 h-4 mr-2"/> {tc("duplicate")}
+                            <Copy className="w-4 h-4 mr-2" /> {tc("duplicate")}
                           </ContextMenuItem>
-                          <ContextMenuItem className="text-destructive"
-                                           onSelect={() => deleteRectangle(contextTargetId!)}>
-                            <Trash className="w-4 h-4 mr-2"/> {tc("delete")}
+                          <ContextMenuItem
+                            className="text-destructive"
+                            onSelect={() => deleteRectangle(contextTargetId!)}
+                          >
+                            <Trash className="w-4 h-4 mr-2" /> {tc("delete")}
                           </ContextMenuItem>
                         </>
                       ) : (
                         <>
                           <ContextMenuItem onSelect={() => setCurrentTool("create")}>
-                            <Square className="w-4 h-4 mr-2"/> {t("tools.create")}
+                            <Square className="w-4 h-4 mr-2" /> {t("tools.create")}
                           </ContextMenuItem>
-                          <ContextMenuSeparator/>
+                          <ContextMenuSeparator />
                           <ContextMenuItem>
-                            <X className="w-4 h-4 mr-2"/> {tc("cancel")}
+                            <X className="w-4 h-4 mr-2" /> {tc("cancel")}
                           </ContextMenuItem>
                         </>
                       )}
@@ -1486,21 +1452,17 @@ export default function ImagemapEditorPage() {
                     <Empty>
                       <EmptyHeader>
                         <EmptyMedia>
-                          <FolderOpen className="w-12 h-12 text-muted-foreground"/>
+                          <FolderOpen className="w-12 h-12 text-muted-foreground" />
                         </EmptyMedia>
                         <EmptyTitle className="text-muted-foreground">{t("placeholder.noImage.title")}</EmptyTitle>
-                        <EmptyDescription
-                          className="text-muted-foreground">{t("placeholder.noImage.description")}</EmptyDescription>
+                        <EmptyDescription className="text-muted-foreground">
+                          {t("placeholder.noImage.description")}
+                        </EmptyDescription>
                       </EmptyHeader>
                     </Empty>
 
                     {/* 拖放状态显示 */}
-                    {isDraggingOver && (
-                      <DragAndDropOverlay
-                        isRounded={!uploadedImage}
-                        rejectReason={rejectReason}
-                      />
-                    )}
+                    {isDraggingOver && <DragAndDropOverlay isRounded={!uploadedImage} rejectReason={rejectReason} />}
                   </div>
                 )}
               </CardContent>
@@ -1511,7 +1473,7 @@ export default function ImagemapEditorPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
-                <Settings/>
+                <Settings />
                 <span>{tc("section.settings")}</span>
               </h2>
 
@@ -1524,7 +1486,7 @@ export default function ImagemapEditorPage() {
                   variant="outline"
                   className="gap-2"
                 >
-                  <Upload className="w-4 h-4"/>
+                  <Upload className="w-4 h-4" />
                   {tc("export")}
                 </Button>
                 <Button
@@ -1534,7 +1496,7 @@ export default function ImagemapEditorPage() {
                   variant="outline"
                   className="gap-2"
                 >
-                  <Download className="w-4 h-4"/>
+                  <Download className="w-4 h-4" />
                   {tc("import")}
                 </Button>
               </div>
@@ -1588,7 +1550,7 @@ export default function ImagemapEditorPage() {
                     <Empty>
                       <EmptyHeader>
                         <EmptyMedia variant="icon">
-                          <MousePointerClick/>
+                          <MousePointerClick />
                         </EmptyMedia>
                         <EmptyTitle>{t("placeholder.noRectangle.title")}</EmptyTitle>
                         <EmptyDescription>{t("placeholder.noRectangle.description")}</EmptyDescription>
@@ -1639,15 +1601,15 @@ export default function ImagemapEditorPage() {
                                 e.preventDefault();
                                 handleTouchEndRow();
                               }}
-                              style={{touchAction: "none"}}
+                              style={{ touchAction: "none" }}
                             >
-                              <GripVertical className="w-4 h-4"/>
+                              <GripVertical className="w-4 h-4" />
                             </div>
-                            {rect.type === RectangleType.Avatar ? <CircleUserRound/> : <Square/>}
+                            {rect.type === RectangleType.Avatar ? <CircleUserRound /> : <Square />}
 
                             <div className="flex flex-col min-w-0 flex-1">
                               <span className={`text-sm font-medium text-left truncate ${rect.alt || "italic"}`}>
-                                {rect.alt || t("rectAttrs.defaultName", {index: index + 1})}
+                                {rect.alt || t("rectAttrs.defaultName", { index: index + 1 })}
                               </span>
                               <span
                                 className={`text-xs text-muted-foreground text-left truncate ${rect.href || "italic"}`}
@@ -1665,7 +1627,7 @@ export default function ImagemapEditorPage() {
                                 className="h-8 w-8 shrink-0"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <MoreVertical className="w-4 h-4"/>
+                                <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -1675,7 +1637,7 @@ export default function ImagemapEditorPage() {
                                   duplicateRectangle(rect.id);
                                 }}
                               >
-                                <Copy className="w-4 h-4 shrink-0"/>
+                                <Copy className="w-4 h-4 shrink-0" />
                                 <span className="truncate">{tc("duplicate")}</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
@@ -1685,7 +1647,7 @@ export default function ImagemapEditorPage() {
                                   deleteRectangle(rect.id);
                                 }}
                               >
-                                <Trash className="w-4 h-4 shrink-0"/>
+                                <Trash className="w-4 h-4 shrink-0" />
                                 <span className="truncate">{tc("delete")}</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -1710,7 +1672,7 @@ export default function ImagemapEditorPage() {
                       onClick={() => duplicateRectangle(selectedRect)}
                       className="flex items-center gap-1"
                     >
-                      <Copy className="w-4 h-4"/>
+                      <Copy className="w-4 h-4" />
                       {tc("duplicate")}
                     </Button>
                     <Button
@@ -1719,7 +1681,7 @@ export default function ImagemapEditorPage() {
                       onClick={() => deleteRectangle(selectedRect)}
                       className="flex items-center gap-1"
                     >
-                      <Trash2 className="w-4 h-4"/>
+                      <Trash2 className="w-4 h-4" />
                       {tc("delete")}
                     </Button>
                   </CardAction>
@@ -1735,13 +1697,15 @@ export default function ImagemapEditorPage() {
                           onValueChange={(e) => updateRectangleType(selectedRect, e as RectangleType)}
                         >
                           <SelectTrigger id="rectType">
-                            <SelectValue/>
+                            <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem key="mapArea"
-                                        value={RectangleType.MapArea}>{t("rectAttrs.types.mapArea")}</SelectItem>
-                            <SelectItem key="avatar"
-                                        value={RectangleType.Avatar}>{t("rectAttrs.types.avatar")}</SelectItem>
+                            <SelectItem key="mapArea" value={RectangleType.MapArea}>
+                              {t("rectAttrs.types.mapArea")}
+                            </SelectItem>
+                            <SelectItem key="avatar" value={RectangleType.Avatar}>
+                              {t("rectAttrs.types.avatar")}
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -1756,11 +1720,13 @@ export default function ImagemapEditorPage() {
                               onValueChange={(e) => updateAvatarField(selectedRect, "styleKey", e)}
                             >
                               <SelectTrigger id="avatarStyle">
-                                <SelectValue/>
+                                <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {STYLE_REGISTRY.map(({key, style}) => (
-                                  <SelectItem key={key} value={key}>{ta(`styles.${style.key}.name`)}</SelectItem>
+                                {STYLE_REGISTRY.map(({ key, style }) => (
+                                  <SelectItem key={key} value={key}>
+                                    {ta(`styles.${style.key}.name`)}
+                                  </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -1834,7 +1800,7 @@ export default function ImagemapEditorPage() {
                                     updateRectangle(selectedRect, "href", generateUserLinkFromId(Number(userInfo)))
                                   }
                                 >
-                                  <Hash className="w-4 h-4"/>
+                                  <Hash className="w-4 h-4" />
                                 </InputGroupButton>
                               </TooltipTrigger>
                               <TooltipContent>{t("rectAttrs.fillAsId")}</TooltipContent>
@@ -1843,9 +1809,11 @@ export default function ImagemapEditorPage() {
                               <TooltipTrigger asChild>
                                 <InputGroupButton
                                   disabled={userInfo.trim().length === 0}
-                                  onClick={() => updateRectangle(selectedRect, "href", generateUserLinkFromName(userInfo))}
+                                  onClick={() =>
+                                    updateRectangle(selectedRect, "href", generateUserLinkFromName(userInfo))
+                                  }
                                 >
-                                  <UserRound className="w-4 h-4"/>
+                                  <UserRound className="w-4 h-4" />
                                 </InputGroupButton>
                               </TooltipTrigger>
                               <TooltipContent>{t("rectAttrs.fillAsUsername")}</TooltipContent>
@@ -1906,7 +1874,7 @@ export default function ImagemapEditorPage() {
                               const clamped = clampSizeInput("width", e.target.value);
                               if (clamped === null) return;
 
-                              setLastSizeInput({...lastSizeInput, width: clamped.toString()});
+                              setLastSizeInput({ ...lastSizeInput, width: clamped.toString() });
                               updateRectangle(selectedRect, "width", clamped.toString(), true);
                             }}
                           />
@@ -1923,7 +1891,7 @@ export default function ImagemapEditorPage() {
                               const clamped = clampSizeInput("height", e.target.value);
                               if (clamped === null) return;
 
-                              setLastSizeInput({...lastSizeInput, height: clamped.toString()});
+                              setLastSizeInput({ ...lastSizeInput, height: clamped.toString() });
                               updateRectangle(selectedRect, "height", clamped.toString(), true);
                             }}
                           />
@@ -1940,37 +1908,44 @@ export default function ImagemapEditorPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="flex-title text-xl font-semibold">
-                <Code/>
+                <Code />
                 <span>{tc("section.generatedCode")}</span>
               </h2>
             </div>
 
             {/* Generated Code */}
             <Card className="flex-1">
-              {uploadedImage && rectangles.length !== 0 ?
-                (<>
+              {uploadedImage && rectangles.length !== 0 ? (
+                <>
                   <CardHeader>
                     <CardTitle className="text-lg">HTML</CardTitle>
                     <CardAction>
-                      <CopyButton text={generateImageMapHtml(rectangles, imagePath ?? imageName, mapName)} size="sm"/>
+                      <CopyButton text={generateImageMapHtml(rectangles, imagePath ?? imageName, mapName)} size="sm" />
                     </CardAction>
                   </CardHeader>
                   <CardContent>
                     <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96">
-                    <pre>
-                    <code
-                      dangerouslySetInnerHTML={{
-                        __html: hljs.highlight(generateImageMapHtml(rectangles, imagePath ?? imageName, mapName),
-                          {language: "html"}).value,
-                      }}/>
-                    </pre>
+                      <pre>
+                        <code
+                          dangerouslySetInnerHTML={{
+                            __html: hljs.highlight(generateImageMapHtml(rectangles, imagePath ?? imageName, mapName), {
+                              language: "html",
+                            }).value,
+                          }}
+                        />
+                      </pre>
                     </div>
                   </CardContent>
                   <CardHeader>
                     <CardTitle className="text-lg">BBCode</CardTitle>
                     <CardAction>
                       <CopyButton
-                        text={generateImageMapBBCode(rectangles, imageSize.width, imageSize.height, imagePath ?? imageName)}
+                        text={generateImageMapBBCode(
+                          rectangles,
+                          imageSize.width,
+                          imageSize.height,
+                          imagePath ?? imageName,
+                        )}
                         size="sm"
                       />
                     </CardAction>
@@ -1980,25 +1955,32 @@ export default function ImagemapEditorPage() {
                       <pre>
                         <code
                           dangerouslySetInnerHTML={{
-                            __html: hljs.highlight(generateImageMapBBCode(rectangles, imageSize.width, imageSize.height, imagePath ?? imageName),
-                              {language: "bbcode"}).value,
-                          }}/>
+                            __html: hljs.highlight(
+                              generateImageMapBBCode(
+                                rectangles,
+                                imageSize.width,
+                                imageSize.height,
+                                imagePath ?? imageName,
+                              ),
+                              { language: "bbcode" },
+                            ).value,
+                          }}
+                        />
                       </pre>
                     </div>
                   </CardContent>
-                </>)
-                : (
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <Code/>
-                      </EmptyMedia>
-                      <EmptyTitle>{t("placeholder.noCode.title")}</EmptyTitle>
-                      <EmptyDescription>{t("placeholder.noCode.description")}</EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                )
-              }
+                </>
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <Code />
+                    </EmptyMedia>
+                    <EmptyTitle>{t("placeholder.noCode.title")}</EmptyTitle>
+                    <EmptyDescription>{t("placeholder.noCode.description")}</EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )}
             </Card>
           </div>
         </div>
@@ -2008,7 +1990,7 @@ export default function ImagemapEditorPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex flex-row items-center gap-2">
-              <OctagonAlert/>
+              <OctagonAlert />
               {t("dialog.overwrite.title")}
             </AlertDialogTitle>
             <AlertDialogDescription>{t("dialog.overwrite.description")}</AlertDialogDescription>
@@ -2025,8 +2007,7 @@ export default function ImagemapEditorPage() {
               className="bg-destructive/50 hover:bg-destructive"
               onClick={() => {
                 if (pendingFile) {
-                  loadImageFile(pendingFile).then(_ => {
-                  });
+                  loadImageFile(pendingFile).then((_) => {});
                 }
                 setPendingFile(null);
                 setOverwriteDialogOpen(false);
@@ -2038,12 +2019,22 @@ export default function ImagemapEditorPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 导出对话框 */}
-      <ExportDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen} data={generateExportData()}/>
+      <ExportDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen} data={generateExportData()} />
 
-      {/* 导入对话框 */}
-      <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} onImport={handleImportData}
-                    imageWidth={imageSize.width} imageHeight={imageSize.height}/>
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleImportData}
+        imageWidth={imageSize.width}
+        imageHeight={imageSize.height}
+      />
+
+      <SaveDialog
+        open={saveDialogOpen}
+        baseName={(mapName && mapName.trim()) || (imageName && imageName.split(".")[0]) || "imagemap"}
+        onOpenChange={setSaveDialogOpen}
+        onSave={handleExportImage}
+      />
     </div>
   );
 }
