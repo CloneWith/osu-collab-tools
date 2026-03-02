@@ -1,21 +1,17 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Check, AlertCircle, Loader2 } from "lucide-react";
+import { Download, Check, AlertCircle, Loader2, Camera, CloudUpload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { isNullOrWhitespace } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { validateFilename } from "@/lib/validation";
+import { useTranslations } from "next-intl";
 
 export interface SaveDialogProps {
   open: boolean;
@@ -25,11 +21,19 @@ export interface SaveDialogProps {
 }
 
 const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, onSave }) => {
+  const t = useTranslations("imagemap.save");
+  const tc = useTranslations("common");
+  const tv = useTranslations("common.validation");
   const { toast } = useToast();
 
-  const [filename, setFilename] = React.useState("export");
+  const [filename, setFilename] = React.useState("");
   const [format, setFormat] = React.useState("image/png");
   const [quality, setQuality] = React.useState(90);
+
+  const extension = format.split("/")[1];
+  const defaultName = `exported-${baseName}-${Date.now()}`;
+
+  const filenameValidation = React.useMemo(() => validateFilename(filename || defaultName + extension), [filename]);
 
   const [service, setService] = React.useState("imgur");
   const [token, setToken] = React.useState("");
@@ -43,6 +47,14 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
   const [uploadError, setUploadError] = React.useState<string | null>(null);
 
   const handleSave = async () => {
+    if (!filenameValidation.success) {
+      toast({
+        title: tv(filenameValidation.messageKey ?? "filenameInvalid"),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsWorking(true);
 
     startSaveTransition(async () => {
@@ -55,12 +67,9 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
         if (result) {
           // 创建下载链接
           const link = document.createElement("a");
-          const extension = format.split("/")[1];
 
           link.href = result;
-          link.download = !isNullOrWhitespace(filename)
-            ? `${filename}.${extension}`
-            : `exported-${baseName}-${Date.now()}.${extension}`;
+          link.download = `${!isNullOrWhitespace(filename) ? filename : defaultName}.${extension}`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -113,36 +122,34 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
     setIsWorking(false);
   };
 
-  const handleCopyResult = () => {
-    if (uploadResult) {
-      navigator.clipboard.writeText(uploadResult).then(() => {
-        toast({
-          title: "已复制",
-          description: "链接已复制到剪贴板",
-        });
-      });
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-200 max-h-[80%] overflow-y-scroll">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Download className="w-5 h-5" />
-            保存图像
+            <Camera className="w-5 h-5" />
+            {t("title")}
           </DialogTitle>
-          <DialogDescription>选择保存图像到本地或上传到文件托管服务</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           <div className="space-y-2">
-            <Label htmlFor="filename">文件名</Label>
-            <Input id="filename" value={filename} onChange={(e) => setFilename(e.target.value)}></Input>
+            <Label htmlFor="filename">{t("filename")}</Label>
+            <Input
+              id="filename"
+              value={filename}
+              aria-invalid={!filenameValidation.success}
+              className={!filenameValidation.success ? "border-yellow-600" : ""}
+              onChange={(e) => setFilename(e.target.value)}
+              placeholder={defaultName}
+            ></Input>
+            {!filenameValidation.success && filenameValidation.messageKey && (
+              <p className="text-sm text-yellow-600">{tv(filenameValidation.messageKey)}</p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="format">导出格式</Label>
+            <Label htmlFor="format">{t("imageFormat")}</Label>
             <Select value={format} onValueChange={setFormat}>
               <SelectTrigger id="format">
                 <SelectValue />
@@ -158,7 +165,7 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
           {format !== "image/png" && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="quality">图像质量</Label>
+                <Label htmlFor="quality">{t("quality")}</Label>
                 <Label>{quality}%</Label>
               </div>
               <Slider
@@ -174,17 +181,20 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">本地保存</CardTitle>
-              <CardDescription>将图片保存到本地</CardDescription>
+              <CardTitle className="text-lg">{t("saveLocally")}</CardTitle>
+              <CardDescription>{t("saveLocallyDescription")}</CardDescription>
               <CardAction>
-                <Button onClick={handleSave} disabled={isWorking || isSaving}>
+                <Button onClick={handleSave} disabled={isWorking || isSaving || !filenameValidation.success}>
                   {isSaving ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      处理中...
+                      {tc("wait")}
                     </>
                   ) : (
-                    "保存"
+                    <>
+                      <Download className="w-4 h-4" />
+                      {tc("save")}
+                    </>
                   )}
                 </Button>
               </CardAction>
@@ -193,25 +203,27 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">上传到图床</CardTitle>
-              <CardDescription>将图片上传到托管服务以便后续使用</CardDescription>
+              <CardTitle className="text-lg">{t("upload")}</CardTitle>
+              <CardDescription>{t("uploadDescription")}</CardDescription>
               <CardAction>
                 <Button onClick={handleUpload} disabled={true || isWorking || !token || isUploading}>
                   {isUploading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      处理中...
+                      {tc("wait")}
                     </>
                   ) : (
-                    "上传"
+                    <>
+                      <CloudUpload className="w-4 h-4" />
+                      {tc("upload")}
+                    </>
                   )}
                 </Button>
               </CardAction>
             </CardHeader>
             <CardContent>
               <Alert>
-                <AlertTitle>注意</AlertTitle>
-                <AlertDescription>上传功能开发中</AlertDescription>
+                <AlertDescription>{tc("wip.description")}</AlertDescription>
               </Alert>
             </CardContent>
           </Card>

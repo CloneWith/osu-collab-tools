@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
+  Camera,
   CircleUserRound,
   Code,
   Copy,
@@ -1221,7 +1222,7 @@ export default function ImagemapEditorPage() {
               <div className="flex items-center gap-2">
                 {uploadedImage && (
                   <Button onClick={() => setSaveDialogOpen(true)} size="sm" variant="outline" className="gap-2">
-                    <Download className="w-4 h-4" />
+                    <Camera className="w-4 h-4" />
                     {t("toolbar.save")}
                   </Button>
                 )}

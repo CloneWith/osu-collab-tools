@@ -9,6 +9,7 @@
     "back": "Back",
     "next": "Next",
     "loading": "Loading...",
+    "wait": "Please wait...",
     "success": "Success",
     "error": "Error",
     "warning": "Warning",
@@ -41,6 +42,12 @@
     "notFound": {
       "description": "What you're looking for might not be here",
       "backHome": "Back to Home"
+    },
+    "validation": {
+      "filenameEmpty": "Filename cannot be empty",
+      "filenameTooLong": "Filename is too long",
+      "filenameInvalid": "Invalid filename",
+      "surroundingWhitespace": "Filename contains surrounding whitespace"
     }
   },
   "home": {
@@ -206,6 +213,16 @@
       "success": "Imported successfully",
       "failed": "Unable to import",
       "importInfo": "{count, plural, =1 {# area is} other {# areas are}} loaded"
+    },
+    "save": {
+      "title": "Save & share",
+      "filename": "Filename",
+      "imageFormat": "Image format",
+      "quality": "Image quality",
+      "saveLocally": "Save locally",
+      "saveLocallyDescription": "Save the image to local filesystem",
+      "upload": "Upload to cloud",
+      "uploadDescription": "Upload the image to hosting services for use anywhere"
     },
     "error": {
       "loadImage": "Cannot load file",
