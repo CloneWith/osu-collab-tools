@@ -4,6 +4,7 @@ import { RectangleType } from "@/app/imagemap/types";
 import type { IAvatarStyle, AvatarInputs } from "@/app/avatar/styles/IAvatarStyle";
 import { isNullOrWhitespace } from "@/lib/utils";
 import { snapdom } from "@zumer/snapdom";
+import { flushSync } from "react-dom";
 
 // 仅在该模块内部使用的测量容器
 export function MeasuredAvatar({
@@ -197,27 +198,36 @@ export async function getAvatarDataURL(
 
   document.body.appendChild(tempContainer);
 
+  let root: ReactDOM.Root | null = null;
+
   try {
     // 渲染 AvatarBox 组件到临时容器
-    const root = ReactDOM.createRoot(tempContainer);
+    root = ReactDOM.createRoot(tempContainer);
     
     // 使用与预览区相同的渲染逻辑
-    root.render(
-      <AvatarBox
-        rect={rect}
-        displayW={displayW}
-        displayH={displayH}
-        styleRegistry={styleRegistry}
-        cacheRef={cacheRef}
-        measured={measured}
-        onMeasure={onMeasure || (() => {})}
-      />,
-    );
+    // Although not recommended, using flushSync() here to ensure that
+    // the React DOM root has been properly displayed.
+    flushSync(() => {
+      root?.render(
+        <AvatarBox
+          rect={rect}
+          displayW={displayW}
+          displayH={displayH}
+          styleRegistry={styleRegistry}
+          cacheRef={cacheRef}
+          measured={measured}
+          onMeasure={onMeasure || (() => {})}
+        />,
+      );
+    });
 
     // 等待组件渲染完成并且所有资源加载完毕
     await new Promise<void>((resolve) => {
       const checkResourcesLoaded = (time: number = 0) => {
-        const images = tempContainer.querySelectorAll('img');
+        const renderedNode = tempContainer.firstElementChild as HTMLElement | null;
+        const renderedRect = renderedNode?.getBoundingClientRect();
+        const hasRenderableContent = !!renderedNode && !!renderedRect && renderedRect.width > 0 && renderedRect.height > 0;
+        const images = tempContainer.querySelectorAll("img");
         const allImagesLoaded = Array.from(images).every(img => {
           return img.complete && img.naturalHeight !== 0;
         });
@@ -226,7 +236,7 @@ export async function getAvatarDataURL(
         const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
 
         // 图像已加载 / 超时，按需增加超时限制
-        if (allImagesLoaded || time >= 1000) {
+        if ((hasRenderableContent && allImagesLoaded) || time >= 2000) {
           fontsReady.then(() => {
             // 额外等待确保所有渲染完成
             requestAnimationFrame(() => {
@@ -265,6 +275,7 @@ export async function getAvatarDataURL(
     console.error("生成头像 dataURL 失败:", error);
     return null;
   } finally {
+    root?.unmount();
     if (tempContainer.parentNode) {
       tempContainer.parentNode.removeChild(tempContainer);
     }

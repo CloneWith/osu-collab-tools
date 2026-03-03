@@ -402,11 +402,24 @@ export default function ImagemapEditorPage() {
     if (!imageRef.current) return { scaleX: 1, scaleY: 1 };
     const displayWidth = imageRef.current.clientWidth;
     const displayHeight = imageRef.current.clientHeight;
+    const safeDisplayWidth = displayWidth > 0 ? displayWidth : 1;
+    const safeDisplayHeight = displayHeight > 0 ? displayHeight : 1;
+    const rawScaleX = imageSize.width / safeDisplayWidth;
+    const rawScaleY = imageSize.height / safeDisplayHeight;
+    const scaleX = Number.isFinite(rawScaleX) && rawScaleX > 0 ? rawScaleX : 1;
+    const scaleY = Number.isFinite(rawScaleY) && rawScaleY > 0 ? rawScaleY : 1;
     return {
-      scaleX: imageSize.width / displayWidth,
-      scaleY: imageSize.height / displayHeight,
+      scaleX,
+      scaleY,
     };
   };
+
+  const waitForNextPaint = () =>
+    new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      });
+    });
 
   // 预览区坐标 => 原图像坐标
   const getRelativeCoordinates = (event: React.MouseEvent) => {
@@ -1142,42 +1155,49 @@ export default function ImagemapEditorPage() {
   const handleExportImage = async (options: { format: string; quality: number }): Promise<string> => {
     if (!uploadedImage) throw new Error();
 
+    setSaveDialogOpen(false);
+    await waitForNextPaint();
+
     // 获取预览使用的当前缩放比例
     const { scaleX, scaleY } = getImageScale();
 
-    // 生成所有头像的 dataURL，传递缩放信息
-    const avatarPromises = rectangles.filter(isRenderableAvatar).map(async (rect) => {
-      const avatarDataURL = await getAvatarDataURL(
-        rect,
-        STYLE_REGISTRY,
-        avatarCacheRef,
-        avatarNaturalSizes[rect.id],
-        // Keep previous measured sizes as the preview uses them
-        () => {},
-        scaleX,
-        scaleY,
-      );
-      return {
-        data: avatarDataURL,
-        attrs: rect,
-      };
-    });
+    try {
+      // 生成所有头像的 dataURL，传递缩放信息
+      const avatarPromises = rectangles.filter(isRenderableAvatar).map(async (rect) => {
+        const avatarDataURL = await getAvatarDataURL(
+          rect,
+          STYLE_REGISTRY,
+          avatarCacheRef,
+          avatarNaturalSizes[rect.id],
+          // Keep previous measured sizes as the preview uses them
+          () => {},
+          scaleX,
+          scaleY,
+        );
+        return {
+          data: avatarDataURL,
+          attrs: rect,
+        };
+      });
 
-    // 等待所有头像生成完成
-    const avatarsWithData = await Promise.all(avatarPromises);
+      // 等待所有头像生成完成
+      const avatarsWithData = await Promise.all(avatarPromises);
 
-    // 过滤掉生成失败的头像
-    const validAvatars = avatarsWithData.filter((avatar): avatar is { data: string; attrs: typeof avatar.attrs } => {
-      return avatar.data !== null;
-    });
+      // 过滤掉生成失败的头像
+      const validAvatars = avatarsWithData.filter((avatar): avatar is { data: string; attrs: typeof avatar.attrs } => {
+        return avatar.data !== null;
+      });
 
-    // 生成合成图像
-    const compositeDataURL = await generateCompositeImage(uploadedImage, validAvatars, options.format, options.quality);
+      // 生成合成图像
+      const compositeDataURL = await generateCompositeImage(uploadedImage, validAvatars, options.format, options.quality);
 
-    if (compositeDataURL) {
-      return compositeDataURL;
-    } else {
+      if (compositeDataURL) {
+        return compositeDataURL;
+      }
+
       throw new Error("无法生成合成图像");
+    } finally {
+      setSaveDialogOpen(true);
     }
   };
 
