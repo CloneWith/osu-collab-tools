@@ -156,7 +156,7 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="image/png">PNG</SelectItem>
-                <SelectItem value="image/jpg">JPG</SelectItem>
+                <SelectItem value="image/jpeg">JPG</SelectItem>
                 <SelectItem value="image/webp">WebP</SelectItem>
               </SelectContent>
             </Select>
