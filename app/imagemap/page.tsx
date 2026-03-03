@@ -2,7 +2,7 @@
 
 import type React from "react";
 import type { ReactElement } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -88,6 +88,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/
 import { fileTypeFromBlob } from "file-type";
 import { CopyButton } from "@/components/ui/copy-button";
 import SaveDialog from "@/components/imagemap/save-dialog";
+import { Avatar } from "../avatar/types";
 
 // 大小调整的八个点
 type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -114,6 +115,16 @@ const STYLE_REGISTRY = [
   { key: "modern", style: new ModernAvatarStyle() as IAvatarStyle },
   { key: "simple", style: new SimpleAvatarStyle() as IAvatarStyle },
 ] as const;
+
+let hljsInitialized = false;
+const ensureHljsInitialized = () => {
+  if (hljsInitialized) return;
+  hljs.registerLanguage("html", html);
+  registerBBCodeHighlight();
+  hljsInitialized = true;
+};
+
+ensureHljsInitialized();
 
 export default function ImagemapEditorPage() {
   const t = useTranslations("imagemap");
@@ -146,7 +157,7 @@ export default function ImagemapEditorPage() {
   const [lastSizeInput, setLastSizeInput] = useState({ width: "50", height: "50" });
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [_, setWindowResizeCounter] = useState(0);
+  const [windowResizeCounter, setWindowResizeCounter] = useState(0);
 
   // UI states
   const [contextTargetId, setContextTargetId] = useState<string | null>(null);
@@ -185,44 +196,43 @@ export default function ImagemapEditorPage() {
     handle: ResizeHandle;
     style: React.CSSProperties;
     cursor: string;
-  }> = [
-    { handle: "top-left", style: { top: -handleOffset, left: -handleOffset }, cursor: "nwse-resize" },
-    {
-      handle: "top",
-      style: { top: -handleOffset, left: "50%", transform: "translateX(-50%)" },
-      cursor: "ns-resize",
-    },
-    { handle: "top-right", style: { top: -handleOffset, right: -handleOffset }, cursor: "nesw-resize" },
-    {
-      handle: "right",
-      style: { top: "50%", right: -handleOffset, transform: "translateY(-50%)" },
-      cursor: "ew-resize",
-    },
-    {
-      handle: "bottom-right",
-      style: { bottom: -handleOffset, right: -handleOffset },
-      cursor: "nwse-resize",
-    },
-    {
-      handle: "bottom",
-      style: { bottom: -handleOffset, left: "50%", transform: "translateX(-50%)" },
-      cursor: "ns-resize",
-    },
-    {
-      handle: "bottom-left",
-      style: { bottom: -handleOffset, left: -handleOffset },
-      cursor: "nesw-resize",
-    },
-    {
-      handle: "left",
-      style: { top: "50%", left: -handleOffset, transform: "translateY(-50%)" },
-      cursor: "ew-resize",
-    },
-  ];
-
-  // 注册 hljs 语言
-  hljs.registerLanguage("html", html);
-  registerBBCodeHighlight();
+  }> = useMemo(
+    () => [
+      { handle: "top-left", style: { top: -handleOffset, left: -handleOffset }, cursor: "nwse-resize" },
+      {
+        handle: "top",
+        style: { top: -handleOffset, left: "50%", transform: "translateX(-50%)" },
+        cursor: "ns-resize",
+      },
+      { handle: "top-right", style: { top: -handleOffset, right: -handleOffset }, cursor: "nesw-resize" },
+      {
+        handle: "right",
+        style: { top: "50%", right: -handleOffset, transform: "translateY(-50%)" },
+        cursor: "ew-resize",
+      },
+      {
+        handle: "bottom-right",
+        style: { bottom: -handleOffset, right: -handleOffset },
+        cursor: "nwse-resize",
+      },
+      {
+        handle: "bottom",
+        style: { bottom: -handleOffset, left: "50%", transform: "translateX(-50%)" },
+        cursor: "ns-resize",
+      },
+      {
+        handle: "bottom-left",
+        style: { bottom: -handleOffset, left: -handleOffset },
+        cursor: "nesw-resize",
+      },
+      {
+        handle: "left",
+        style: { top: "50%", left: -handleOffset, transform: "translateY(-50%)" },
+        cursor: "ew-resize",
+      },
+    ],
+    [handleOffset],
+  );
 
   useEffect(() => {
     rectanglesRef.current = rectangles;
@@ -289,13 +299,14 @@ export default function ImagemapEditorPage() {
     const file = event.target.files?.[0];
 
     if (file) {
-      loadImageFile(file).then((_) => {});
+      void loadImageFile(file);
     }
   };
 
   // Shared image loader for file input & drag-drop
   const loadImageFile = async (file: File) => {
     const detected = await fileTypeFromBlob(file);
+    console.log(detected);
     if (!detected?.mime?.startsWith("image/")) {
       toast({
         title: t("error.loadImage"),
@@ -394,11 +405,11 @@ export default function ImagemapEditorPage() {
       return;
     }
 
-    if (file) loadImageFile(file).then((_) => {});
+    if (file) void loadImageFile(file);
   };
 
-  // 获取缩放比例
-  const getImageScale = () => {
+  // 缩放比例用于渲染与坐标换算。依赖 resize 计数器以确保缩放变更时重算。
+  const imageScale = useMemo(() => {
     if (!imageRef.current) return { scaleX: 1, scaleY: 1 };
     const displayWidth = imageRef.current.clientWidth;
     const displayHeight = imageRef.current.clientHeight;
@@ -408,11 +419,8 @@ export default function ImagemapEditorPage() {
     const rawScaleY = imageSize.height / safeDisplayHeight;
     const scaleX = Number.isFinite(rawScaleX) && rawScaleX > 0 ? rawScaleX : 1;
     const scaleY = Number.isFinite(rawScaleY) && rawScaleY > 0 ? rawScaleY : 1;
-    return {
-      scaleX,
-      scaleY,
-    };
-  };
+    return { scaleX, scaleY };
+  }, [imageSize.height, imageSize.width, uploadedImage, windowResizeCounter]);
 
   const waitForNextPaint = () =>
     new Promise<void>((resolve) => {
@@ -425,7 +433,7 @@ export default function ImagemapEditorPage() {
   const getRelativeCoordinates = (event: React.MouseEvent) => {
     if (!imageRef.current || !containerRef.current) return { x: 0, y: 0 };
     const rect = imageRef.current.getBoundingClientRect();
-    const { scaleX, scaleY } = getImageScale();
+    const { scaleX, scaleY } = imageScale;
     return {
       x: (event.clientX - rect.left) * scaleX,
       y: (event.clientY - rect.top) * scaleY,
@@ -436,7 +444,7 @@ export default function ImagemapEditorPage() {
     if (!imageRef.current || !containerRef.current) return { x: 0, y: 0 };
     const rect = imageRef.current.getBoundingClientRect();
     const touch = event.touches[0] || event.changedTouches[0];
-    const { scaleX, scaleY } = getImageScale();
+    const { scaleX, scaleY } = imageScale;
     return {
       x: (touch.clientX - rect.left) * scaleX,
       y: (touch.clientY - rect.top) * scaleY,
@@ -1011,11 +1019,7 @@ export default function ImagemapEditorPage() {
     );
   };
 
-  const updateAvatarField = (
-    id: string,
-    field: "styleKey" | "imageUrl" | "username" | "countryCode",
-    value: string,
-  ) => {
+  const updateAvatarField = (id: string, field: keyof Avatar, value: string) => {
     setRectangles((prev) =>
       prev.map((rect) => {
         if (rect.id !== id) return rect;
@@ -1115,16 +1119,6 @@ export default function ImagemapEditorPage() {
     setDraggingRectId(null);
   };
 
-  // 生成导出数据
-  const generateExportData = (): ImageMapConfig => {
-    return {
-      imagePath: imagePath,
-      imageName: imageName,
-      mapName: mapName,
-      rectangles: rectangles,
-    };
-  };
-
   // 处理导入数据
   const handleImportData = (data: ImageMapConfig) => {
     // 新导入配置前清理头像组件缓存，避免旧组件干扰
@@ -1159,7 +1153,7 @@ export default function ImagemapEditorPage() {
     await waitForNextPaint();
 
     // 获取预览使用的当前缩放比例
-    const { scaleX, scaleY } = getImageScale();
+    const { scaleX, scaleY } = imageScale;
 
     try {
       // 生成所有头像的 dataURL，传递缩放信息
@@ -1189,7 +1183,12 @@ export default function ImagemapEditorPage() {
       });
 
       // 生成合成图像
-      const compositeDataURL = await generateCompositeImage(uploadedImage, validAvatars, options.format, options.quality);
+      const compositeDataURL = await generateCompositeImage(
+        uploadedImage,
+        validAvatars,
+        options.format,
+        options.quality,
+      );
 
       if (compositeDataURL) {
         return compositeDataURL;
@@ -1200,6 +1199,26 @@ export default function ImagemapEditorPage() {
       setSaveDialogOpen(true);
     }
   };
+
+  const deferredRectangles = useDeferredValue(rectangles);
+  const resolvedImagePath = imagePath ?? imageName;
+  const exportData = useMemo(
+    () => ({ imagePath, imageName, mapName, rectangles }),
+    [imageName, imagePath, mapName, rectangles],
+  );
+
+  // Cached generated code
+  const htmlCode = useMemo(
+    () => generateImageMapHtml(deferredRectangles, resolvedImagePath, mapName),
+    [deferredRectangles, mapName, resolvedImagePath],
+  );
+  const bbCode = useMemo(
+    () => generateImageMapBBCode(deferredRectangles, imageSize.width, imageSize.height, resolvedImagePath),
+    [deferredRectangles, imageSize.height, imageSize.width, resolvedImagePath],
+  );
+
+  const highlightedHtmlCode = useMemo(() => hljs.highlight(htmlCode, { language: "html" }).value, [htmlCode]);
+  const highlightedBBCode = useMemo(() => hljs.highlight(bbCode, { language: "bbcode" }).value, [bbCode]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -1324,7 +1343,7 @@ export default function ImagemapEditorPage() {
                         {/* Existing rectangles */}
                         {/* 显示时将原图像坐标缩放到预览区 */}
                         {rectangles.map((rect, index) => {
-                          const { scaleX, scaleY } = getImageScale();
+                          const { scaleX, scaleY } = imageScale;
 
                           // 十字光标较为特殊（画框），在此处先处理
                           return (
@@ -1421,7 +1440,7 @@ export default function ImagemapEditorPage() {
                         {/* Current drawing rectangle */}
                         {currentRect &&
                           (() => {
-                            const { scaleX, scaleY } = getImageScale();
+                            const { scaleX, scaleY } = imageScale;
                             return (
                               <div
                                 className="absolute border-2 border-red-400 bg-red-500/10 select-none"
@@ -1817,9 +1836,11 @@ export default function ImagemapEditorPage() {
                               <TooltipTrigger asChild>
                                 <InputGroupButton
                                   disabled={userInfo.trim().length === 0 || Number.isNaN(Number(userInfo))}
-                                  onClick={() =>
-                                    updateRectangle(selectedRect, "href", generateUserLinkFromId(Number(userInfo)))
-                                  }
+                                  onClick={() => {
+                                    updateRectangle(selectedRect, "href", generateUserLinkFromId(Number(userInfo)));
+
+                                    updateAvatarField(selectedRect, "imageUrl", `https://a.ppy.sh/${userInfo}`);
+                                  }}
                                 >
                                   <Hash className="w-4 h-4" />
                                 </InputGroupButton>
@@ -1830,9 +1851,13 @@ export default function ImagemapEditorPage() {
                               <TooltipTrigger asChild>
                                 <InputGroupButton
                                   disabled={userInfo.trim().length === 0}
-                                  onClick={() =>
-                                    updateRectangle(selectedRect, "href", generateUserLinkFromName(userInfo))
-                                  }
+                                  onClick={() => {
+                                    updateRectangle(selectedRect, "href", generateUserLinkFromName(userInfo));
+                                    updateRectangle(selectedRect, "alt", userInfo);
+
+                                    updateAvatarField(selectedRect, "username", userInfo)
+                                    updateAvatarField(selectedRect, "imageUrl", `https://a.ppy.sh/${userInfo}`);
+                                  }}
                                 >
                                   <UserRound className="w-4 h-4" />
                                 </InputGroupButton>
@@ -1941,7 +1966,7 @@ export default function ImagemapEditorPage() {
                   <CardHeader>
                     <CardTitle className="text-lg">HTML</CardTitle>
                     <CardAction>
-                      <CopyButton text={generateImageMapHtml(rectangles, imagePath ?? imageName, mapName)} size="sm" />
+                      <CopyButton text={htmlCode} size="sm" />
                     </CardAction>
                   </CardHeader>
                   <CardContent>
@@ -1949,9 +1974,7 @@ export default function ImagemapEditorPage() {
                       <pre>
                         <code
                           dangerouslySetInnerHTML={{
-                            __html: hljs.highlight(generateImageMapHtml(rectangles, imagePath ?? imageName, mapName), {
-                              language: "html",
-                            }).value,
+                            __html: highlightedHtmlCode,
                           }}
                         />
                       </pre>
@@ -1960,15 +1983,7 @@ export default function ImagemapEditorPage() {
                   <CardHeader>
                     <CardTitle className="text-lg">BBCode</CardTitle>
                     <CardAction>
-                      <CopyButton
-                        text={generateImageMapBBCode(
-                          rectangles,
-                          imageSize.width,
-                          imageSize.height,
-                          imagePath ?? imageName,
-                        )}
-                        size="sm"
-                      />
+                      <CopyButton text={bbCode} size="sm" />
                     </CardAction>
                   </CardHeader>
                   <CardContent>
@@ -1976,15 +1991,7 @@ export default function ImagemapEditorPage() {
                       <pre>
                         <code
                           dangerouslySetInnerHTML={{
-                            __html: hljs.highlight(
-                              generateImageMapBBCode(
-                                rectangles,
-                                imageSize.width,
-                                imageSize.height,
-                                imagePath ?? imageName,
-                              ),
-                              { language: "bbcode" },
-                            ).value,
+                            __html: highlightedBBCode,
                           }}
                         />
                       </pre>
@@ -2028,7 +2035,7 @@ export default function ImagemapEditorPage() {
               className="bg-destructive/50 hover:bg-destructive"
               onClick={() => {
                 if (pendingFile) {
-                  loadImageFile(pendingFile).then((_) => {});
+                  void loadImageFile(pendingFile);
                 }
                 setPendingFile(null);
                 setOverwriteDialogOpen(false);
@@ -2040,7 +2047,7 @@ export default function ImagemapEditorPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <ExportDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen} data={generateExportData()} />
+      <ExportDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen} data={exportData} />
 
       <ImportDialog
         open={importDialogOpen}
