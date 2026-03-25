@@ -5,13 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Check, AlertCircle, Loader2, Camera, CloudUpload } from "lucide-react";
+import { Download, Loader2, Camera, CloudUpload, CloudCheck, CloudAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { isNullOrWhitespace } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { validateFilename } from "@/lib/validation";
 import { useTranslations } from "next-intl";
+import { CopyButton } from "../ui/copy-button";
 
 export interface SaveDialogProps {
   open: boolean;
@@ -33,9 +34,9 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
   const extension = format.split("/")[1];
   const defaultName = `exported-${baseName}-${Date.now()}`;
 
-  const filenameValidation = React.useMemo(() => validateFilename(filename || defaultName + extension), [filename]);
+  const filenameValidation = React.useMemo(() => validateFilename(filename || defaultName + extension), [filename, defaultName, extension]);
 
-  const [service, setService] = React.useState("imgur");
+  const [service, setService] = React.useState("s-ul");
   const [token, setToken] = React.useState("");
 
   const [isWorking, setIsWorking] = React.useState(false);
@@ -101,25 +102,59 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
         });
 
         if (result) {
-          setUploadResult(result);
-          if (true) {
-            toast({
-              title: "上传成功",
-              description: "图像已成功上传到文件托管服务",
+          // 处理s-ul上传
+          if (service === "s-ul") {
+            const response = await fetch(result);
+            const blob = await response.blob();
+
+            const formData = new FormData();
+            formData.append("file", blob, `image.${extension}`);
+            formData.append("key", token);
+            formData.append("service", service);
+
+            const uploadResponse = await fetch(`/api/upload/${service}`, {
+              method: "POST",
+              body: formData,
             });
+
+            const uploadData = await uploadResponse.json();
+
+            console.log(uploadResponse);
+
+            if (uploadData.success === false) {
+              setUploadError(uploadData.reason || t("uploadFailed"));
+              toast({
+                title: t("uploadFailed"),
+                description: uploadData.reason || t("uploadFailed"),
+                variant: "destructive",
+              });
+            } else if (uploadData.url) {
+              setUploadResult(uploadData.url);
+              toast({
+                title: t("uploadSuccess"),
+                description: t("uploadSuccessDescription"),
+              });
+            } else {
+              setUploadError(t("uploadFailed"));
+              toast({
+                title: t("uploadFailed"),
+                description: t("uploadFailed"),
+                variant: "destructive",
+              });
+            }
           }
         }
       } catch (error) {
-        setUploadError(error instanceof Error ? error.message : "上传失败");
+        setUploadError(error instanceof Error ? error.message : t("uploadFailed"));
         toast({
-          title: "上传失败",
-          description: error instanceof Error ? error.message : "未知错误",
+          title: t("uploadFailed"),
+          description: error instanceof Error ? error.message : t("uploadFailed"),
           variant: "destructive",
         });
+      } finally {
+        setIsWorking(false);
       }
     });
-
-    setIsWorking(false);
   };
 
   return (
@@ -206,7 +241,7 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
               <CardTitle className="text-lg">{t("upload")}</CardTitle>
               <CardDescription>{t("uploadDescription")}</CardDescription>
               <CardAction>
-                <Button onClick={handleUpload} disabled={true || isWorking || !token || isUploading}>
+                <Button onClick={handleUpload} disabled={isWorking || !token || isUploading}>
                   {isUploading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -221,10 +256,51 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
                 </Button>
               </CardAction>
             </CardHeader>
-            <CardContent>
-              <Alert>
-                <AlertDescription>{tc("wip.description")}</AlertDescription>
-              </Alert>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="service">{t("service")}</Label>
+                <Select value={service} onValueChange={setService}>
+                  <SelectTrigger id="service">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="s-ul">s-ul</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="token">{t("apiKey")}</Label>
+                <Input
+                  id="token"
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  placeholder={t("apiKeyPlaceholder")}
+                ></Input>
+              </div>
+              {uploadResult && (
+                <Alert variant="success">
+                  <AlertTitle className="flex items-center gap-2 text-lg">
+                    <CloudCheck />
+                    {t("uploadSuccess")}
+                  </AlertTitle>
+                  <AlertDescription>
+                    {t("uploadSuccessDescription")}
+                    <div className="flex items-center gap-2">
+                      <Input value={uploadResult} readOnly />
+                      <CopyButton text={uploadResult} variant="default" />
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+              {uploadError && (
+                <Alert variant="destructive">
+                  <AlertTitle className="flex items-center gap-2 text-lg">
+                    <CloudAlert />
+                    {t("uploadFailed")}
+                  </AlertTitle>
+                  <AlertDescription>{uploadError}</AlertDescription>
+                </Alert>
+              )}
             </CardContent>
           </Card>
         </div>

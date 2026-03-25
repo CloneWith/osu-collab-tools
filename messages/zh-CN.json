@@ -222,7 +222,13 @@
       "saveLocally": "本地保存",
       "saveLocallyDescription": "将图片保存到本地文件系统",
       "upload": "上传到图床",
-      "uploadDescription": "将图片上传到托管服务，随处可用"
+      "uploadDescription": "将图片上传到托管服务，随处可用",
+      "service": "图床服务",
+      "apiKey": "API 密钥",
+      "apiKeyPlaceholder": "需要使用有效的 API 密钥，方可将图像上传到你的账户。",
+      "uploadSuccess": "图像已上传",
+      "uploadSuccessDescription": "使用以下链接访问图像",
+      "uploadFailed": "无法上传"
     },
     "error": {
       "loadImage": "无法加载文件",

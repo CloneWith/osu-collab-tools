@@ -222,7 +222,13 @@
       "saveLocally": "Save locally",
       "saveLocallyDescription": "Save the image to local filesystem",
       "upload": "Upload to cloud",
-      "uploadDescription": "Upload the image to hosting services for use anywhere"
+      "uploadDescription": "Upload the image to hosting services for use anywhere",
+      "service": "Image sharing service",
+      "apiKey": "API key",
+      "apiKeyPlaceholder": "A valid API key is required to upload the image to your account.",
+      "uploadSuccess": "Image uploaded",
+      "uploadSuccessDescription": "Access the image via the link below",
+      "uploadFailed": "Unable to upload"
     },
     "error": {
       "loadImage": "Cannot load file",
