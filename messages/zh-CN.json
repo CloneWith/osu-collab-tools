@@ -212,7 +212,24 @@
       "confirm": "确认导入",
       "success": "导入成功",
       "failed": "导入失败",
-      "importInfo": "已加载 {count} 个区域"
+      "importInfo": "{count, plural, =1 {# area is} other {# areas are}} loaded"
+    },
+    "save": {
+      "title": "保存与分享",
+      "filename": "文件名",
+      "imageFormat": "图像格式",
+      "quality": "图像质量",
+      "saveLocally": "本地保存",
+      "saveLocallyDescription": "将图片保存到本地文件系统",
+      "upload": "上传到图床",
+      "uploadDescription": "将图片上传到托管服务，随处可用",
+      "service": "图床服务",
+      "apiKey": "API 密钥",
+      "apiKeyPrompt": "需要使用有效的 API 密钥，方可将图像上传到你的账户。",
+      "apiKeyGuide": "若已有账户，可在登录后访问<infoPageLink>用户信息页面</infoPageLink>以获取 API 密钥。",
+      "uploadSuccess": "图像已上传",
+      "uploadSuccessDescription": "使用以下链接访问图像",
+      "uploadFailed": "无法上传"
     },
     "save": {
       "title": "保存与分享",
@@ -245,7 +262,7 @@
     "nav": {
       "home": "首页",
       "avatar": "头像卡片",
-      "imagemap": "Imagemap 编辑",
+      "imagemap": "Imagemap 编辑器",
       "docs": "使用文档"
     },
     "external": {
@@ -270,7 +287,7 @@
       "github": "该项目的源代码可在 <repoLink>GitHub</repoLink> 上查看，在此期待各位的反馈或贡献~"
     },
     "avatar": {
-      "title": "头像卡片生成工具",
+      "title": "头像卡片生成",
       "description": "生成各种样式的用户头像卡片",
       "content": [
         "该功能受到众多 osu! 机器人的启发，所在群用户可以使用一条短小精悍的命令生成用户卡片。不过如果恰巧没法接触到部署这个功能的实例，或者单纯不想让群里的其他人知道这事...可能会有些麻烦。",
