@@ -222,7 +222,14 @@
       "saveLocally": "本地保存",
       "saveLocallyDescription": "将图片保存到本地文件系统",
       "upload": "上传到图床",
-      "uploadDescription": "将图片上传到托管服务，随处可用"
+      "uploadDescription": "将图片上传到托管服务，随处可用",
+      "service": "图床服务",
+      "apiKey": "API 密钥",
+      "apiKeyPrompt": "需要使用有效的 API 密钥，方可将图像上传到你的账户。",
+      "apiKeyGuide": "若已有账户，可在登录后访问<infoPageLink>用户信息页面</infoPageLink>以获取 API 密钥。",
+      "uploadSuccess": "图像已上传",
+      "uploadSuccessDescription": "使用以下链接访问图像",
+      "uploadFailed": "无法上传"
     },
     "error": {
       "loadImage": "无法加载文件",
@@ -357,10 +364,13 @@
         "title": "使用生成的代码",
         "description": "在个人资料或其他地方使用",
         "preview": {
-          "title": "新功能预告",
-          "description": "我们正在规划向 ImageMap 编辑器添加便捷上传到主流图床平台的功能，敬请期待。"
+          "title": "更多图床服务",
+          "description": "目前只支持将图像上传到 s-ul.eu。如果你知道别的图床服务，还请在项目页创建 issue，谢谢喵~"
         },
-        "hosting": "在其他网站使用 ImageMap 前，需要先将图像上传到支持的平台（图床）。",
+        "hosting": {
+          "intro": "在其他网站使用 ImageMap 前，需要先将图像上传到支持的平台（图床）。",
+          "feature": "osu! Collab Tools 提供一项便捷功能，只要图床平台受支持，并且你拥有账户对应的 API 密钥，敲几下键盘后，便可将图像一键上传到图床。"
+        },
         "bbcode": {
           "title": "使用 BBCode",
           "steps": [
