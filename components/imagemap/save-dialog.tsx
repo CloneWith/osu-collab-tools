@@ -21,6 +21,10 @@ export interface SaveDialogProps {
   onSave: (options: { format: string; quality: number }) => Promise<string | null>;
 }
 
+const infoLinks: Record<string, string> = {
+  "s-ul": "https://s-ul.eu/account/info",
+};
+
 const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, onSave }) => {
   const t = useTranslations("imagemap.save");
   const tc = useTranslations("common");
@@ -270,12 +274,19 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
               </div>
               <div className="space-y-2">
                 <Label htmlFor="token">{t("apiKey")}</Label>
-                <Input
-                  id="token"
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                  placeholder={t("apiKeyPlaceholder")}
-                ></Input>
+                <div className="text-sm text-muted-foreground">
+                  <div>{t("apiKeyPrompt")}</div>
+                  <div>
+                    {t.rich("apiKeyGuide", {
+                      infoPageLink: (link) => (
+                        <a href={infoLinks[service]} className="doc-link">
+                          {link}
+                        </a>
+                      ),
+                    })}
+                  </div>
+                </div>
+                <Input id="token" value={token} onChange={(e) => setToken(e.target.value)}></Input>
               </div>
               {uploadResult && (
                 <Alert variant="success">

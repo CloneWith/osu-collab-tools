@@ -225,7 +225,8 @@
       "uploadDescription": "Upload the image to hosting services for use anywhere",
       "service": "Image sharing service",
       "apiKey": "API key",
-      "apiKeyPlaceholder": "A valid API key is required to upload the image to your account.",
+      "apiKeyPrompt": "A valid API key is required to upload the image to your account.",
+      "apiKeyGuide": "If you have an existing account, you can get your API key in the <infoPageLink>info page</infoPageLink> after login.",
       "uploadSuccess": "Image uploaded",
       "uploadSuccessDescription": "Access the image via the link below",
       "uploadFailed": "Unable to upload"
@@ -363,10 +364,13 @@
         "title": "Using Generated Code",
         "description": "Use it in profiles or other places",
         "preview": {
-          "title": "New Feature Preview",
-          "description": "We are planning to add a feature to the ImageMap editor for easy uploading to mainstream image hosting platforms. Stay tuned."
+          "title": "We need more image sharing services",
+          "description": "Currently we only support uploading images to s-ul.eu. Feel free to open an issue if you know other such services!"
         },
-        "hosting": "Before using ImageMap on other websites, you need to upload the image to a supported platform (image hosting).",
+        "hosting": {
+          "intro": "Before using ImageMap on other websites, you need to upload the image to a supported platform (image hosting).",
+          "feature": "osu! Collab Tools provide a feature that you can upload it easily within a few keystrokes and one click, as soon as the platform is supported by us and you have an API key available."
+        },
         "bbcode": {
           "title": "Using BBCode",
           "steps": [
