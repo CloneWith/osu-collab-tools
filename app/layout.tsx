@@ -8,6 +8,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Footer from "@/app/footer";
 import { IntlProvider } from "@/components/providers/intl-provider";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({subsets: ["latin"]});
 
@@ -24,18 +26,20 @@ export default function RootLayout({
   // Suppressing hydration warning due to dark mode class
   return (
     <html lang="en" suppressHydrationWarning>
-    <body className={inter.className}>
-    <IntlProvider>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <TooltipProvider delayDuration={300}>
-          <Navbar/>
-          <main>{children}</main>
-          <Toaster/>
-          <Footer/>
-        </TooltipProvider>
-      </ThemeProvider>
-    </IntlProvider>
-    </body>
+      <body className={inter.className}>
+        <IntlProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <TooltipProvider delayDuration={300}>
+              <Navbar />
+              <main>{children}</main>
+              <Toaster />
+              <Footer />
+            </TooltipProvider>
+          </ThemeProvider>
+        </IntlProvider>
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
