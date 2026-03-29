@@ -16,15 +16,10 @@ You can request more features by submitting an issue.
 
 ## Build and Deployment
 
-![Build Status on Netlify](https://api.netlify.com/api/v1/badges/e9267089-3b2b-4cd8-b9e9-6bddf234fb43/deploy-status)
+You could use the live deployment at the following sites:
 
-There is a live deployment by GitHub Pages [here](
-https://clonewith.github.io/osu-collab-tools/), where You can always use the **latest** features!
-
-If network conditions don't allow for access, you can try the following sites:
-
+- [Main (Recommended)](https://amaz1ng-c0llab.clonewith.me)
 - [Vercel](https://amaz1ng-c0llab.vercel.app)
-- [Netlify](https://amaz1ng-c0llab-cw.netlify.app/) (Will not always be up to date with latest changes)
 
 ### Run Locally
 
