@@ -1,28 +1,24 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
-import { EditorView, basicSetup } from "codemirror";
-import { EditorState } from "@codemirror/state";
-import { json } from "@codemirror/lang-json";
-import { keymap, EditorView as ViewExt } from "@codemirror/view";
-import { defaultKeymap, indentWithTab } from "@codemirror/commands";
-import { githubDark } from "@fsegurai/codemirror-theme-github-dark";
 import { cn } from "@/lib/utils";
+import { defaultKeymap, indentWithTab } from "@codemirror/commands";
+import { json } from "@codemirror/lang-json";
+import { EditorState } from "@codemirror/state";
+import { keymap, EditorView as ViewExt } from "@codemirror/view";
+import { githubDark } from "@fsegurai/codemirror-theme-github-dark";
+import { basicSetup, EditorView } from "codemirror";
+import { useCallback, useEffect, useRef } from "react";
 
 interface CodeMirrorEditorProps {
   value: string;
   onChange: (value: string) => void;
-  readOnly?: boolean;
   className?: string;
-  height?: string;
 }
 
 export function CodeMirrorEditor({
   value,
   onChange,
-  readOnly = false,
   className = "",
-  height = "320px",
 }: CodeMirrorEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<EditorView | null>(null);
@@ -33,9 +29,12 @@ export function CodeMirrorEditor({
     valueRef.current = value;
   }, [value]);
 
-  const handleChange = useCallback((newValue: string) => {
-    onChange(newValue);
-  }, [onChange]);
+  const handleChange = useCallback(
+    (newValue: string) => {
+      onChange(newValue);
+    },
+    [onChange],
+  );
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -48,7 +47,7 @@ export function CodeMirrorEditor({
 
     // 创建编辑器状态
     const state = EditorState.create({
-      doc: value,
+      doc: valueRef.current,
       extensions: [
         basicSetup,
         json(),
@@ -62,14 +61,12 @@ export function CodeMirrorEditor({
             handleChange(newValue);
           }
         }),
-        EditorView.editable.of(!readOnly),
         // 自定义主题和样式
         EditorView.theme({
           ".cm-editor": {
             height: "100%",
             fontSize: "14px",
-            fontFamily:
-              "'Cascadia Code', 'Fira Code', 'Menlo', 'Monaco', monospace",
+            fontFamily: "'Cascadia Code', 'Fira Code', 'Menlo', 'Monaco', monospace",
             backgroundColor: "#1e1e1e",
           },
           ".cm-gutters": {
@@ -103,14 +100,11 @@ export function CodeMirrorEditor({
         editorRef.current = null;
       }
     };
-  }, [handleChange, readOnly]);
+  }, [handleChange]);
 
   // 同步外部值变化（避免不必要的更新）
   useEffect(() => {
-    if (
-      editorRef.current &&
-      editorRef.current.state.doc.toString() !== value
-    ) {
+    if (editorRef.current && editorRef.current.state.doc.toString() !== value) {
       const changes = editorRef.current.state.changes({
         from: 0,
         to: editorRef.current.state.doc.length,
@@ -124,8 +118,10 @@ export function CodeMirrorEditor({
   return (
     <div
       ref={containerRef}
-      className={cn("w-full border border-gray-700 rounded-md overflow-y-auto overflow-x-hidden bg-gray-900 dark:bg-gray-950", className)}
-      style={{ height }}
+      className={cn(
+        "w-full border border-gray-700 rounded-md overflow-y-auto overflow-x-hidden bg-gray-900 dark:bg-gray-950",
+        className,
+      )}
     />
   );
 }
