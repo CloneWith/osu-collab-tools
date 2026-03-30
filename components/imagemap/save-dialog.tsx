@@ -1,17 +1,17 @@
-import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Loader2, Camera, CloudUpload, CloudCheck, CloudAlert } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { useToast } from "@/hooks/use-toast";
 import { isNullOrWhitespace } from "@/lib/utils";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { validateFilename } from "@/lib/validation";
+import { Camera, CloudAlert, CloudCheck, CloudUpload, Download, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import * as React from "react";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { CopyButton } from "../ui/copy-button";
 
 export interface SaveDialogProps {
@@ -38,7 +38,10 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
   const extension = format.split("/")[1];
   const defaultName = `exported-${baseName}-${Date.now()}`;
 
-  const filenameValidation = React.useMemo(() => validateFilename(filename || defaultName + extension), [filename, defaultName, extension]);
+  const filenameValidation = React.useMemo(
+    () => validateFilename(filename || defaultName + extension),
+    [filename, defaultName, extension],
+  );
 
   const [service, setService] = React.useState("s-ul");
   const [token, setToken] = React.useState("");
@@ -106,7 +109,7 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
         });
 
         if (result) {
-          // 处理s-ul上传
+          // Add more uploading services here
           if (service === "s-ul") {
             const response = await fetch(result);
             const blob = await response.blob();
@@ -286,7 +289,7 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
                     })}
                   </div>
                 </div>
-                <Input id="token" value={token} onChange={(e) => setToken(e.target.value)}></Input>
+                <Input id="token" type="password" value={token} onChange={(e) => setToken(e.target.value)}></Input>
               </div>
               {uploadResult && (
                 <Alert variant="success">
