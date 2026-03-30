@@ -45,7 +45,7 @@ export function IntlProvider({ children }: IntlProviderProps) {
 
   return (
     <IntlContext.Provider value={{ locale, setLocale }}>
-      <NextIntlClientProvider locale={locale} messages={messages}>
+      <NextIntlClientProvider locale={locale} timeZone="UTC" messages={messages}>
         {children}
       </NextIntlClientProvider>
     </IntlContext.Provider>
