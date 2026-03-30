@@ -1,8 +1,8 @@
 "use client";
 
+import { common } from "@/app/common";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText } from "lucide-react";
-import { common } from "@/app/common";
 import { useTranslations } from "next-intl";
 
 export default function InfoDocCard() {
@@ -11,7 +11,7 @@ export default function InfoDocCard() {
     <Card id="info">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <FileText className="w-5 h-5"/>
+          <FileText className="w-5 h-5" />
           {t("sections.intro")}
         </CardTitle>
         <CardDescription>{t("description")}</CardDescription>
@@ -24,7 +24,15 @@ export default function InfoDocCard() {
           <li>{t("intro.features.secure")}</li>
           <li>{t("intro.features.integrated")}</li>
         </ul>
-        <p>{t.rich("intro.github", {repoLink: (link) => <a href={common.repoUrl} className="doc-link">{link}</a>})}</p>
+        <p>
+          {t.rich("intro.github", {
+            repoLink: (link) => (
+              <a href={common.repoUrl} className="doc-link">
+                {link}
+              </a>
+            ),
+          })}
+        </p>
       </CardContent>
     </Card>
   );

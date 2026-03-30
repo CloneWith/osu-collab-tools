@@ -1,18 +1,18 @@
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import {
   Code,
   Hash,
   Info,
   Keyboard,
-  Map,
+  Map as MapIcon,
   MousePointer,
   Square,
   Trash2,
   TriangleAlert,
   UserRound,
 } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { useTranslations } from "next-intl";
 
 export default function ImagemapDocCard() {
@@ -22,7 +22,7 @@ export default function ImagemapDocCard() {
     <Card id="imagemap">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Map className="w-5 h-5" />
+          <MapIcon className="w-5 h-5" />
           {t("title")}
         </CardTitle>
         <CardDescription>{t("description")}</CardDescription>

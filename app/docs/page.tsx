@@ -1,8 +1,8 @@
 "use client";
 
-import InfoDocCard from "@/app/docs/info-card";
-import ImagemapDocCard from "@/app/docs/imagemap-card";
 import AvatarDocCard from "@/app/docs/avatar-card";
+import ImagemapDocCard from "@/app/docs/imagemap-card";
+import InfoDocCard from "@/app/docs/info-card";
 import { useTranslations } from "next-intl";
 
 export default function DocsPage() {
@@ -18,13 +18,13 @@ export default function DocsPage() {
 
         <div className="space-y-8">
           {/* Section - 站点简介 */}
-          <InfoDocCard/>
+          <InfoDocCard />
 
           {/* Section - Avatar Generator */}
-          <AvatarDocCard/>
+          <AvatarDocCard />
 
           {/* Section - ImageMap Editor */}
-          <ImagemapDocCard/>
+          <ImagemapDocCard />
         </div>
       </div>
     </div>
