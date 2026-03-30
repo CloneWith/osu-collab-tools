@@ -1,8 +1,8 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 import { common } from "@/app/common";
+import type { Rectangle } from "@/app/imagemap/types";
 import flagFallback from "@/public/flag-fallback.png";
-import { Rectangle } from "@/app/imagemap/types";
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -32,8 +32,8 @@ export function generateId(fallback: string = `rect-${Date.now()}`) {
 export function getServerLink() {
     return typeof window !== "undefined"
         ? (localStorage.getItem("custom_endpoint") ?? common.defaultEndpoint)
-        // 在 SSR / 构建阶段没有 window / localStorage
-        : common.defaultEndpoint;
+        : // 在 SSR / 构建阶段没有 window / localStorage
+          common.defaultEndpoint;
 }
 
 export function generateUserLinkFromId(userId: number) {
@@ -45,7 +45,11 @@ export function generateUserLinkFromName(username: string) {
     return encodeURI(`${getServerLink()}/u/${username}`.toWellFormed());
 }
 
-export function generateImageMapHtml(rectangles: Rectangle[], imagePath: string | undefined, mapName: string | undefined) {
+export function generateImageMapHtml(
+    rectangles: Rectangle[],
+    imagePath: string | undefined,
+    mapName: string | undefined,
+) {
     const name = mapName ?? "imagemap";
     const areas = rectangles
         .map(
@@ -62,7 +66,12 @@ ${areas}
 </map>`;
 }
 
-export function generateImageMapBBCode(rectangles: Rectangle[], width: number, height: number, imagePath: string | undefined) {
+export function generateImageMapBBCode(
+    rectangles: Rectangle[],
+    width: number,
+    height: number,
+    imagePath: string | undefined,
+) {
     const areas = rectangles
         .map(
             (rect) =>
@@ -157,10 +166,10 @@ export function getProxiedImageUrl(url?: string): string {
  */
 export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout | null = null;
-    
+
     return (...args: Parameters<T>) => {
         if (timeout) clearTimeout(timeout);
-        
+
         timeout = setTimeout(() => {
             func(...args);
             timeout = null;
@@ -176,12 +185,12 @@ export function debounce<T extends (...args: any[]) => any>(func: T, wait: numbe
  */
 export function throttle<T extends (...args: any[]) => any>(func: T, limit: number): (...args: Parameters<T>) => void {
     let inThrottle: boolean = false;
-    
+
     return (...args: Parameters<T>) => {
         if (!inThrottle) {
             func(...args);
             inThrottle = true;
-            
+
             setTimeout(() => {
                 inThrottle = false;
             }, limit);
