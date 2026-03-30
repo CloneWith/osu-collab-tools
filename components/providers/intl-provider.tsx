@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useState, useContext, useEffect } from "react";
-import { Locale, NextIntlClientProvider } from "next-intl";
 import { defaultLocale, getMessages, isLocale } from "@/lib/i18n";
+import { type Locale, NextIntlClientProvider } from "next-intl";
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface IntlContextType {
   locale: Locale;

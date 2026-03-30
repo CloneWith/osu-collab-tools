@@ -1,25 +1,25 @@
 "use client";
 
-import * as React from "react";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Moon, Sun, Settings, Languages, SunMoon } from "lucide-react";
-import { useTheme } from "next-themes";
 import { common } from "@/app/common";
-import { useEffect } from "react";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Languages, Moon, Settings, Sun, SunMoon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
+import * as React from "react";
+import { useEffect } from "react";
 
 export function SettingsFlyout() {
   const t = useTranslations("settings");
   const endpointKey = "custom_endpoint";
-  const [currentEndpoint, setCurrentEndpoint] = React.useState<string>(typeof window !== "undefined"
-    ? (localStorage.getItem("custom_endpoint") ?? "")
-    : "");
+  const [currentEndpoint, setCurrentEndpoint] = React.useState<string>(
+    typeof window !== "undefined" ? (localStorage.getItem("custom_endpoint") ?? "") : "",
+  );
 
-  const {theme, setTheme} = useTheme();
+  const { theme, setTheme } = useTheme();
   const [themeValue, setThemeValue] = React.useState<string>(theme ?? "system");
   const [endpointValid, setEndpointValid] = React.useState<boolean>(true);
 
@@ -67,15 +67,16 @@ export function SettingsFlyout() {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="flex items-center space-x-2 p-2">
-          <Settings className="w-4 h-4"/>
+          <Settings className="w-4 h-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-56">
         <div className="flex flex-col space-y-3">
           <Label className="flex items-center flex-row gap-1 text-sm font-medium">
-            <Languages className="w-4 h-4"/>{t("language")}
+            <Languages className="w-4 h-4" />
+            {t("language")}
           </Label>
-          <LanguageSwitcher/>
+          <LanguageSwitcher />
 
           <div>
             <Label className="text-sm font-medium">{t("colorScheme")}</Label>
@@ -88,9 +89,21 @@ export function SettingsFlyout() {
             className="inline-flex items-center rounded-full border border-border/60 bg-transparent p-1 justify-between"
           >
             {[
-              {key: "light", icon: <Sun className="w-4 h-4"/>, title: t("themes.light")},
-              {key: "system", icon: <SunMoon className="w-4 h-4"/>, title: t("themes.system")},
-              {key: "dark", icon: <Moon className="w-4 h-4"/>, title: t("themes.dark")},
+              {
+                key: "light",
+                icon: <Sun className="w-4 h-4" />,
+                title: t("themes.light"),
+              },
+              {
+                key: "system",
+                icon: <SunMoon className="w-4 h-4" />,
+                title: t("themes.system"),
+              },
+              {
+                key: "dark",
+                icon: <Moon className="w-4 h-4" />,
+                title: t("themes.dark"),
+              },
             ].map((opt, _, __) => {
               const selected = themeValue === (opt.key as string);
               return (
@@ -114,15 +127,17 @@ export function SettingsFlyout() {
           </div>
 
           <div>
-            <Label htmlFor="endpoint" className="text-sm font-medium">{t("serverEndpoint")}</Label>
+            <Label htmlFor="endpoint" className="text-sm font-medium">
+              {t("serverEndpoint")}
+            </Label>
             <div className="text-xs text-muted-foreground">{t("serverEndpointDescription")}</div>
           </div>
-          <Input id="endpoint"
-                 className={`w-full px-2 py-1 border font-mono text-sm ${endpointValid ? "" : "border-yellow-600"}`}
-                 aria-label="服务器地址输入框"
-                 placeholder={common.defaultEndpoint}
-                 defaultValue={currentEndpoint}
-                 onChange={(v) => onEndpointChange(v.target.value.trim())}
+          <Input
+            id="endpoint"
+            className={`w-full px-2 py-1 border font-mono text-sm ${endpointValid ? "" : "border-yellow-600"}`}
+            placeholder={common.defaultEndpoint}
+            defaultValue={currentEndpoint}
+            onChange={(v) => onEndpointChange(v.target.value.trim())}
           />
         </div>
       </PopoverContent>

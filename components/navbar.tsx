@@ -1,19 +1,19 @@
 "use client";
 
+import Logo from "@/components/logo";
+import { Button } from "@/components/ui/button";
+import { SettingsFlyout } from "@/components/ui/settings-flyout";
+import { FileText, Home, Map as MapIcon, Menu, UserRound, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Map, Home, FileText, Menu, X, UserRound } from "lucide-react";
 import { useState } from "react";
-import { SettingsFlyout } from "@/components/ui/settings-flyout";
-import Logo from "@/components/logo";
-import { useTranslations } from "next-intl";
 
 const navigation = [
-  {key: "home", href: "/", icon: Home},
-  {key: "avatar", href: "/avatar", icon: UserRound},
-  {key: "imagemap", href: "/imagemap", icon: Map},
-  {key: "docs", href: "/docs", icon: FileText},
+  { key: "home", href: "/", icon: Home },
+  { key: "avatar", href: "/avatar", icon: UserRound },
+  { key: "imagemap", href: "/imagemap", icon: MapIcon },
+  { key: "docs", href: "/docs", icon: FileText },
 ] as const;
 
 export function Navbar() {
@@ -28,7 +28,7 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <Logo/>
+              <Logo />
               <span className="text-xl font-bold text-gray-900 dark:text-white">Collab Tools</span>
             </Link>
           </div>
@@ -48,20 +48,19 @@ export function Navbar() {
                       : "text-gray-600 hover:text-gray-900 hover:bg-primary/10 dark:text-gray-300"
                   }`}
                 >
-                  <Icon className="w-4 h-4"/>
+                  <Icon className="w-4 h-4" />
                   <span>{t(`nav.${item.key}`)}</span>
                 </Link>
               );
             })}
-            <SettingsFlyout/>
+            <SettingsFlyout />
           </div>
 
           {/* Mobile menu button & theme toggle */}
           <div className="md:hidden flex items-center space-x-2">
-            <SettingsFlyout/>
-            <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    className="p-2">
-              {mobileMenuOpen ? <X className="w-5 h-5"/> : <Menu className="w-5 h-5"/>}
+            <SettingsFlyout />
+            <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2">
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
         </div>
@@ -78,11 +77,13 @@ export function Navbar() {
                     key={item.key}
                     href={item.href}
                     className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                      isActive ? "bg-primary/10 text-primary dark:bg-primary dark:text-primary-foreground" : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      isActive
+                        ? "bg-primary/10 text-primary dark:bg-primary dark:text-primary-foreground"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <Icon className="w-5 h-5"/>
+                    <Icon className="w-5 h-5" />
                     <span>{t(`nav.${item.key}`)}</span>
                   </Link>
                 );
