@@ -1,21 +1,25 @@
-import Link from "next/link";
-import { HelpCircle } from "lucide-react";
-import type React from "react";
 import { cn } from "@/lib/utils";
+import { HelpCircle } from "lucide-react";
+import Link from "next/link";
+import type React from "react";
 
 interface HelpIconButtonProps {
-  alt?: string;
   section?: string;
   className?: string;
 }
 
 export const HelpIconButton: React.FC<HelpIconButtonProps> = ({
-                                                                alt = "查看帮助",
-                                                                section,
-                                                                className,
-                                                              }) => (
-  <Link aria-label={alt} href={`/docs${section ? "#" + section : ""}`}
-        className={cn("transition-all ease-out duration-200 hover:text-accent", className)}>
-    <HelpCircle/>
+  section,
+  className,
+}) => (
+  <Link
+    aria-label="Help Button"
+    href={`/docs${section ? `#${section}` : ""}`}
+    className={cn(
+      "transition-all ease-out duration-200 hover:text-accent",
+      className,
+    )}
+  >
+    <HelpCircle />
   </Link>
 );
