@@ -1,9 +1,9 @@
-import type React from "react";
-import { useState, useEffect } from "react";
-import type { AvatarInputs, IAvatarStyle } from "./IAvatarStyle";
+import { torus } from "@/lib/fonts";
 import { FlagTheme, getCountryFlagDataUrl, getProxiedImageUrl } from "@/lib/utils";
 import flagFallback from "@/public/flag-fallback.png";
-import { torus } from "@/lib/fonts";
+import type React from "react";
+import { useEffect, useState } from "react";
+import type { AvatarInputs, IAvatarStyle } from "./IAvatarStyle";
 
 export class SimpleAvatarStyle implements IAvatarStyle {
   key = "simple";
@@ -21,7 +21,7 @@ export class SimpleAvatarStyle implements IAvatarStyle {
         if (inputs.countryCode) {
           getCountryFlagDataUrl(inputs.countryCode, FlagTheme.Twemoji).then(setFlagUrl);
         }
-      }, [inputs.countryCode]);
+      }, []);
 
       return (
         <div

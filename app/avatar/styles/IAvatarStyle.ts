@@ -1,7 +1,7 @@
 /**
  * Represents a specific style of avatar.
  */
-import React from "react";
+import type React from "react";
 
 /**
  * Inputs required to generate an avatar preview/component.
@@ -15,10 +15,10 @@ export interface AvatarInputs {
     countryCode?: string;
     /** Optional font override for this render */
     font?: {
-        family?: string,
-        size?: number,
-        weight?: string,
-    }
+        family?: string;
+        size?: number;
+        weight?: string;
+    };
 }
 
 /**
@@ -33,16 +33,16 @@ export interface IAvatarStyle {
     size: {
         width: number;
         height: number;
-    },
+    };
 
     /**
      * The default font used for this style.
      */
     defaultFont: {
-        family?: string,
-        size?: number,
-        weight?: string,
-    }
+        family?: string;
+        size?: number;
+        weight?: string;
+    };
 
     /**
      * Generate a React component representing the avatar preview

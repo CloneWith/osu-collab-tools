@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from "react";
-import type { AvatarInputs, IAvatarStyle } from "./IAvatarStyle";
+import { torus } from "@/lib/fonts";
 import { FlagTheme, getCountryFlagDataUrl, getProxiedImageUrl } from "@/lib/utils";
 import flagFallback from "@/public/flag-fallback.png";
-import { torus } from "@/lib/fonts";
+import type React from "react";
+import { useEffect, useState } from "react";
+import type { AvatarInputs, IAvatarStyle } from "./IAvatarStyle";
 
 export class ModernAvatarStyle implements IAvatarStyle {
   key = "modern";
-  size = {width: 300, height: 300};
-  defaultFont = {family: "Torus", size: 40, weight: "500"};
+  size = { width: 300, height: 300 };
+  defaultFont = { family: "Torus", size: 40, weight: "500" };
 
   generateAvatar = (inputs: AvatarInputs): React.FC => {
-    const {width, height} = this.size;
+    const { width, height } = this.size;
     const font = inputs.font ?? this.defaultFont;
 
     return () => {
@@ -22,7 +23,7 @@ export class ModernAvatarStyle implements IAvatarStyle {
             setFlagUrl(url);
           });
         }
-      }, [inputs.countryCode]);
+      }, []);
 
       return (
         <div
@@ -60,7 +61,7 @@ export class ModernAvatarStyle implements IAvatarStyle {
               alt={inputs.countryCode}
               crossOrigin="anonymous"
               draggable={false}
-              style={{height: 72}}
+              style={{ height: 72 }}
               className="mt-2 mb-5 object-cover rounded-md select-none"
             />
           ) : null}

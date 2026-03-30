@@ -1,22 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
+import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
+import { HelpIconButton } from "@/components/help-icon-button";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import type { IAvatarStyle, AvatarInputs } from "./styles/IAvatarStyle";
-import { ClassicAvatarStyle } from "./styles/ClassicAvatarStyle";
-import { Eye, Settings, Download, UserRoundPen, OctagonAlert } from "lucide-react";
-import { HelpIconButton } from "@/components/help-icon-button";
 import { useToast } from "@/hooks/use-toast";
-import { snapdom } from "@zumer/snapdom";
-import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
-import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
 import { cn, debounce, isNullOrWhitespace } from "@/lib/utils";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { snapdom } from "@zumer/snapdom";
+import { Download, Eye, OctagonAlert, Settings, UserRoundPen } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ClassicAvatarStyle } from "./styles/ClassicAvatarStyle";
+import type { AvatarInputs, IAvatarStyle } from "./styles/IAvatarStyle";
 
 // 注册所有可用样式
 const STYLE_REGISTRY = [
@@ -78,7 +78,7 @@ export default function AvatarGeneratorPage() {
         </Empty>
       );
     }
-  }, [selectedStyle, inputs, imageUrl, username]);
+  }, [selectedStyle, inputs, imageUrl, username, t]);
 
   useEffect(() => {
     const container = previewRef.current;
@@ -107,7 +107,7 @@ export default function AvatarGeneratorPage() {
       setHasPendingUpdate(true);
       debouncedCommit(inputImageUrl, inputCountryCode);
     }
-  }, [inputImageUrl, inputCountryCode, debouncedCommit]);
+  }, [inputImageUrl, inputCountryCode, debouncedCommit, username]);
 
   const handleDownload = async () => {
     if (!previewRef.current?.firstElementChild) return;
@@ -207,7 +207,7 @@ export default function AvatarGeneratorPage() {
                   <SelectContent>
                     {SUPPORTED_SCALES.map((key) => (
                       <SelectItem key={key} value={key.toString()}>
-                        {key + "x"}
+                        {`${key}x`}
                       </SelectItem>
                     ))}
                   </SelectContent>

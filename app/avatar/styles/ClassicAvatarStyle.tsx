@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
-import type { AvatarInputs, IAvatarStyle } from "./IAvatarStyle";
 import { FlagTheme, getCountryFlagDataUrl, getProxiedImageUrl } from "@/lib/utils";
 import flagFallback from "@/public/flag-fallback.png";
+import type React from "react";
+import { useEffect, useState } from "react";
+import type { AvatarInputs, IAvatarStyle } from "./IAvatarStyle";
 
 export class ClassicAvatarStyle implements IAvatarStyle {
   key = "classic";
-  size = {width: 320, height: 320};
-  defaultFont = {family: "Tahoma", size: 48, weight: "500"};
+  size = { width: 320, height: 320 };
+  defaultFont = { family: "Tahoma", size: 48, weight: "500" };
 
   generateAvatar = (inputs: AvatarInputs): React.FC => {
-    const {width, height} = this.size;
+    const { width, height } = this.size;
     const font = inputs.font ?? this.defaultFont;
 
     return () => {
@@ -19,7 +20,7 @@ export class ClassicAvatarStyle implements IAvatarStyle {
         if (inputs.countryCode) {
           getCountryFlagDataUrl(inputs.countryCode, FlagTheme.Normal).then(setFlagUrl);
         }
-      }, [inputs.countryCode]);
+      }, []);
 
       return (
         <div
@@ -59,7 +60,7 @@ export class ClassicAvatarStyle implements IAvatarStyle {
               alt={inputs.countryCode}
               crossOrigin="anonymous"
               draggable={false}
-              style={{height: 26}}
+              style={{ height: 26 }}
               className="mt-2 mb-5 object-cover rounded-md select-none"
             />
           ) : null}
