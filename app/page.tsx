@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { createScope, createTimeline, Scope, splitText, stagger } from "animejs";
 import { TrianglesBackground } from "@/components/triangles-background";
-import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { createScope, createTimeline, type Scope, splitText, stagger } from "animejs";
+import { ArrowRight, Construction } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useEffect, useRef } from "react";
 
 export default function MainPage() {
   const t = useTranslations("home");
@@ -15,15 +15,15 @@ export default function MainPage() {
   const scope = useRef<Scope>(null);
 
   useEffect(() => {
-    scope.current = createScope({root}).add(self => {
-      const {words} = splitText(".hero-title", {words: {wrap: "clip"}});
+    scope.current = createScope({ root }).add((_) => {
+      const { words } = splitText(".hero-title", { words: { wrap: "clip" } });
 
-      createTimeline({defaults: {ease: "inOut(3)", duration: 650}})
-        .add(words, {y: ["100%", "0%"]}, stagger(125))
+      createTimeline({ defaults: { ease: "inOut(3)", duration: 650 } })
+        .add(words, { y: ["100%", "0%"] }, stagger(125))
         .init();
     });
 
-    return () => scope.current!.revert();
+    return () => scope.current?.revert();
   }, []);
 
   return (
@@ -43,17 +43,13 @@ export default function MainPage() {
         </div>
         <div className="w-full px-4 sm:px-6 lg:px-8 py-24 relative z-10 bg-muted/50">
           <div className="text-center">
-            <h1 className="hero-title text-4xl md:text-6xl font-bold text-card-foreground mb-6">
-              {t("hero.title")}
-            </h1>
-            <p className="text-xl text-card-foreground mb-8 max-w-3xl mx-auto">
-              {t("hero.description")}
-            </p>
+            <h1 className="hero-title text-4xl md:text-6xl font-bold text-card-foreground mb-6">{t("hero.title")}</h1>
+            <p className="text-xl text-card-foreground mb-8 max-w-3xl mx-auto">{t("hero.description")}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/imagemap">
                 <Button size="lg" className="text-lg px-8 py-3">
                   {t("hero.startButton")}
-                  <ArrowRight className="ml-2 w-5 h-5"/>
+                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
               <Link href="/docs">
@@ -71,14 +67,12 @@ export default function MainPage() {
         <Empty>
           <EmptyHeader>
             <EmptyMedia>
-              <ArrowUpRight className="w-24 h-24"/>
+              <Construction className="w-24 h-24" />
             </EmptyMedia>
-            <EmptyTitle>草</EmptyTitle>
-            <EmptyDescription>请稍后再来。</EmptyDescription>
+            <EmptyTitle>{t("feature.title")}</EmptyTitle>
+            <EmptyDescription>{t("feature.wip")}</EmptyDescription>
           </EmptyHeader>
-          <EmptyContent>
-            使用导航栏选择工具
-          </EmptyContent>
+          <EmptyContent>{t("feature.useNavigationBar")}</EmptyContent>
         </Empty>
       </section>
     </div>

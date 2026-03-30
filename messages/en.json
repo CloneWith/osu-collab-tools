@@ -56,6 +56,11 @@
       "description": "Make it easier to create collab images",
       "startButton": "Get Started",
       "docsButton": "View Documentation"
+    },
+    "feature": {
+      "title": "Under construction",
+      "wip": "We are making a brand new feature section for this project!",
+      "useNavigationBar": "Please use the navigation bar to access features for now."
     }
   },
   "settings": {

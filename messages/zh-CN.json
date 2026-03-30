@@ -56,6 +56,11 @@
       "description": "助力你做出还不错的 osu! 赛博合影",
       "startButton": "开始使用",
       "docsButton": "查看文档"
+    },
+    "feature": {
+      "title": "开发中",
+      "wip": "正在制作全新的功能展示区域！",
+      "useNavigationBar": "目前可使用导航栏切换功能。"
     }
   },
   "settings": {
