@@ -244,7 +244,7 @@
   },
   "navbar": {
     "viewOnGitHub": "View on GitHub",
-    "hostedByNetlify": "Hosted on Netlify",
+    "hostedByVercel": "Hosted on Vercel",
     "toolsTitle": "Tools",
     "externalProjects": "More Awesome Projects",
     "nav": {

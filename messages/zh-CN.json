@@ -244,7 +244,7 @@
   },
   "navbar": {
     "viewOnGitHub": "在 GitHub 查看",
-    "hostedByNetlify": "使用 Netlify 托管",
+    "hostedByVercel": "使用 Vercel 托管",
     "toolsTitle": "工具",
     "externalProjects": "友情链接",
     "nav": {
