@@ -56,6 +56,11 @@
       "description": "助力你做出还不错的 osu! 赛博合影",
       "startButton": "开始使用",
       "docsButton": "查看文档"
+    },
+    "feature": {
+      "title": "开发中",
+      "wip": "正在制作全新的功能展示区域！",
+      "useNavigationBar": "目前可使用导航栏切换功能。"
     }
   },
   "settings": {
@@ -239,7 +244,7 @@
   },
   "navbar": {
     "viewOnGitHub": "在 GitHub 查看",
-    "hostedByNetlify": "使用 Netlify 托管",
+    "hostedByVercel": "使用 Vercel 托管",
     "toolsTitle": "工具",
     "externalProjects": "友情链接",
     "nav": {
