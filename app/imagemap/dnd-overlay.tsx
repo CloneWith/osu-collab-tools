@@ -21,10 +21,7 @@ export enum DnDRejectReason {
  * @param isDragAccepted `true` 时对应允许放下文件，反之亦然
  * @param rejectReason 拖放被拒绝的原因，用于展示
  */
-export default function DragAndDropOverlay({
-                                             isRounded = false,
-                                             rejectReason = undefined,
-                                           }: DragAndDropOverlayProps) {
+export default function DragAndDropOverlay({ isRounded = false, rejectReason = undefined }: DragAndDropOverlayProps) {
   const t = useTranslations("imagemap");
   const isDragAccepted = rejectReason === undefined;
   let reasonPrompt = t("dnd.dropAccepted");
@@ -50,14 +47,16 @@ export default function DragAndDropOverlay({
     <div
       className={`pointer-events-none absolute inset-0 z-40 grid place-items-center backdrop-blur-md
                         ${isRounded && "rounded-md"}
-                        ${isDragAccepted ? "bg-primary/20" : "bg-destructive/20"}`}>
+                        ${isDragAccepted ? "bg-primary/20" : "bg-destructive/20"}`}
+    >
       <div className="text-center">
-        {isDragAccepted ? <Inbox className="w-10 h-10 mx-auto mb-3 text-primary"/>
-          : <Ban className="w-10 h-10 mx-auto mb-3 text-destructive"/>}
+        {isDragAccepted ? (
+          <Inbox className="w-10 h-10 mx-auto mb-3 text-primary" />
+        ) : (
+          <Ban className="w-10 h-10 mx-auto mb-3 text-destructive" />
+        )}
 
-        <p className="font-semibold">
-          {reasonPrompt}
-        </p>
+        <p className="font-semibold">{reasonPrompt}</p>
         {!isDragAccepted && subPrompt != null && <p className="text-sm">{subPrompt}</p>}
       </div>
     </div>

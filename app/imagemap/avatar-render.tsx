@@ -1,20 +1,21 @@
-import React, { useEffect, useRef } from "react";
+import type { AvatarInputs, IAvatarStyle } from "@/app/avatar/styles/IAvatarStyle";
 import type { Rectangle } from "@/app/imagemap/types";
 import { RectangleType } from "@/app/imagemap/types";
-import type { IAvatarStyle, AvatarInputs } from "@/app/avatar/styles/IAvatarStyle";
 import { isNullOrWhitespace } from "@/lib/utils";
 import { snapdom } from "@zumer/snapdom";
+import type React from "react";
+import { useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
 
 // 仅在该模块内部使用的测量容器
 export function MeasuredAvatar({
-                                 rectId,
-                                 onMeasure,
-                                 scale,
-                                 offsetX = 0,
-                                 offsetY = 0,
-                                 children,
-                               }: {
+  rectId,
+  onMeasure,
+  scale,
+  offsetX = 0,
+  offsetY = 0,
+  children,
+}: {
   rectId: string;
   onMeasure: (w: number, h: number) => void;
   scale: number;
@@ -23,6 +24,7 @@ export function MeasuredAvatar({
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -32,6 +34,7 @@ export function MeasuredAvatar({
     ro.observe(el);
     return () => ro.disconnect();
   }, [rectId, onMeasure]);
+
   return (
     <div
       ref={ref}
@@ -48,30 +51,37 @@ export function MeasuredAvatar({
   );
 }
 
-export const isRenderableAvatar = (rect: Rectangle) =>
-  rect.type === RectangleType.Avatar && !!rect.avatar &&
-  !isNullOrWhitespace(rect.avatar.imageUrl ?? "") && !isNullOrWhitespace(rect.avatar.username ?? "");
+export const canRenderAvatar = (rect: Rectangle) =>
+  rect.type === RectangleType.Avatar &&
+  !!rect.avatar &&
+  !isNullOrWhitespace(rect.avatar.imageUrl) &&
+  !isNullOrWhitespace(rect.avatar.username);
 
 export function resolveAvatar(
   rect: Rectangle,
   styleRegistry: ReadonlyArray<{ key: string; style: IAvatarStyle }>,
   cacheRef: React.RefObject<Map<string, { comp: React.FC; signature: string }>>,
-): { AvatarComponent: React.FC; styleObj: IAvatarStyle; inputs: AvatarInputs } | null {
-  if (!isRenderableAvatar(rect)) return null;
-  const styleObj = styleRegistry.find(s => s.key === (rect.avatar!.styleKey as any))?.style;
+): {
+  AvatarComponent: React.FC;
+  styleObj: IAvatarStyle;
+  inputs: AvatarInputs;
+} | null {
+  if (!canRenderAvatar(rect)) return null;
+
+  const styleObj = styleRegistry.find((s) => s.key === rect.avatar!.styleKey)?.style;
   if (!styleObj) return null;
   const inputs: AvatarInputs = {
     imageUrl: rect.avatar!.imageUrl,
     username: rect.avatar!.username,
-    countryCode: rect.avatar!.countryCode?.trim() ? rect.avatar!.countryCode.trim().toUpperCase() : undefined,
+    countryCode: rect.avatar?.countryCode?.trim() ? rect.avatar.countryCode.trim().toUpperCase() : undefined,
   };
-  const signature = `${rect.avatar!.styleKey}|${inputs.imageUrl}|${inputs.username}|${inputs.countryCode ?? ""}`;
+  const signature = `${rect.avatar!.styleKey}|${inputs.imageUrl}|${inputs.username}|${inputs.countryCode}`;
   let cache = cacheRef.current.get(rect.id);
   if (!cache || cache.signature !== signature) {
     try {
       const Comp = styleObj.generateAvatar(inputs);
       if (Comp) {
-        cache = {comp: Comp, signature};
+        cache = { comp: Comp, signature };
         cacheRef.current.set(rect.id, cache);
       }
     } catch {
@@ -79,15 +89,10 @@ export function resolveAvatar(
     }
   }
   const AvatarComponent = cache?.comp ?? null;
-  return AvatarComponent ? {AvatarComponent, styleObj, inputs} : null;
+  return AvatarComponent ? { AvatarComponent, styleObj, inputs } : null;
 }
 
-export const computeUniformScale = (
-  naturalW: number,
-  naturalH: number,
-  displayW: number,
-  displayH: number,
-) => {
+export const computeUniformScale = (naturalW: number, naturalH: number, displayW: number, displayH: number) => {
   const nw = Math.max(0, naturalW);
   const nh = Math.max(0, naturalH);
   const s = Math.min(nw > 0 ? displayW / nw : 1, nh > 0 ? displayH / nh : 1);
@@ -95,14 +100,14 @@ export const computeUniformScale = (
 };
 
 export function AvatarBox({
-                            rect,
-                            displayW,
-                            displayH,
-                            styleRegistry,
-                            cacheRef,
-                            measured,
-                            onMeasure,
-                          }: {
+  rect,
+  displayW,
+  displayH,
+  styleRegistry,
+  cacheRef,
+  measured,
+  onMeasure,
+}: {
   rect: Rectangle;
   displayW: number;
   displayH: number;
@@ -113,7 +118,7 @@ export function AvatarBox({
 }) {
   const resolved = resolveAvatar(rect, styleRegistry, cacheRef);
   if (!resolved) return null;
-  const {AvatarComponent} = resolved;
+  const { AvatarComponent } = resolved;
   const naturalW = measured?.width ?? displayW;
   const naturalH = measured?.height ?? displayH;
   const uniformScale = computeUniformScale(naturalW, naturalH, displayW, displayH);
@@ -139,7 +144,7 @@ export function AvatarBox({
       }}
     >
       <MeasuredAvatar rectId={rect.id} onMeasure={onMeasure} scale={uniformScale} offsetX={offsetX} offsetY={offsetY}>
-        <AvatarComponent/>
+        <AvatarComponent />
       </MeasuredAvatar>
     </div>
   );
@@ -173,14 +178,14 @@ export async function getAvatarDataURL(
   previewScaleY?: number,
 ): Promise<string | null> {
   // 检查是否为可渲染的头像
-  if (!isRenderableAvatar(rect)) {
+  if (!canRenderAvatar(rect)) {
     return null;
   }
 
   // 如果提供了预览缩放比例，使用与预览区相同的显示逻辑
   let displayW = rect.width;
   let displayH = rect.height;
-  
+
   if (previewScaleX && previewScaleY) {
     // 确保渲染一致性
     displayW = rect.width / previewScaleX;
@@ -203,7 +208,7 @@ export async function getAvatarDataURL(
   try {
     // 渲染 AvatarBox 组件到临时容器
     root = ReactDOM.createRoot(tempContainer);
-    
+
     // 使用与预览区相同的渲染逻辑
     // Although not recommended, using flushSync() here to ensure that
     // the React DOM root has been properly displayed.
@@ -226,12 +231,13 @@ export async function getAvatarDataURL(
       const checkResourcesLoaded = (time: number = 0) => {
         const renderedNode = tempContainer.firstElementChild as HTMLElement | null;
         const renderedRect = renderedNode?.getBoundingClientRect();
-        const hasRenderableContent = !!renderedNode && !!renderedRect && renderedRect.width > 0 && renderedRect.height > 0;
+        const hasRenderableContent =
+          !!renderedNode && !!renderedRect && renderedRect.width > 0 && renderedRect.height > 0;
         const images = tempContainer.querySelectorAll("img");
-        const allImagesLoaded = Array.from(images).every(img => {
+        const allImagesLoaded = Array.from(images).every((img) => {
           return img.complete && img.naturalHeight !== 0;
         });
-        
+
         // 检查字体是否加载完成
         const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
 
@@ -250,7 +256,7 @@ export async function getAvatarDataURL(
           setTimeout(() => checkResourcesLoaded(time + 50), 50);
         }
       };
-      
+
       // 初始等待React渲染完成
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -262,7 +268,7 @@ export async function getAvatarDataURL(
     const result = await snapdom(tempContainer, {
       // 使用2倍缩放提高质量，但保持组件逻辑尺寸不变
       scale: 2.0,
-      backgroundColor: "transparent", 
+      backgroundColor: "transparent",
       embedFonts: true,
       fast: false,
       placeholders: false,
@@ -294,7 +300,7 @@ export async function generateCompositeImage(
   backgroundDataURL: string,
   avatars: Array<RenderableAvatar>,
   format: string,
-  quality: number
+  quality: number,
 ): Promise<string | null> {
   return new Promise<string | null>((resolve) => {
     try {
@@ -353,12 +359,14 @@ export async function generateCompositeImage(
           });
 
           // 等待所有头像绘制完成
-          Promise.all(avatarPromises).then(() => {
-            const dataURL = canvas.toDataURL(format, quality);
-            resolve(dataURL);
-          }).catch(() => {
-            resolve(null);
-          });
+          Promise.all(avatarPromises)
+            .then(() => {
+              const dataURL = canvas.toDataURL(format, quality);
+              resolve(dataURL);
+            })
+            .catch(() => {
+              resolve(null);
+            });
         } catch (error) {
           console.error("生成合成图像失败:", error);
           resolve(null);

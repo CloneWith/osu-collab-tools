@@ -1,16 +1,17 @@
 "use client";
 
-import type React from "react";
-import type { ReactElement } from "react";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ClassicAvatarStyle } from "@/app/avatar/styles/ClassicAvatarStyle";
+import type { IAvatarStyle } from "@/app/avatar/styles/IAvatarStyle";
+import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
+import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
+import { common } from "@/app/common";
+import { AvatarBox, canRenderAvatar, generateCompositeImage, getAvatarDataURL } from "@/app/imagemap/avatar-render";
+import DragAndDropOverlay, { DnDRejectReason } from "@/app/imagemap/dnd-overlay";
+import { type ImageMapConfig, type Rectangle, RectangleType } from "@/app/imagemap/types";
+import { HelpIconButton } from "@/components/help-icon-button";
+import { ExportDialog } from "@/components/imagemap/export-dialog";
+import { ImportDialog } from "@/components/imagemap/import-dialog";
+import SaveDialog from "@/components/imagemap/save-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +22,44 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { CopyButton } from "@/components/ui/copy-button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
+import { registerBBCodeHighlight } from "@/lib/hljs-support";
+import {
+  clamp,
+  cn,
+  generateId,
+  generateImageMapBBCode,
+  generateImageMapHtml,
+  generateUserLinkFromId,
+  generateUserLinkFromName,
+} from "@/lib/utils";
+import { fileTypeFromBlob } from "file-type";
+import hljs from "highlight.js/lib/core";
+import html from "highlight.js/lib/languages/xml";
 import {
   Camera,
   CircleUserRound,
@@ -47,48 +85,10 @@ import {
   X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import {
-  clamp,
-  cn,
-  generateId,
-  generateImageMapBBCode,
-  generateImageMapHtml,
-  generateUserLinkFromId,
-  generateUserLinkFromName,
-} from "@/lib/utils";
-import DragAndDropOverlay, { DnDRejectReason } from "@/app/imagemap/dnd-overlay";
-import { common } from "@/app/common";
-import hljs from "highlight.js/lib/core";
-import html from "highlight.js/lib/languages/xml";
-import { HelpIconButton } from "@/components/help-icon-button";
-import { registerBBCodeHighlight } from "@/lib/hljs-support";
-import { ExportDialog } from "@/components/imagemap/export-dialog";
-import { ImportDialog } from "@/components/imagemap/import-dialog";
-import { ImageMapConfig, Rectangle, RectangleType } from "@/app/imagemap/types";
-import type { IAvatarStyle } from "@/app/avatar/styles/IAvatarStyle";
-import { ClassicAvatarStyle } from "@/app/avatar/styles/ClassicAvatarStyle";
-import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
-import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
-import { AvatarBox, generateCompositeImage, getAvatarDataURL, isRenderableAvatar } from "@/app/imagemap/avatar-render";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { fileTypeFromBlob } from "file-type";
-import { CopyButton } from "@/components/ui/copy-button";
-import SaveDialog from "@/components/imagemap/save-dialog";
-import { Avatar } from "../avatar/types";
+import type React from "react";
+import type { ReactElement } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import type { Avatar } from "../avatar/types";
 
 // 大小调整的八个点
 type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -103,7 +103,11 @@ interface Tool {
 const tools: Tool[] = [
   { key: "select", name: "select", icon: <MousePointer className="w-5 h-5" /> },
   { key: "create", name: "create", icon: <Square className="w-5 h-5" /> },
-  { key: "create-avatar", name: "createAvatar", icon: <CircleUserRound className="w-5 h-5" /> },
+  {
+    key: "create-avatar",
+    name: "createAvatar",
+    icon: <CircleUserRound className="w-5 h-5" />,
+  },
   { key: "delete", name: "delete", icon: <Trash2 className="w-5 h-5" /> },
 ];
 
@@ -153,8 +157,14 @@ export default function ImagemapEditorPage() {
   const [resizeStartPoint, setResizeStartPoint] = useState({ x: 0, y: 0 });
   const [resizeStartRect, setResizeStartRect] = useState<Rectangle | null>(null);
   const [draggingRectId, setDraggingRectId] = useState<string | null>(null);
-  const [lastPositionInput, setLastPositionInput] = useState({ x: "0", y: "0" });
-  const [lastSizeInput, setLastSizeInput] = useState({ width: "50", height: "50" });
+  const [lastPositionInput, setLastPositionInput] = useState({
+    x: "0",
+    y: "0",
+  });
+  const [lastSizeInput, setLastSizeInput] = useState({
+    width: "50",
+    height: "50",
+  });
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [windowResizeCounter, setWindowResizeCounter] = useState(0);
@@ -198,16 +208,32 @@ export default function ImagemapEditorPage() {
     cursor: string;
   }> = useMemo(
     () => [
-      { handle: "top-left", style: { top: -handleOffset, left: -handleOffset }, cursor: "nwse-resize" },
+      {
+        handle: "top-left",
+        style: { top: -handleOffset, left: -handleOffset },
+        cursor: "nwse-resize",
+      },
       {
         handle: "top",
-        style: { top: -handleOffset, left: "50%", transform: "translateX(-50%)" },
+        style: {
+          top: -handleOffset,
+          left: "50%",
+          transform: "translateX(-50%)",
+        },
         cursor: "ns-resize",
       },
-      { handle: "top-right", style: { top: -handleOffset, right: -handleOffset }, cursor: "nesw-resize" },
+      {
+        handle: "top-right",
+        style: { top: -handleOffset, right: -handleOffset },
+        cursor: "nesw-resize",
+      },
       {
         handle: "right",
-        style: { top: "50%", right: -handleOffset, transform: "translateY(-50%)" },
+        style: {
+          top: "50%",
+          right: -handleOffset,
+          transform: "translateY(-50%)",
+        },
         cursor: "ew-resize",
       },
       {
@@ -217,7 +243,11 @@ export default function ImagemapEditorPage() {
       },
       {
         handle: "bottom",
-        style: { bottom: -handleOffset, left: "50%", transform: "translateX(-50%)" },
+        style: {
+          bottom: -handleOffset,
+          left: "50%",
+          transform: "translateX(-50%)",
+        },
         cursor: "ns-resize",
       },
       {
@@ -227,7 +257,11 @@ export default function ImagemapEditorPage() {
       },
       {
         handle: "left",
-        style: { top: "50%", left: -handleOffset, transform: "translateY(-50%)" },
+        style: {
+          top: "50%",
+          left: -handleOffset,
+          transform: "translateY(-50%)",
+        },
         cursor: "ew-resize",
       },
     ],
@@ -465,7 +499,10 @@ export default function ImagemapEditorPage() {
 
     if (target) {
       setLastPositionInput({ x: target.x.toString(), y: target.y.toString() });
-      setLastSizeInput({ width: target.width.toString(), height: target.height.toString() });
+      setLastSizeInput({
+        width: target.width.toString(),
+        height: target.height.toString(),
+      });
     } else {
       console.warn(`Cannot find a rectangle with selected id ${id}. Got:`, rectangles);
     }
@@ -537,7 +574,21 @@ export default function ImagemapEditorPage() {
 
       // 创建副本
       if (event.ctrlKey && !event.altKey && !event.metaKey && event.key.toLowerCase() === "d") {
-        duplicateRectangle(selectedId);
+        setRectangles((prev) => {
+          const rectToDuplicate = prev.find((rect) => rect.id === selectedId);
+          if (!rectToDuplicate) return prev;
+
+          const newRect: Rectangle = {
+            ...rectToDuplicate,
+            id: generateId(),
+            x: rectToDuplicate.x + 20,
+            y: rectToDuplicate.y + 20,
+            alt: `${rectToDuplicate.alt} ${tc("duplicateSuffix")}`,
+          };
+
+          setSelectedRect(newRect.id);
+          return [newRect, ...prev];
+        });
         event.preventDefault();
         return;
       }
@@ -545,7 +596,18 @@ export default function ImagemapEditorPage() {
       if (!event.ctrlKey && !event.altKey && !event.metaKey) {
         // 层级调节
         if (event.key === "-" || event.key === "=") {
-          moveRectangleLayer(selectedId, event.key === "-" ? 1 : -1);
+          setRectangles((prev) => {
+            const next = [...prev];
+            const fromIndex = next.findIndex((rect) => rect.id === selectedId);
+            if (fromIndex === -1) return prev;
+
+            const toIndex = fromIndex + (event.key === "-" ? 1 : -1);
+            if (toIndex < 0 || toIndex >= next.length) return prev;
+
+            const [moved] = next.splice(fromIndex, 1);
+            next.splice(toIndex, 0, moved);
+            return next;
+          });
           event.preventDefault();
           return;
         }
@@ -553,7 +615,13 @@ export default function ImagemapEditorPage() {
 
       // 删除
       if (event.key === "Delete") {
-        deleteRectangle(selectedId);
+        setRectangles((prev) => prev.filter((rect) => rect.id !== selectedId));
+        setSelectedRect(null);
+        avatarCacheRef.current.delete(selectedId);
+        setAvatarNaturalSizes((prev) => {
+          const { [selectedId]: _omit, ...rest } = prev;
+          return rest;
+        });
         event.preventDefault();
         return;
       }
@@ -601,7 +669,10 @@ export default function ImagemapEditorPage() {
       // Update input fields after arrow key release
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
         if (selectedRectData && selectedRectRef.current === selectedRectData.id) {
-          setLastPositionInput({ x: selectedRectData.x.toString(), y: selectedRectData.y.toString() });
+          setLastPositionInput({
+            x: selectedRectData.x.toString(),
+            y: selectedRectData.y.toString(),
+          });
         }
       }
     };
@@ -612,7 +683,7 @@ export default function ImagemapEditorPage() {
       window.removeEventListener("keydown", handler);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [imageSize.height, imageSize.width, selectedRectData]);
+  }, [imageSize.height, imageSize.width, selectedRectData, tc]);
 
   const calculateResizedRect = (rect: Rectangle, handle: ResizeHandle, deltaX: number, deltaY: number) => {
     let { x, y, width, height } = rect;
@@ -946,8 +1017,14 @@ export default function ImagemapEditorPage() {
       setRectangles((prev) => [newRect, ...prev]);
 
       setSelectedRectId(newRect.id);
-      setLastPositionInput({ x: newRect.x.toString(), y: newRect.y.toString() });
-      setLastSizeInput({ width: newRect.width.toString(), height: newRect.height.toString() });
+      setLastPositionInput({
+        x: newRect.x.toString(),
+        y: newRect.y.toString(),
+      });
+      setLastSizeInput({
+        width: newRect.width.toString(),
+        height: newRect.height.toString(),
+      });
 
       // Upon calling of this method, we cannot get the newly added rectangle. Why?
       // setSelectedRect(newRect.id)
@@ -962,7 +1039,10 @@ export default function ImagemapEditorPage() {
       // Update input fields after movement is complete
       const movedRect = rectangles.find((r) => r.id === movingRect);
       if (movedRect && selectedRect === movingRect) {
-        setLastPositionInput({ x: movedRect.x.toString(), y: movedRect.y.toString() });
+        setLastPositionInput({
+          x: movedRect.x.toString(),
+          y: movedRect.y.toString(),
+        });
       }
     }
 
@@ -973,15 +1053,21 @@ export default function ImagemapEditorPage() {
       setResizeStartRect(null);
       // Update input fields after resize completes
       if (selectedRectData) {
-        setLastPositionInput({ x: selectedRectData.x.toString(), y: selectedRectData.y.toString() });
-        setLastSizeInput({ width: selectedRectData.width.toString(), height: selectedRectData.height.toString() });
+        setLastPositionInput({
+          x: selectedRectData.x.toString(),
+          y: selectedRectData.y.toString(),
+        });
+        setLastSizeInput({
+          width: selectedRectData.width.toString(),
+          height: selectedRectData.height.toString(),
+        });
       }
     }
   };
 
   const updateRectangle = (id: string, field: keyof Rectangle, value: string, castToNumber: boolean = false) => {
     // Don't update if user needs a number, and we cannot convert the source value to one.
-    if (castToNumber && isNaN(Number(value))) return;
+    if (castToNumber && Number.isNaN(Number(value))) return;
 
     console.log("updateRectangle", id, field, value);
     setRectangles((prev) =>
@@ -1024,7 +1110,12 @@ export default function ImagemapEditorPage() {
       prev.map((rect) => {
         if (rect.id !== id) return rect;
         if (rect.type !== RectangleType.Avatar) return rect;
-        const avatar = rect.avatar ?? { styleKey: "simple", imageUrl: "", username: "", countryCode: "" };
+        const avatar = rect.avatar ?? {
+          styleKey: "simple",
+          imageUrl: "",
+          username: "",
+          countryCode: "",
+        };
         return { ...rect, avatar: { ...avatar, [field]: value } };
       }),
     );
@@ -1157,7 +1248,7 @@ export default function ImagemapEditorPage() {
 
     try {
       // 生成所有头像的 dataURL，传递缩放信息
-      const avatarPromises = rectangles.filter(isRenderableAvatar).map(async (rect) => {
+      const avatarPromises = rectangles.filter(canRenderAvatar).map(async (rect) => {
         const avatarDataURL = await getAvatarDataURL(
           rect,
           STYLE_REGISTRY,
@@ -1283,7 +1374,11 @@ export default function ImagemapEditorPage() {
                 {tools.map((tool, index) => (
                   <Tooltip key={tool.key}>
                     <TooltipTrigger asChild>
-                      <button className={getToolButtonClass(tool.key)} onClick={() => setCurrentTool(tool.key)}>
+                      <button
+                        type="button"
+                        className={getToolButtonClass(tool.key)}
+                        onClick={() => setCurrentTool(tool.key)}
+                      >
                         {tool.icon}
                       </button>
                     </TooltipTrigger>
@@ -1382,7 +1477,7 @@ export default function ImagemapEditorPage() {
                                   ? Math.max(rect.height / scaleY, 44)
                                   : rect.height / scaleY;
 
-                                return isRenderableAvatar(rect) ? (
+                                return canRenderAvatar(rect) ? (
                                   <AvatarBox
                                     rect={rect}
                                     displayW={displayW}
@@ -1394,7 +1489,10 @@ export default function ImagemapEditorPage() {
                                       setAvatarNaturalSizes((prev) => {
                                         const current = prev[rect.id];
                                         if (current && current.width === w && current.height === h) return prev;
-                                        return { ...prev, [rect.id]: { width: w, height: h } };
+                                        return {
+                                          ...prev,
+                                          [rect.id]: { width: w, height: h },
+                                        };
                                       });
                                     }}
                                   />
@@ -1458,12 +1556,12 @@ export default function ImagemapEditorPage() {
                     <ContextMenuContent>
                       {contextTargetId ? (
                         <>
-                          <ContextMenuItem onSelect={() => duplicateRectangle(contextTargetId!)}>
+                          <ContextMenuItem onSelect={() => duplicateRectangle(contextTargetId)}>
                             <Copy className="w-4 h-4 mr-2" /> {tc("duplicate")}
                           </ContextMenuItem>
                           <ContextMenuItem
                             className="text-destructive"
-                            onSelect={() => deleteRectangle(contextTargetId!)}
+                            onSelect={() => deleteRectangle(contextTargetId)}
                           >
                             <Trash className="w-4 h-4 mr-2" /> {tc("delete")}
                           </ContextMenuItem>
@@ -1626,6 +1724,7 @@ export default function ImagemapEditorPage() {
                               onDragStart={(e) => handleDragStartRow(e, rect.id)}
                               onDragEnd={handleDragEndRow}
                               draggable
+                              role={"button"}
                               aria-label={t("rectAttrs.dragPrompt")}
                               tabIndex={-1}
                               onTouchStart={(e) => {
@@ -1649,7 +1748,10 @@ export default function ImagemapEditorPage() {
 
                             <div className="flex flex-col min-w-0 flex-1">
                               <span className={`text-sm font-medium text-left truncate ${rect.alt || "italic"}`}>
-                                {rect.alt || t("rectAttrs.defaultName", { index: index + 1 })}
+                                {rect.alt ||
+                                  t("rectAttrs.defaultName", {
+                                    index: index + 1,
+                                  })}
                               </span>
                               <span
                                 className={`text-xs text-muted-foreground text-left truncate ${rect.href || "italic"}`}
@@ -1855,7 +1957,7 @@ export default function ImagemapEditorPage() {
                                     updateRectangle(selectedRect, "href", generateUserLinkFromName(userInfo));
                                     updateRectangle(selectedRect, "alt", userInfo);
 
-                                    updateAvatarField(selectedRect, "username", userInfo)
+                                    updateAvatarField(selectedRect, "username", userInfo);
                                     updateAvatarField(selectedRect, "imageUrl", `https://a.ppy.sh/${userInfo}`);
                                   }}
                                 >
@@ -1920,7 +2022,10 @@ export default function ImagemapEditorPage() {
                               const clamped = clampSizeInput("width", e.target.value);
                               if (clamped === null) return;
 
-                              setLastSizeInput({ ...lastSizeInput, width: clamped.toString() });
+                              setLastSizeInput({
+                                ...lastSizeInput,
+                                width: clamped.toString(),
+                              });
                               updateRectangle(selectedRect, "width", clamped.toString(), true);
                             }}
                           />
@@ -1937,7 +2042,10 @@ export default function ImagemapEditorPage() {
                               const clamped = clampSizeInput("height", e.target.value);
                               if (clamped === null) return;
 
-                              setLastSizeInput({ ...lastSizeInput, height: clamped.toString() });
+                              setLastSizeInput({
+                                ...lastSizeInput,
+                                height: clamped.toString(),
+                              });
                               updateRectangle(selectedRect, "height", clamped.toString(), true);
                             }}
                           />
@@ -2059,7 +2167,7 @@ export default function ImagemapEditorPage() {
 
       <SaveDialog
         open={saveDialogOpen}
-        baseName={(mapName && mapName.trim()) || (imageName && imageName.split(".")[0]) || "imagemap"}
+        baseName={mapName?.trim() || imageName?.split(".")[0] || "imagemap"}
         onOpenChange={setSaveDialogOpen}
         onSave={handleExportImage}
       />
