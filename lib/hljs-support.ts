@@ -1,7 +1,7 @@
 import hljs from "highlight.js/lib/core";
 
 /**
- * 向 Highlight.js 注册 BBCode 解析库。
+ * Register BBCode syntax highlighting to Highlight.js.
  * @author Paul Reid (https://github.com/highlightjs/highlightjs-bbcode/blob/master/bbcode.js)
  */
 export function registerBBCodeHighlight() {

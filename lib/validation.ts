@@ -1,17 +1,20 @@
 /**
- * 表示验证结果，用于导入等验证过程方法
+ * Standard validation result used by input parsing/import flows.
  */
 export interface ValidationResult {
-    /** 验证是否通过 */
+    /** Whether validation succeeded. */
     success: boolean;
 
-    /** 验证附带的消息，用于显示 */
+    /** Optional i18n message key describing the validation failure. */
     messageKey?: string;
 
-    /** 附加信息，用于 l10n */
+    /** Optional interpolation payload for localized error messages. */
     details?: ValidationDetails;
 }
 
+/**
+ * Key-value payload for localized validation messages.
+ */
 export type ValidationDetails = Record<string, string | number>;
 
 const WINDOWS_RESERVED_FILENAME_REGEX = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i;
@@ -20,6 +23,16 @@ const PATH_TRAVERSAL_REGEX = /(^|[\\/])\.\.([\\/]|$)/;
 const BIDI_OVERRIDE_CHARS_REGEX = /[\u202A-\u202E\u2066-\u2069]/;
 const filenameByteEncoder = new TextEncoder();
 
+/**
+ * Validates a file name for export/save operations.
+ *
+ * Rules include:
+ * - no surrounding whitespace
+ * - not empty
+ * - max byte length: 127 (UTF-8)
+ * - no path traversal or directory separators
+ * - no control characters, bidi overrides, or Windows reserved names
+ */
 export function validateFilename(input: string): ValidationResult {
     // Reject filenames with surrounding whitespaces
     if (input.startsWith(" ") || input.endsWith(" ")) {

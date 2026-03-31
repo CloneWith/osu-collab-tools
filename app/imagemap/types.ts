@@ -1,57 +1,45 @@
 /**
- * ImageMap Editor 共用数据结构定义
+ * Shared data structures for the imagemap editor.
  */
 
 import type { Avatar } from "@/app/avatar/types";
+import type { MappableArea } from "@/lib/imagemap/types";
 import { generateId } from "@/lib/utils";
 import type { ValidationResult } from "@/lib/validation";
 import { parse } from "@bbob/parser";
 import type { TagNode } from "@bbob/types";
 
 /**
- * 一个矩形区域。
+ * A single editable rectangular area on the imagemap.
  */
-export interface Rectangle {
-    /** 区分区域的唯一 ID */
+export interface Rectangle extends MappableArea {
+    /** Unique identifier for list operations, selection, and serialization. */
     id: string;
-    /** 该区域的类型 */
+    /** Functional area type. */
     type: RectangleType;
-    /** 区域左上角的 X 坐标 */
-    x: number;
-    /** 区域左上角的 Y 坐标 */
-    y: number;
-    /** 区域宽度 */
-    width: number;
-    /** 区域高度 */
-    height: number;
-    /** 区域指向的链接 */
-    href: string;
-    /** 区域显示的备选文本 */
-    alt: string;
-    /** Avatar 类型的附加配置（仅当 type 为 Avatar 时生效） */
+    /** Avatar-specific payload, valid only when type is Avatar. */
     avatar?: Avatar;
 }
 
 export enum RectangleType {
-    /** 一般矩形区域 */
+    /** Generic rectangular map area. */
     MapArea = "map-area",
 
-    /** 头像映射区 */
+    /** Avatar-rendered mapped area. */
     Avatar = "avatar",
 }
 
 /**
- * ImageMap 配置数据结构
- * 用于导出、导入和编辑器状态管理
+ * Persisted imagemap configuration used for export/import and editor state restore.
  */
 export interface ImageMapConfig {
-    /** 给定的图像路径（用户设置，图床等） */
+    /** Resolved image URL/path used as the map background. */
     imagePath?: string;
-    /** 图像名称（可能并不重要...） */
+    /** Optional image file/display name. */
     imageName?: string;
-    /** 自定义的 Imagemap 名称 */
+    /** Optional custom <map name> value. */
     mapName?: string;
-    /** Imagemap 中的所有区域 */
+    /** All defined map rectangles. */
     rectangles: Rectangle[];
 }
 
@@ -137,6 +125,7 @@ export function validateImageMapJsonConfig(data: unknown, width: number, height:
 }
 
 export interface ImageMapBBCodeParseResult extends ValidationResult {
+    /** Parsed and normalized config when parsing succeeds. */
     config?: ImageMapConfig;
 }
 
