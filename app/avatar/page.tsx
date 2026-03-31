@@ -9,8 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { AVATAR_STYLE_REGISTRY, type AvatarStyleKey } from "@/lib/avatar/style-registry";
+import { downloadElementSnapshot } from "@/lib/export/snapdom";
 import { cn, debounce, isNullOrWhitespace } from "@/lib/utils";
-import { snapdom } from "@zumer/snapdom";
 import { Download, Eye, OctagonAlert, Settings, UserRoundPen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -129,10 +129,11 @@ export default function AvatarGeneratorPage() {
     if (!previewRef.current?.firstElementChild) return;
 
     try {
-      const result = await snapdom(previewRef.current?.firstElementChild as HTMLElement);
-      await result.download({
-        filename: `avatar-${username}-${Date.now()}.png`,
-        scale: exportScale,
+      await downloadElementSnapshot(previewRef.current.firstElementChild as HTMLElement, {
+        downloadOptions: {
+          filename: `avatar-${username}-${Date.now()}.png`,
+          scale: exportScale,
+        },
       });
     } catch (e) {
       toast({
@@ -246,7 +247,9 @@ export default function AvatarGeneratorPage() {
                   </Button>
                 )}
               </CardAction>
-              {shouldScalePreview && previewSize && <CardDescription>{t("sizePrompt", { ...previewSize })}</CardDescription>}
+              {shouldScalePreview && previewSize && (
+                <CardDescription>{t("sizePrompt", { ...previewSize })}</CardDescription>
+              )}
             </CardHeader>
             <CardContent>
               <div

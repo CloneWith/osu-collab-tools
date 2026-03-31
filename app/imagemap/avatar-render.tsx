@@ -6,8 +6,8 @@ import {
   type AvatarStyleRegistry,
   resolveCachedAvatarComponent,
 } from "@/lib/avatar/render-cache";
+import { captureElementWithSnapdom } from "@/lib/export/snapdom";
 import { isNullOrWhitespace } from "@/lib/utils";
-import { snapdom } from "@zumer/snapdom";
 import type React from "react";
 import { useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
@@ -266,13 +266,15 @@ export async function getAvatarDataURL(
       });
     });
 
-    const result = await snapdom(tempContainer, {
-      // 使用2倍缩放提高质量，但保持组件逻辑尺寸不变
-      scale: 2.0,
-      backgroundColor: "transparent",
-      embedFonts: true,
-      fast: false,
-      placeholders: false,
+    const result = await captureElementWithSnapdom(tempContainer, {
+      snapdomOptions: {
+        // 使用2倍缩放提高质量，但保持组件逻辑尺寸不变
+        scale: 2.0,
+        backgroundColor: "transparent",
+        embedFonts: true,
+        fast: false,
+        placeholders: false,
+      },
     });
 
     // 获取 PNG 图像并返回其 dataURL
