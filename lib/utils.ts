@@ -1,8 +1,16 @@
 import { common } from "@/app/common";
-import type { Rectangle } from "@/app/imagemap/types";
 import flagFallback from "@/public/flag-fallback.png";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+
+interface ImageMapAreaLike {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    href: string;
+    alt: string;
+}
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -46,7 +54,7 @@ export function generateUserLinkFromName(username: string) {
 }
 
 export function generateImageMapHtml(
-    rectangles: Rectangle[],
+    rectangles: ImageMapAreaLike[],
     imagePath: string | undefined,
     mapName: string | undefined,
 ) {
@@ -67,7 +75,7 @@ ${areas}
 }
 
 export function generateImageMapBBCode(
-    rectangles: Rectangle[],
+    rectangles: ImageMapAreaLike[],
     width: number,
     height: number,
     imagePath: string | undefined,

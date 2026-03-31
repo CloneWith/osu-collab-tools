@@ -1,9 +1,5 @@
 "use client";
 
-import { ClassicAvatarStyle } from "@/app/avatar/styles/ClassicAvatarStyle";
-import type { IAvatarStyle } from "@/app/avatar/styles/IAvatarStyle";
-import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
-import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
 import { common } from "@/app/common";
 import { AvatarBox, canRenderAvatar, generateCompositeImage, getAvatarDataURL } from "@/app/imagemap/avatar-render";
 import DragAndDropOverlay, { DnDRejectReason } from "@/app/imagemap/dnd-overlay";
@@ -47,6 +43,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
+import { AVATAR_STYLE_REGISTRY } from "@/lib/avatar/style-registry";
 import { registerBBCodeHighlight } from "@/lib/hljs-support";
 import {
   clamp,
@@ -112,13 +109,6 @@ const tools: Tool[] = [
 ];
 
 type EditorTool = Tool["key"];
-
-// 注册所有可用头像样式（与 avatar/page.tsx 保持一致）
-const STYLE_REGISTRY = [
-  { key: "classic", style: new ClassicAvatarStyle() as IAvatarStyle },
-  { key: "modern", style: new ModernAvatarStyle() as IAvatarStyle },
-  { key: "simple", style: new SimpleAvatarStyle() as IAvatarStyle },
-] as const;
 
 let hljsInitialized = false;
 const ensureHljsInitialized = () => {
@@ -740,7 +730,7 @@ export default function ImagemapEditorPage() {
     // 当为头像区域时，锁定宽高比（基于组件实时测量 size，回退样式 size）并以左上角为锚点
     if (rect.type === RectangleType.Avatar) {
       const styleKey = rect.avatar?.styleKey ?? "simple";
-      const styleObj = STYLE_REGISTRY.find((s) => s.key === styleKey)?.style;
+      const styleObj = AVATAR_STYLE_REGISTRY.find((s) => s.key === styleKey)?.style;
       const measured = avatarNaturalSizes[rect.id];
       const naturalW = measured?.width ?? styleObj?.size.width ?? Math.max(width, MIN_RECT_SIZE);
       const naturalH = measured?.height ?? styleObj?.size.height ?? Math.max(height, MIN_RECT_SIZE);
@@ -997,7 +987,7 @@ export default function ImagemapEditorPage() {
         };
 
         // 绘制结束后，依据组件测量/样式宽高比自动调整为等比（contain）大小，锚定左上角
-        const styleObj = STYLE_REGISTRY.find((s) => s.key === "simple")?.style;
+        const styleObj = AVATAR_STYLE_REGISTRY.find((s) => s.key === "simple")?.style;
         const measured = avatarNaturalSizes[newRect.id];
         const naturalW = measured?.width ?? styleObj?.size.width ?? newRect.width;
         const naturalH = measured?.height ?? styleObj?.size.height ?? newRect.height;
@@ -1251,7 +1241,7 @@ export default function ImagemapEditorPage() {
       const avatarPromises = rectangles.filter(canRenderAvatar).map(async (rect) => {
         const avatarDataURL = await getAvatarDataURL(
           rect,
-          STYLE_REGISTRY,
+          AVATAR_STYLE_REGISTRY,
           avatarCacheRef,
           avatarNaturalSizes[rect.id],
           // Keep previous measured sizes as the preview uses them
@@ -1482,7 +1472,7 @@ export default function ImagemapEditorPage() {
                                     rect={rect}
                                     displayW={displayW}
                                     displayH={displayH}
-                                    styleRegistry={STYLE_REGISTRY}
+                                    styleRegistry={AVATAR_STYLE_REGISTRY}
                                     cacheRef={avatarCacheRef}
                                     measured={avatarNaturalSizes[rect.id]}
                                     onMeasure={(w, h) => {
@@ -1865,7 +1855,7 @@ export default function ImagemapEditorPage() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {STYLE_REGISTRY.map(({ key, style }) => (
+                                {AVATAR_STYLE_REGISTRY.map(({ key, style }) => (
                                   <SelectItem key={key} value={key}>
                                     {ta(`styles.${style.key}.name`)}
                                   </SelectItem>

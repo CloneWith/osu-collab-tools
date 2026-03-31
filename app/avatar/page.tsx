@@ -1,7 +1,5 @@
 "use client";
 
-import { ModernAvatarStyle } from "@/app/avatar/styles/ModernAvatarStyle";
-import { SimpleAvatarStyle } from "@/app/avatar/styles/SimpleAvatarStyle";
 import { HelpIconButton } from "@/components/help-icon-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,22 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { AVATAR_STYLE_REGISTRY, type AvatarStyleKey } from "@/lib/avatar/style-registry";
 import { cn, debounce, isNullOrWhitespace } from "@/lib/utils";
 import { snapdom } from "@zumer/snapdom";
 import { Download, Eye, OctagonAlert, Settings, UserRoundPen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ClassicAvatarStyle } from "./styles/ClassicAvatarStyle";
-import type { AvatarInputs, IAvatarStyle } from "./styles/IAvatarStyle";
-
-// 注册所有可用样式
-const STYLE_REGISTRY = [
-  { key: "classic", style: new ClassicAvatarStyle() as IAvatarStyle },
-  { key: "modern", style: new ModernAvatarStyle() as IAvatarStyle },
-  { key: "simple", style: new SimpleAvatarStyle() as IAvatarStyle },
-] as const;
-
-type StyleKey = (typeof STYLE_REGISTRY)[number]["key"];
+import type { AvatarInputs } from "./styles/IAvatarStyle";
 
 const SUPPORTED_SCALES = [0.5, 0.75, 1, 1.5, 2, 3, 4] as const;
 
@@ -34,8 +23,8 @@ export default function AvatarGeneratorPage() {
   const tc = useTranslations("common");
   const { toast } = useToast();
 
-  const [styleKey, setStyleKey] = useState<StyleKey>(STYLE_REGISTRY[0].key);
-  const selectedStyle = useMemo(() => STYLE_REGISTRY.find((s) => s.key === styleKey)?.style, [styleKey]);
+  const [styleKey, setStyleKey] = useState<AvatarStyleKey>(AVATAR_STYLE_REGISTRY[0].key);
+  const selectedStyle = useMemo(() => AVATAR_STYLE_REGISTRY.find((s) => s.key === styleKey)?.style, [styleKey]);
 
   const [imageUrl, setImageUrl] = useState<string>("");
   const [username, setUsername] = useState<string>("");
@@ -203,12 +192,12 @@ export default function AvatarGeneratorPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="avatarStyle">{t("settings.avatarStyle")}</Label>
-                <Select value={styleKey} onValueChange={(v) => setStyleKey(v as StyleKey)}>
+                <Select value={styleKey} onValueChange={(v) => setStyleKey(v as AvatarStyleKey)}>
                   <SelectTrigger id="avatarStyle" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {STYLE_REGISTRY.map(({ key, style }) => (
+                    {AVATAR_STYLE_REGISTRY.map(({ key, style }) => (
                       <SelectItem key={key} value={key}>
                         {t(`styles.${style.key}.name`)}
                       </SelectItem>
