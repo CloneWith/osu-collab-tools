@@ -1,6 +1,11 @@
 import type { AvatarInputs, IAvatarStyle } from "@/app/avatar/styles/IAvatarStyle";
 import type { Rectangle } from "@/app/imagemap/types";
 import { RectangleType } from "@/app/imagemap/types";
+import {
+  type AvatarComponentCache,
+  type AvatarStyleRegistry,
+  resolveCachedAvatarComponent,
+} from "@/lib/avatar/render-cache";
 import { isNullOrWhitespace } from "@/lib/utils";
 import { snapdom } from "@zumer/snapdom";
 import type React from "react";
@@ -9,14 +14,12 @@ import { flushSync } from "react-dom";
 
 // 仅在该模块内部使用的测量容器
 export function MeasuredAvatar({
-  rectId,
   onMeasure,
   scale,
   offsetX = 0,
   offsetY = 0,
   children,
 }: {
-  rectId: string;
   onMeasure: (w: number, h: number) => void;
   scale: number;
   offsetX?: number;
@@ -33,7 +36,7 @@ export function MeasuredAvatar({
     const ro = new ResizeObserver(() => report());
     ro.observe(el);
     return () => ro.disconnect();
-  }, [rectId, onMeasure]);
+  }, [onMeasure]);
 
   return (
     <div
@@ -59,37 +62,35 @@ export const canRenderAvatar = (rect: Rectangle) =>
 
 export function resolveAvatar(
   rect: Rectangle,
-  styleRegistry: ReadonlyArray<{ key: string; style: IAvatarStyle }>,
-  cacheRef: React.RefObject<Map<string, { comp: React.FC; signature: string }>>,
+  styleRegistry: AvatarStyleRegistry,
+  cacheRef: React.RefObject<AvatarComponentCache>,
 ): {
   AvatarComponent: React.FC;
   styleObj: IAvatarStyle;
   inputs: AvatarInputs;
 } | null {
   if (!canRenderAvatar(rect)) return null;
+  const avatar = rect.avatar;
+  if (!avatar) return null;
 
-  const styleObj = styleRegistry.find((s) => s.key === rect.avatar!.styleKey)?.style;
-  if (!styleObj) return null;
-  const inputs: AvatarInputs = {
-    imageUrl: rect.avatar!.imageUrl,
-    username: rect.avatar!.username,
-    countryCode: rect.avatar?.countryCode?.trim() ? rect.avatar.countryCode.trim().toUpperCase() : undefined,
-  };
-  const signature = `${rect.avatar!.styleKey}|${inputs.imageUrl}|${inputs.username}|${inputs.countryCode}`;
-  let cache = cacheRef.current.get(rect.id);
-  if (!cache || cache.signature !== signature) {
-    try {
-      const Comp = styleObj.generateAvatar(inputs);
-      if (Comp) {
-        cache = { comp: Comp, signature };
-        cacheRef.current.set(rect.id, cache);
+  const resolved = resolveCachedAvatarComponent(
+    rect.id,
+    {
+      styleKey: avatar.styleKey,
+      imageUrl: avatar.imageUrl,
+      username: avatar.username,
+      countryCode: avatar.countryCode,
+    },
+    styleRegistry,
+    cacheRef.current,
+  );
+  return resolved
+    ? {
+        AvatarComponent: resolved.component,
+        styleObj: resolved.styleObj,
+        inputs: resolved.inputs,
       }
-    } catch {
-      return null;
-    }
-  }
-  const AvatarComponent = cache?.comp ?? null;
-  return AvatarComponent ? { AvatarComponent, styleObj, inputs } : null;
+    : null;
 }
 
 export const computeUniformScale = (naturalW: number, naturalH: number, displayW: number, displayH: number) => {
@@ -111,8 +112,8 @@ export function AvatarBox({
   rect: Rectangle;
   displayW: number;
   displayH: number;
-  styleRegistry: ReadonlyArray<{ key: string; style: IAvatarStyle }>;
-  cacheRef: React.RefObject<Map<string, { comp: React.FC; signature: string }>>;
+  styleRegistry: AvatarStyleRegistry;
+  cacheRef: React.RefObject<AvatarComponentCache>;
   measured?: { width: number; height: number };
   onMeasure: (w: number, h: number) => void;
 }) {
@@ -143,7 +144,7 @@ export function AvatarBox({
         }
       }}
     >
-      <MeasuredAvatar rectId={rect.id} onMeasure={onMeasure} scale={uniformScale} offsetX={offsetX} offsetY={offsetY}>
+      <MeasuredAvatar onMeasure={onMeasure} scale={uniformScale} offsetX={offsetX} offsetY={offsetY}>
         <AvatarComponent />
       </MeasuredAvatar>
     </div>
@@ -170,8 +171,8 @@ import ReactDOM from "react-dom/client";
  */
 export async function getAvatarDataURL(
   rect: Rectangle,
-  styleRegistry: ReadonlyArray<{ key: string; style: IAvatarStyle }>,
-  cacheRef: React.RefObject<Map<string, { comp: React.FC; signature: string }>>,
+  styleRegistry: AvatarStyleRegistry,
+  cacheRef: React.RefObject<AvatarComponentCache>,
   measured?: { width: number; height: number },
   onMeasure?: (w: number, h: number) => void,
   previewScaleX?: number,

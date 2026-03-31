@@ -43,8 +43,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
+import type { AvatarComponentCache } from "@/lib/avatar/render-cache";
 import { AVATAR_STYLE_REGISTRY } from "@/lib/avatar/style-registry";
 import { registerBBCodeHighlight } from "@/lib/hljs-support";
+import { waitForAnimationFrames } from "@/lib/render/wait-for-paint";
 import {
   clamp,
   cn,
@@ -187,7 +189,7 @@ export default function ImagemapEditorPage() {
   const rectListRef = useRef<HTMLDivElement>(null);
   const rectanglesRef = useRef<Rectangle[]>([]);
   const selectedRectRef = useRef<string | null>(null);
-  const avatarCacheRef = useRef<Map<string, { comp: React.FC; signature: string }>>(new Map());
+  const avatarCacheRef = useRef<AvatarComponentCache>(new Map());
   const [avatarNaturalSizes, setAvatarNaturalSizes] = useState<Record<string, { width: number; height: number }>>({});
 
   const handleSize = isTouchDevice ? 16 : 10;
@@ -445,13 +447,6 @@ export default function ImagemapEditorPage() {
     const scaleY = Number.isFinite(rawScaleY) && rawScaleY > 0 ? rawScaleY : 1;
     return { scaleX, scaleY };
   }, [imageSize.height, imageSize.width, uploadedImage, windowResizeCounter]);
-
-  const waitForNextPaint = () =>
-    new Promise<void>((resolve) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => resolve());
-      });
-    });
 
   // 预览区坐标 => 原图像坐标
   const getRelativeCoordinates = (event: React.MouseEvent) => {
@@ -1231,7 +1226,7 @@ export default function ImagemapEditorPage() {
     if (!uploadedImage) throw new Error();
 
     setSaveDialogOpen(false);
-    await waitForNextPaint();
+    await waitForAnimationFrames(2);
 
     // 获取预览使用的当前缩放比例
     const { scaleX, scaleY } = imageScale;
