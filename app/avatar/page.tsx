@@ -1,19 +1,19 @@
 "use client";
 
 import { HelpIconButton } from "@/components/help-icon-button";
+import SaveDialog from "@/components/imagemap/save-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
 import { AVATAR_STYLE_REGISTRY, type AvatarStyleKey } from "@/lib/avatar/style-registry";
-import { downloadElementSnapshot } from "@/lib/export/snapdom";
+import { exportElementSnapshotDataUrl } from "@/lib/export/snapdom";
 import { cn, debounce, isNullOrWhitespace } from "@/lib/utils";
-import { Download, Eye, OctagonAlert, Settings, UserRoundPen } from "lucide-react";
+import { Camera, Eye, OctagonAlert, Settings, UserRoundPen } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AvatarInputs } from "./styles/IAvatarStyle";
 
 const SUPPORTED_SCALES = [0.5, 0.75, 1, 1.5, 2, 3, 4] as const;
@@ -21,7 +21,6 @@ const SUPPORTED_SCALES = [0.5, 0.75, 1, 1.5, 2, 3, 4] as const;
 export default function AvatarGeneratorPage() {
   const t = useTranslations("avatar");
   const tc = useTranslations("common");
-  const { toast } = useToast();
 
   const [styleKey, setStyleKey] = useState<AvatarStyleKey>(AVATAR_STYLE_REGISTRY[0].key);
   const selectedStyle = useMemo(() => AVATAR_STYLE_REGISTRY.find((s) => s.key === styleKey)?.style, [styleKey]);
@@ -32,6 +31,7 @@ export default function AvatarGeneratorPage() {
   const [exportScale, setExportScale] = useState(1);
 
   const [hasPendingUpdate, setHasPendingUpdate] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
   const [previewSize, setPreviewSize] = useState<{ width: number; height: number } | null>(null);
   const [devicePixelRatio, setDevicePixelRatio] = useState(1);
@@ -125,26 +125,23 @@ export default function AvatarGeneratorPage() {
     }
   }, [inputImageUrl, inputCountryCode, debouncedCommit, username]);
 
-  const handleDownload = async () => {
-    if (!previewRef.current?.firstElementChild) return;
+  const handleExportImage = useCallback(
+    async (options: { format: string; quality: number }): Promise<string | null> => {
+      const target = previewRef.current?.firstElementChild as HTMLElement | null;
+      if (!target) {
+        throw new Error(tc("unknownError"));
+      }
 
-    try {
-      await downloadElementSnapshot(previewRef.current.firstElementChild as HTMLElement, {
-        downloadOptions: {
-          filename: `avatar-${username}-${Date.now()}.png`,
+      return exportElementSnapshotDataUrl(target, {
+        format: options.format,
+        quality: options.quality,
+        exportOptions: {
           scale: exportScale,
         },
       });
-    } catch (e) {
-      toast({
-        title: t("downloadError"),
-        description: e instanceof Error ? e.message : tc("unknownError"),
-        variant: "destructive",
-      });
-
-      console.error("Error while generating card image.", e);
-    }
-  };
+    },
+    [exportScale, tc],
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -241,9 +238,9 @@ export default function AvatarGeneratorPage() {
               </CardTitle>
               <CardAction>
                 {shouldScalePreview && (
-                  <Button onClick={handleDownload} size="sm" className="gap-2">
-                    <Download className="w-4 h-4" />
-                    {tc("download")}
+                  <Button onClick={() => setSaveDialogOpen(true)} size="sm" className="gap-2">
+                    <Camera className="w-4 h-4" />
+                    {tc("save")}
                   </Button>
                 )}
               </CardAction>
@@ -282,6 +279,13 @@ export default function AvatarGeneratorPage() {
           </Card>
         </div>
       </div>
+
+      <SaveDialog
+        open={saveDialogOpen}
+        baseName={username.trim() || "avatar"}
+        onOpenChange={setSaveDialogOpen}
+        onSave={handleExportImage}
+      />
     </div>
   );
 }
