@@ -45,6 +45,7 @@ export default function AvatarGeneratorPage() {
   const [hasPendingUpdate, setHasPendingUpdate] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
   const [previewSize, setPreviewSize] = useState<{ width: number; height: number } | null>(null);
+  const [devicePixelRatio, setDevicePixelRatio] = useState(1);
 
   // 缓冲输入
   const [inputImageUrl, setInputImageUrl] = useState<string>("");
@@ -59,37 +60,63 @@ export default function AvatarGeneratorPage() {
     [imageUrl, username, countryCode],
   );
 
-  const previewEl = useMemo(() => {
+  useEffect(() => {
+    const updateDevicePixelRatio = () => {
+      setDevicePixelRatio(window.devicePixelRatio || 1);
+    };
+
+    updateDevicePixelRatio();
+    window.addEventListener("resize", updateDevicePixelRatio);
+
+    return () => {
+      window.removeEventListener("resize", updateDevicePixelRatio);
+    };
+  }, []);
+
+  const previewResult = useMemo(() => {
     try {
-      if (isNullOrWhitespace(imageUrl) || isNullOrWhitespace(username)) return null;
+      if (isNullOrWhitespace(imageUrl) || isNullOrWhitespace(username)) {
+        return { node: null, isAvatarCard: false };
+      }
+
       const AvatarComponent = selectedStyle?.generateAvatar(inputs);
-      return AvatarComponent ? <AvatarComponent /> : null;
+      if (!AvatarComponent) {
+        return { node: null, isAvatarCard: false };
+      }
+
+      return { node: <AvatarComponent />, isAvatarCard: true };
     } catch (e) {
       console.error("Error in preview generation.", e);
 
-      return (
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <OctagonAlert />
-            </EmptyMedia>
-            <EmptyTitle>{t("previewError")}</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      );
+      return {
+        node: (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <OctagonAlert />
+              </EmptyMedia>
+              <EmptyTitle>{t("previewError")}</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        ),
+        isAvatarCard: false,
+      };
     }
   }, [selectedStyle, inputs, imageUrl, username, t]);
+
+  const previewEl = previewResult.node;
+  const shouldScalePreview = previewResult.isAvatarCard;
 
   useEffect(() => {
     const container = previewRef.current;
     const child = container?.firstElementChild as HTMLElement | null;
-    if (!child || !previewEl) {
+    if (!child || !shouldScalePreview) {
       setPreviewSize(null);
       return;
     }
     const measure = () => setPreviewSize({ width: child.offsetWidth, height: child.offsetHeight });
     requestAnimationFrame(measure);
-  }, [previewEl]);
+  }, [shouldScalePreview]);
 
   const debouncedCommit = useMemo(
     () =>
@@ -223,22 +250,29 @@ export default function AvatarGeneratorPage() {
                 {tc("section.preview")}
               </CardTitle>
               <CardAction>
-                {previewEl && (
+                {shouldScalePreview && (
                   <Button onClick={handleDownload} size="sm" className="gap-2">
                     <Download className="w-4 h-4" />
                     {tc("download")}
                   </Button>
                 )}
               </CardAction>
-              {previewEl && previewSize && <CardDescription>{t("sizePrompt", { ...previewSize })}</CardDescription>}
+              {shouldScalePreview && previewSize && <CardDescription>{t("sizePrompt", { ...previewSize })}</CardDescription>}
             </CardHeader>
             <CardContent>
               <div
                 ref={previewRef}
                 className={cn(
-                  "flex items-center justify-center select-none transition-opacity",
+                  "flex items-center justify-center select-none transition-all",
                   hasPendingUpdate && "opacity-50",
                 )}
+                style={
+                  shouldScalePreview
+                    ? {
+                        transform: `scale(${1 / devicePixelRatio})`,
+                      }
+                    : undefined
+                }
               >
                 {previewEl ?? (
                   <Empty>
