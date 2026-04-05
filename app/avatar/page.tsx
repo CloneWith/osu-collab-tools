@@ -258,7 +258,7 @@ export default function AvatarGeneratorPage() {
                 style={
                   shouldScalePreview
                     ? {
-                        transform: `scale(${1 / devicePixelRatio})`,
+                        zoom: 1 / devicePixelRatio,
                       }
                     : undefined
                 }
