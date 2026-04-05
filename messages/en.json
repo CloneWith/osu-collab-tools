@@ -66,6 +66,7 @@
   "settings": {
     "language": "Language",
     "colorScheme": "Color scheme",
+    "benchmark": "Open Benchmark",
     "themes": {
       "light": "Light",
       "system": "Follow system settings",
@@ -251,11 +252,81 @@
       "home": "Home",
       "avatar": "Avatar Card",
       "imagemap": "Imagemap Editor",
-      "docs": "Documentation"
+            "docs": "Documentation"
     },
     "external": {
       "colorcode": "Exsper's gradient text BBCode generator",
       "mobe": "BBCode Editor (MOBE)"
+    }
+  },
+  "benchmark": {
+    "title": "Benchmark",
+    "controls": {
+      "title": "Run checks",
+      "runAll": "Run all",
+      "runFeature": "Run feature checks",
+      "runUrl": "Run URL checks",
+      "rerun": "Rerun",
+      "running": "Running...",
+      "neverRun": "No checks have been run yet",
+      "lastRun": "Last run: {date}"
+    },
+    "summary": {
+      "featureCoverage": "Feature support",
+      "urlCoverage": "Address reachability"
+    },
+    "table": {
+      "feature": "Feature",
+      "usage": "Used for",
+      "status": "Status",
+      "endpoint": "Address",
+      "address": "URL",
+      "latency": "Latency"
+    },
+    "statuses": {
+      "supported": "Supported",
+      "unsupported": "Unsupported",
+      "reachable": "Reachable",
+      "opaque": "Reachable | Opaque",
+      "unreachable": "Unreachable",
+      "pending": "Pending"
+    },
+    "featureChecks": {
+      "title": "Web feature checks",
+      "description": "Check support for key browser APIs used by this project."
+    },
+    "urlChecks": {
+      "title": "Connectivity",
+      "description": "Check reachability of addresses required by runtime flows.",
+      "items": {
+        "osuEndpoint": "Configured osu! endpoint",
+        "osuUserPage": "osu! user profile page",
+        "avatarCdn": "Avatar CDN",
+        "imageProxy": "Image proxy (wsrv.nl)",
+        "flagCdn": "Flag CDN",
+        "twemojiCdn": "Twemoji CDN",
+        "sulInfo": "s-ul account info page",
+        "uploadApi": "Image sharing API proxy"
+      }
+    },
+    "clientInfo": {
+      "title": "Client environment",
+      "field": "Field",
+      "value": "Value",
+      "unknown": "Unknown",
+      "boolean": {
+        "true": "Yes",
+        "false": "No"
+      },
+      "items": {
+        "userAgent": "User-Agent",
+        "platform": "Platform",
+        "mobile": "Mobile device",
+        "touch": "Touch enabled",
+        "maxTouchPoints": "Max touch points",
+        "hardwareConcurrency": "Logical CPU cores",
+        "deviceMemory": "Approx. device memory"
+      }
     }
   },
   "docs": {

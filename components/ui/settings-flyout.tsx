@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Languages, Moon, Settings, Sun, SunMoon } from "lucide-react";
+import { ClipboardCheck, Languages, Moon, Settings, Sun, SunMoon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import * as React from "react";
 import { useEffect } from "react";
 
@@ -139,6 +140,13 @@ export function SettingsFlyout() {
             defaultValue={currentEndpoint}
             onChange={(v) => onEndpointChange(v.target.value.trim())}
           />
+
+          <Button asChild variant="outline" className="w-full justify-start">
+            <Link href="/benchmark" className="cursor-default">
+              <ClipboardCheck className="w-4 h-4 mr-2" />
+              {t("benchmark")}
+            </Link>
+          </Button>
         </div>
       </PopoverContent>
     </Popover>
