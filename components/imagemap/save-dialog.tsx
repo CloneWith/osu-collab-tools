@@ -32,7 +32,7 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
   const { toast } = useToast();
 
   const [filename, setFilename] = React.useState("");
-  const [format, setFormat] = React.useState("image/png");
+  const [format, setFormat] = React.useState("image/jpeg");
   const [quality, setQuality] = React.useState(90);
 
   const extension = format.split("/")[1];
