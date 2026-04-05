@@ -15,8 +15,6 @@ export interface GridUser extends AvatarGridUserModel {
 export interface GridLayout {
     /** Number of columns in the grid. */
     columns: number;
-    /** Number of rows. Use 0 to auto-calculate from item count. */
-    rows: number;
     /** Gap between grid items in pixels. */
     gap: number;
     /** Inner padding of the preview container in pixels. */

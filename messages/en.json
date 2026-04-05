@@ -251,12 +251,97 @@
     "nav": {
       "home": "Home",
       "avatar": "Avatar Card",
+      "avatargrid": "Grid Collab",
       "imagemap": "Imagemap Editor",
-            "docs": "Documentation"
+      "docs": "Documentation"
     },
     "external": {
       "colorcode": "Exsper's gradient text BBCode generator",
       "mobe": "BBCode Editor (MOBE)"
+    }
+  },
+  "avatargrid": {
+    "title": "Grid Collab Generator",
+    "description": "Generate grid layout avatar cards from a list of users",
+    "sections": {
+      "users": "User Management",
+      "style": "Avatar Style",
+      "layout": "Grid Layout",
+      "background": "Background",
+      "imagemap": "Imagemap Code"
+    },
+    "tabs": {
+      "table": "User List",
+      "bulk": "Bulk Add"
+    },
+    "fields": {
+      "username": "Username",
+      "userId": "User ID",
+      "countryCode": "Country Code",
+      "bulkInput": "Bulk Input",
+      "customLink": "Custom Link",
+      "newUser": "New User",
+      "editingUser": "Editing User"
+    },
+    "placeholders": {
+      "bulkInput": "One user per line, format: username userId countryCode (optional)\nExample:\npeppy 2 US\nCookiezi 124493 JP"
+    },
+    "actions": {
+      "addUser": "Add User",
+      "addBulk": "Add Bulk",
+      "loadSample": "Load Sample",
+      "uploadImage": "Upload Image",
+      "removeUser": "Remove {username}"
+    },
+    "layout": {
+      "columns": "Columns",
+      "gap": "Gap",
+      "padding": "Padding"
+    },
+    "style": {
+      "showUsernames": "Show username",
+      "showFlags": "Show flag"
+    },
+    "background": {
+      "type": "Background Type",
+      "types": {
+        "color": "Solid Color",
+        "gradient": "Gradient",
+        "image": "Image"
+      },
+      "color": "Background Color",
+      "gradientFrom": "Gradient From",
+      "gradientTo": "Gradient To",
+      "gradientDirection": "Gradient Direction",
+      "imageUrl": "Image URL"
+    },
+    "directions": {
+      "toRight": "Left to Right",
+      "toBottom": "Top to Bottom",
+      "toBottomRight": "Top-Left to Bottom-Right",
+      "toBottomLeft": "Top-Right to Bottom-Left"
+    },
+    "export": {
+      "previewNotFound": "Preview element not found",
+      "noUsers": "No users to export"
+    },
+    "userCount": "{count} users total",
+    "table": {
+      "userId": "UID",
+      "username": "Username",
+      "actions": "Actions"
+    },
+    "validation": {
+      "emptyInput": "Please enter user data",
+      "noValidUsers": "No valid users found",
+      "checkInputFormat": "Please check if the input format is correct"
+    },
+    "users": {
+      "added": "Added {count} users"
+    },
+    "empty": {
+      "title": "No Users",
+      "description": "Add some users to start generating avatar grid"
     }
   },
   "benchmark": {

@@ -3,7 +3,7 @@
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { SettingsFlyout } from "@/components/ui/settings-flyout";
-import { FileText, Home, Map as MapIcon, Menu, UserRound, X } from "lucide-react";
+import { FileText, Grid3X3, Home, Map as MapIcon, Menu, UserRound, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -12,6 +12,7 @@ import { useState } from "react";
 const navigation = [
   { key: "home", href: "/", icon: Home },
   { key: "avatar", href: "/avatar", icon: UserRound },
+  { key: "avatargrid", href: "/avatargrid", icon: Grid3X3 },
   { key: "imagemap", href: "/imagemap", icon: MapIcon },
   { key: "docs", href: "/docs", icon: FileText },
 ] as const;

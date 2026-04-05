@@ -251,12 +251,97 @@
     "nav": {
       "home": "首页",
       "avatar": "头像卡片",
+      "avatargrid": "网格 Collab 图",
       "imagemap": "Imagemap 编辑",
       "docs": "使用文档"
     },
     "external": {
       "colorcode": "Exsper 的渐变颜色生成器",
       "mobe": "BBCode 编辑器 (MOBE)"
+    }
+  },
+  "avatargrid": {
+    "title": "网格 Collab 生成器",
+    "description": "从用户列表生成网格布局的头像卡片图",
+    "sections": {
+      "users": "用户管理",
+      "style": "头像样式",
+      "layout": "网格布局",
+      "background": "背景设置",
+      "imagemap": "Imagemap 代码"
+    },
+    "tabs": {
+      "table": "用户列表",
+      "bulk": "批量添加"
+    },
+    "fields": {
+      "username": "用户名",
+      "userId": "用户 ID",
+      "countryCode": "国家/地区代码",
+      "bulkInput": "批量输入",
+      "customLink": "自定义链接",
+      "newUser": "新用户",
+      "editingUser": "编辑用户"
+    },
+    "placeholders": {
+      "bulkInput": "每行一个用户，格式：用户名 用户ID 国家代码（可选）\n例如：\npeppy 2 US\nCookiezi 124493 JP"
+    },
+    "actions": {
+      "addUser": "添加用户",
+      "addBulk": "批量添加",
+      "loadSample": "加载示例",
+      "uploadImage": "上传图片",
+      "removeUser": "移除 {username}"
+    },
+    "layout": {
+      "columns": "列数",
+      "gap": "间距",
+      "padding": "内边距"
+    },
+    "style": {
+      "showUsernames": "显示用户名",
+      "showFlags": "显示国家/地区旗"
+    },
+    "background": {
+      "type": "背景类型",
+      "types": {
+        "color": "纯色",
+        "gradient": "渐变",
+        "image": "图片"
+      },
+      "color": "背景颜色",
+      "gradientFrom": "渐变起始色",
+      "gradientTo": "渐变结束色",
+      "gradientDirection": "渐变方向",
+      "imageUrl": "图片链接"
+    },
+    "directions": {
+      "toRight": "从左到右",
+      "toBottom": "从上到下",
+      "toBottomRight": "从左上到右下",
+      "toBottomLeft": "从右上到左下"
+    },
+    "export": {
+      "previewNotFound": "未找到预览区域",
+      "noUsers": "没有可导出的用户"
+    },
+    "userCount": "共 {count} 个用户",
+    "table": {
+      "userId": "UID",
+      "username": "用户名",
+      "actions": "操作"
+    },
+    "validation": {
+      "emptyInput": "请输入用户数据",
+      "noValidUsers": "未找到有效用户",
+      "checkInputFormat": "请检查输入格式是否正确"
+    },
+    "users": {
+      "added": "已添加 {count} 个用户"
+    },
+    "empty": {
+      "title": "暂无用户",
+      "description": "添加一些用户以开始生成头像网格"
     }
   },
   "benchmark": {
