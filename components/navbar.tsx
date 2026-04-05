@@ -78,8 +78,8 @@ export function Navbar() {
                     href={item.href}
                     className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
                       isActive
-                        ? "bg-primary/10 text-primary dark:bg-primary dark:text-primary-foreground"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                        ? "bg-primary/10 text-primary"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-primary/10 dark:text-gray-300"
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
