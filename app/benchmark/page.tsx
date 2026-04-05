@@ -1,12 +1,13 @@
 "use client";
 
+import { BenchmarkExportDialog } from "@/app/benchmark/export-dialog";
 import { common } from "@/app/common";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Check, ClipboardCheck, Cog, Info, Loader2, Network, RefreshCw, X } from "lucide-react";
+import { Braces, Check, ClipboardCheck, Cog, Info, Loader2, Network, RefreshCw, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -259,6 +260,7 @@ export default function BenchmarkPage() {
   const [runningUrlChecks, setRunningUrlChecks] = useState(false);
   const [lastRunAt, setLastRunAt] = useState<Date | null>(null);
   const [clientInfo, setClientInfo] = useState<ClientEnvironmentInfo | null>(null);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const urlCheckRunIdRef = useRef(0);
 
   const createUrlTargets = useCallback((): UrlCheckTarget[] => {
@@ -387,6 +389,18 @@ export default function BenchmarkPage() {
     return { total, reachable, percent };
   }, [urlResults]);
 
+  const exportPayload = useMemo(() => {
+    return {
+      generatedAt: new Date().toISOString(),
+      lastRunAt: lastRunAt?.toISOString() ?? null,
+      clientInfo,
+      featureResults,
+      urlResults,
+    };
+  }, [lastRunAt, clientInfo, featureResults, urlResults]);
+
+  const exportJson = useMemo(() => JSON.stringify(exportPayload, null, 2), [exportPayload]);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -415,19 +429,29 @@ export default function BenchmarkPage() {
                 : t("controls.neverRun")}
             </CardDescription>
             <CardAction>
-              <Button onClick={() => void runAllChecks()} disabled={runningFeatureChecks || runningUrlChecks}>
-                {runningFeatureChecks || runningUrlChecks ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t("controls.running")}
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    {t("controls.runAll")}
-                  </>
-                )}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setExportDialogOpen(true)}
+                  disabled={runningFeatureChecks || runningUrlChecks}
+                >
+                  <Braces className="w-4 h-4 mr-2" />
+                  {t("controls.exportData")}
+                </Button>
+                <Button onClick={() => void runAllChecks()} disabled={runningFeatureChecks || runningUrlChecks}>
+                  {runningFeatureChecks || runningUrlChecks ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {t("controls.running")}
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      {t("controls.runAll")}
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardAction>
           </CardHeader>
         </Card>
@@ -592,6 +616,8 @@ export default function BenchmarkPage() {
           </Card>
         </div>
       </div>
+
+      <BenchmarkExportDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen} jsonString={exportJson} />
     </div>
   );
 }

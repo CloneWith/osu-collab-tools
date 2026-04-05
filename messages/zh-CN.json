@@ -266,10 +266,15 @@
       "runAll": "全部检测",
       "runFeature": "检测特性支持",
       "runUrl": "检测地址连通性",
+      "exportData": "导出数据",
       "rerun": "重新检测",
       "running": "检测中...",
       "neverRun": "尚未执行检测",
       "lastRun": "上次检测：{date}"
+    },
+    "exportDialog": {
+      "title": "基准测试数据导出",
+      "description": "请在开发者需要时提供以下输出。"
     },
     "summary": {
       "featureCoverage": "特性支持率",

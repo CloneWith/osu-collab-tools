@@ -266,10 +266,15 @@
       "runAll": "Run all",
       "runFeature": "Run feature checks",
       "runUrl": "Run URL checks",
+      "exportData": "Export data",
       "rerun": "Rerun",
       "running": "Running...",
       "neverRun": "No checks have been run yet",
       "lastRun": "Last run: {date}"
+    },
+    "exportDialog": {
+      "title": "Benchmark Data Export",
+      "description": "Provide the following output to developers if requested."
     },
     "summary": {
       "featureCoverage": "Feature support",
