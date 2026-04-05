@@ -791,21 +791,6 @@ export default function ImagemapEditorPage() {
     }
   };
 
-  const moveRectangleLayer = (id: string, delta: number) => {
-    setRectangles((prev) => {
-      const next = [...prev];
-      const fromIndex = next.findIndex((rect) => rect.id === id);
-      if (fromIndex === -1) return prev;
-
-      const toIndex = fromIndex + delta;
-      if (toIndex < 0 || toIndex >= next.length) return prev;
-
-      const [moved] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, moved);
-      return next;
-    });
-  };
-
   const handleResizeStart = (event: React.MouseEvent | React.TouchEvent, rectId: string, handle: ResizeHandle) => {
     if (!uploadedImage || currentTool !== "select") return;
 
@@ -967,7 +952,7 @@ export default function ImagemapEditorPage() {
 
       const newRect: Rectangle = {
         ...currentRect,
-        id: Date.now().toString(),
+        id: generateId(),
         width: Math.round(Math.min(currentRect.width, imageSize.width - currentRect.x)),
         height: Math.round(Math.min(currentRect.height, imageSize.height - currentRect.y)),
       };
