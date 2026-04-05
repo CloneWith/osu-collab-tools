@@ -66,6 +66,7 @@
   "settings": {
     "language": "语言",
     "colorScheme": "颜色主题",
+    "benchmark": "打开基准测试",
     "themes": {
       "light": "浅色",
       "system": "跟随系统",
@@ -256,6 +257,76 @@
     "external": {
       "colorcode": "Exsper 的渐变颜色生成器",
       "mobe": "BBCode 编辑器 (MOBE)"
+    }
+  },
+  "benchmark": {
+    "title": "基准测试",
+    "controls": {
+      "title": "执行检测",
+      "runAll": "全部检测",
+      "runFeature": "检测特性支持",
+      "runUrl": "检测地址连通性",
+      "rerun": "重新检测",
+      "running": "检测中...",
+      "neverRun": "尚未执行检测",
+      "lastRun": "上次检测：{date}"
+    },
+    "summary": {
+      "featureCoverage": "特性支持率",
+      "urlCoverage": "地址可达率"
+    },
+    "table": {
+      "feature": "特性",
+      "usage": "项目用途",
+      "status": "状态",
+      "endpoint": "地址项",
+      "address": "URL",
+      "latency": "延迟"
+    },
+    "statuses": {
+      "supported": "已支持",
+      "unsupported": "不支持",
+      "reachable": "可访问",
+      "opaque": "可访问 | 受限",
+      "unreachable": "不可访问",
+      "pending": "待检测"
+    },
+    "featureChecks": {
+      "title": "Web 特性",
+      "description": "检测项目使用的必要特性是否受浏览器支持。"
+    },
+    "urlChecks": {
+      "title": "连通性",
+      "description": "检测项目运行依赖地址的可访问性。",
+      "items": {
+        "osuEndpoint": "当前配置的 osu! 服务器",
+        "osuUserPage": "osu! 用户资料页",
+        "avatarCdn": "头像 CDN",
+        "imageProxy": "图片代理 (wsrv.nl)",
+        "flagCdn": "Flag CDN",
+        "twemojiCdn": "Twemoji CDN",
+        "sulInfo": "s-ul 账户信息页",
+        "uploadApi": "图床上传 API 代理"
+      }
+    },
+    "clientInfo": {
+      "title": "客户端环境信息",
+      "field": "字段",
+      "value": "值",
+      "unknown": "未知",
+      "boolean": {
+        "true": "是",
+        "false": "否"
+      },
+      "items": {
+        "userAgent": "User-Agent",
+        "platform": "平台",
+        "mobile": "移动设备",
+        "touch": "支持触摸",
+        "maxTouchPoints": "最大触点数",
+        "hardwareConcurrency": "逻辑 CPU 核心数",
+        "deviceMemory": "设备内存估计值"
+      }
     }
   },
   "docs": {
