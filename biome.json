@@ -6,6 +6,11 @@
     "useIgnoreFile": true,
     "defaultBranch": "main"
   },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "linter": {
     "rules": {
       "a11y": {
