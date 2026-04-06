@@ -2,6 +2,7 @@
 
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { SettingsFlyout } from "@/components/ui/settings-flyout";
 import { FileText, Grid3X3, Home, Map as MapIcon, Menu, UserRound, X } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -18,7 +19,7 @@ const navigation = [
 ] as const;
 
 export function Navbar() {
-  const t = useTranslations("navbar");
+  const t = useTranslations();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -39,19 +40,44 @@ export function Navbar() {
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
+              const title = t(`navbar.nav.${item.key}`);
+
               return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-gray-600 hover:text-gray-900 hover:bg-primary/10 dark:text-gray-300"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{t(`nav.${item.key}`)}</span>
-                </Link>
+                <HoverCard key={item.key} openDelay={120} closeDelay={80}>
+                  <HoverCardTrigger asChild>
+                    <Link
+                      href={item.href}
+                      aria-label={title}
+                      className={`flex items-center rounded-md text-sm font-medium ${
+                        isActive
+                          ? "bg-primary/10 px-3 py-2 text-primary"
+                          : "h-10 w-10 justify-center text-gray-600 hover:bg-primary/10 hover:text-gray-900 dark:text-gray-300"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span
+                        className={`overflow-hidden whitespace-nowrap ${
+                          isActive ? "ml-1.5 max-w-32 opacity-100" : "max-w-0 opacity-0"
+                        }`}
+                      >
+                        {title}
+                      </span>
+                    </Link>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold leading-none text-popover-foreground">
+                          {t(`${item.key}.title`)}
+                        </p>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{t(`${item.key}.description`)}</p>
+                      </div>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
               );
             })}
             <SettingsFlyout />

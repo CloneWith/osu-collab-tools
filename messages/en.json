@@ -51,6 +51,8 @@
     }
   },
   "home": {
+    "title": "Home",
+    "description": "A glance through osu! Collab Tools",
     "hero": {
       "title": "This is a Collab Toolbox",
       "description": "Make it easier to create collab images",
