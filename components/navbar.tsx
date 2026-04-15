@@ -111,7 +111,7 @@ export function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Icon className="w-5 h-5" />
-                    <span>{t(`nav.${item.key}`)}</span>
+                    <span>{t(`${item.key}.title`)}</span>
                   </Link>
                 );
               })}
