@@ -24,6 +24,7 @@
     "preview": "预览",
     "export": "导出",
     "import": "导入",
+    "or": "或者",
     "duplicateSuffix": "(副本)",
     "unknownError": "未知错误",
     "cannotReadClipboard": "无法读取剪贴板",
@@ -315,7 +316,11 @@
       "gradientFrom": "渐变起始色",
       "gradientTo": "渐变结束色",
       "gradientDirection": "渐变方向",
-      "imageUrl": "图片链接"
+      "imageUrl": "图片链接",
+      "uploaded": "背景图上传成功",
+      "uploadedDescription": "背景图片已应用",
+      "uploadError": "背景图上传失败",
+      "uploadErrorDescription": "请更换图片或检查文件后重试"
     },
     "directions": {
       "toRight": "从左到右",
@@ -336,7 +341,11 @@
     "validation": {
       "emptyInput": "请输入用户数据",
       "noValidUsers": "未找到有效用户",
-      "checkInputFormat": "请检查输入格式是否正确"
+      "checkInputFormat": "请检查输入格式是否正确",
+      "invalidImage": "无效的图片文件",
+      "imageOnly": "请上传图片文件",
+      "imageTooLarge": "图片文件过大",
+      "imageSizeLimit": "图片大小不能超过 5MB"
     },
     "users": {
       "added": "已添加 {count} 个用户"
