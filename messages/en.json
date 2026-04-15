@@ -24,6 +24,7 @@
     "preview": "Preview",
     "export": "Export",
     "import": "Import",
+    "or": "or",
     "duplicateSuffix": "(copy)",
     "unknownError": "Unknown error",
     "cannotReadClipboard": "Unable to read from the clipboard",
@@ -315,7 +316,11 @@
       "gradientFrom": "Gradient From",
       "gradientTo": "Gradient To",
       "gradientDirection": "Gradient Direction",
-      "imageUrl": "Image URL"
+      "imageUrl": "Image URL",
+      "uploaded": "Background image uploaded",
+      "uploadedDescription": "Background image has been applied",
+      "uploadError": "Failed to upload background image",
+      "uploadErrorDescription": "Please try another image or check the file"
     },
     "directions": {
       "toRight": "Left to Right",
@@ -336,7 +341,11 @@
     "validation": {
       "emptyInput": "Please enter user data",
       "noValidUsers": "No valid users found",
-      "checkInputFormat": "Please check if the input format is correct"
+      "checkInputFormat": "Please check if the input format is correct",
+      "invalidImage": "Invalid image file",
+      "imageOnly": "Please upload an image file",
+      "imageTooLarge": "Image file is too large",
+      "imageSizeLimit": "Maximum image size is 5MB"
     },
     "users": {
       "added": "Added {count} users"

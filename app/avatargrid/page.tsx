@@ -1049,7 +1049,7 @@ export default function AvatarGridPage() {
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">{t("common.or")}</span>
+                      <span className="text-sm text-muted-foreground">{tc("or")}</span>
                       <input
                         type="file"
                         accept="image/*"
