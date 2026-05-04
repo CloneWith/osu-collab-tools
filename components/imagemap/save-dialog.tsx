@@ -39,8 +39,13 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
   const defaultName = `exported-${baseName}-${Date.now()}`;
 
   const filenameValidation = React.useMemo(
-    () => validateFilename(filename || defaultName + extension),
+    () => validateFilename(`${filename || defaultName}.${extension}`),
     [filename, defaultName, extension],
+  );
+
+  const finalFilename = React.useMemo(
+    () => `${!isNullOrWhitespace(filename) && filenameValidation.success ? filename : defaultName}.${extension}`,
+    [filename, defaultName, extension, filenameValidation],
   );
 
   const [service, setService] = React.useState("s-ul");
@@ -77,7 +82,7 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
           const link = document.createElement("a");
 
           link.href = result;
-          link.download = `${!isNullOrWhitespace(filename) ? filename : defaultName}.${extension}`;
+          link.download = finalFilename;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -115,7 +120,7 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, o
             const blob = await response.blob();
 
             const formData = new FormData();
-            formData.append("file", blob, `image.${extension}`);
+            formData.append("file", blob, finalFilename);
             formData.append("key", token);
             formData.append("service", service);
 
