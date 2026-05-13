@@ -13,12 +13,14 @@ export class ModernAvatarStyle implements IAvatarStyle {
   generateAvatar = (inputs: AvatarInputs): React.FC => {
     const { width, height } = this.size;
     const font = inputs.font ?? this.defaultFont;
+    const showUsername = inputs.showUsername ?? true;
+    const showFlag = inputs.showFlag ?? true;
 
     return () => {
       const [flagUrl, setFlagUrl] = useState(flagFallback.src);
 
       useEffect(() => {
-        if (inputs.countryCode) {
+        if (showFlag && inputs.countryCode) {
           getCountryFlagDataUrl(inputs.countryCode, FlagTheme.Twemoji).then((url) => {
             setFlagUrl(url);
           });
@@ -45,17 +47,19 @@ export class ModernAvatarStyle implements IAvatarStyle {
             className="mt-8 rounded-2xl object-cover select-none"
           />
 
-          <div
-            style={{
-              fontWeight: font.weight,
-              fontSize: font.size,
-            }}
-            className={`text-white ${torus.className}`}
-          >
-            {inputs.username}
-          </div>
+          {showUsername ? (
+            <div
+              style={{
+                fontWeight: font.weight,
+                fontSize: font.size,
+              }}
+              className={`text-white ${torus.className}`}
+            >
+              {inputs.username}
+            </div>
+          ) : null}
 
-          {inputs.countryCode ? (
+          {showFlag && inputs.countryCode ? (
             <img
               src={flagUrl}
               alt={inputs.countryCode}

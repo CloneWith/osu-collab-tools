@@ -6,6 +6,8 @@ export interface AvatarRenderSource {
     imageUrl: string;
     username: string;
     countryCode?: string;
+    showUsername?: boolean;
+    showFlag?: boolean;
 }
 
 export interface AvatarComponentCacheEntry {
@@ -21,10 +23,12 @@ export const toAvatarInputs = (source: AvatarRenderSource): AvatarInputs => ({
     imageUrl: source.imageUrl,
     username: source.username,
     countryCode: source.countryCode?.trim() ? source.countryCode.trim().toUpperCase() : undefined,
+    showUsername: source.showUsername,
+    showFlag: source.showFlag,
 });
 
 const buildAvatarSignature = (styleKey: string, inputs: AvatarInputs) =>
-    `${styleKey}|${inputs.imageUrl}|${inputs.username}|${inputs.countryCode}`;
+    `${styleKey}|${inputs.imageUrl}|${inputs.username}|${inputs.countryCode}|${inputs.showUsername ?? true}|${inputs.showFlag ?? true}`;
 
 export function resolveCachedAvatarComponent(
     cacheId: string,

@@ -13,12 +13,14 @@ export class SimpleAvatarStyle implements IAvatarStyle {
   generateAvatar = (inputs: AvatarInputs): React.FC => {
     const { width, height } = this.size;
     const font = inputs.font ?? this.defaultFont;
+    const showUsername = inputs.showUsername ?? true;
+    const showFlag = inputs.showFlag ?? true;
 
     return () => {
       const [flagUrl, setFlagUrl] = useState(flagFallback.src);
 
       useEffect(() => {
-        if (inputs.countryCode) {
+        if (showFlag && inputs.countryCode) {
           getCountryFlagDataUrl(inputs.countryCode, FlagTheme.Twemoji).then(setFlagUrl);
         }
       }, []);
@@ -46,28 +48,32 @@ export class SimpleAvatarStyle implements IAvatarStyle {
             }}
           />
 
-          <div
-            style={{
-              background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.85) 100%)",
-              fontWeight: font.weight,
-              fontSize: font.size,
-            }}
-            className={`absolute bottom-0 left-0 right-0 p-3 text-white flex items-center gap-2.5 ${torus.className}`}
-          >
-            {inputs.countryCode ? (
-              <img
-                src={flagUrl}
-                alt={inputs.countryCode}
-                crossOrigin="anonymous"
-                style={{ height: 22 }}
-                className="object-cover rounded-md select-none"
-                draggable={false}
-              />
-            ) : null}
-            <span style={{ letterSpacing: 0.2 }} className="truncate">
-              {inputs.username}
-            </span>
-          </div>
+          {showUsername || (showFlag && inputs.countryCode) ? (
+            <div
+              style={{
+                background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.85) 100%)",
+                fontWeight: font.weight,
+                fontSize: font.size,
+              }}
+              className={`absolute bottom-0 left-0 right-0 p-3 text-white flex items-center gap-2.5 ${torus.className}`}
+            >
+              {showFlag && inputs.countryCode ? (
+                <img
+                  src={flagUrl}
+                  alt={inputs.countryCode}
+                  crossOrigin="anonymous"
+                  style={{ height: 22 }}
+                  className="object-cover rounded-md select-none"
+                  draggable={false}
+                />
+              ) : null}
+              {showUsername ? (
+                <span style={{ letterSpacing: 0.2 }} className="truncate">
+                  {inputs.username}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       );
     };

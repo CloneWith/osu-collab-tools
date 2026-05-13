@@ -13,6 +13,10 @@ export interface AvatarInputs {
     username: string;
     /** ISO country/region code like "US" / "CN" (optional) */
     countryCode?: string;
+    /** Whether to render the username in the generated avatar */
+    showUsername?: boolean;
+    /** Whether to render the country flag in the generated avatar */
+    showFlag?: boolean;
     /** Optional font override for this render */
     font?: {
         family?: string;

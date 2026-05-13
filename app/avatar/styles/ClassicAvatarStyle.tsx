@@ -12,12 +12,14 @@ export class ClassicAvatarStyle implements IAvatarStyle {
   generateAvatar = (inputs: AvatarInputs): React.FC => {
     const { width, height } = this.size;
     const font = inputs.font ?? this.defaultFont;
+    const showUsername = inputs.showUsername ?? true;
+    const showFlag = inputs.showFlag ?? true;
 
     return () => {
       const [flagUrl, setFlagUrl] = useState(flagFallback.src);
 
       useEffect(() => {
-        if (inputs.countryCode) {
+        if (showFlag && inputs.countryCode) {
           getCountryFlagDataUrl(inputs.countryCode, FlagTheme.Normal).then(setFlagUrl);
         }
       }, []);
@@ -43,18 +45,20 @@ export class ClassicAvatarStyle implements IAvatarStyle {
             className="mt-8 border-white border-8 object-cover select-none"
           />
 
-          <div
-            style={{
-              fontFamily: font.family,
-              fontWeight: font.weight,
-              fontSize: font.size,
-            }}
-            className="text-black"
-          >
-            {inputs.username}
-          </div>
+          {showUsername ? (
+            <div
+              style={{
+                fontFamily: font.family,
+                fontWeight: font.weight,
+                fontSize: font.size,
+              }}
+              className="text-black"
+            >
+              {inputs.username}
+            </div>
+          ) : null}
 
-          {inputs.countryCode && flagUrl ? (
+          {showFlag && inputs.countryCode && flagUrl ? (
             <img
               src={flagUrl}
               alt={inputs.countryCode}
