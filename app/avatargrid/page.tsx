@@ -161,6 +161,9 @@ export default function AvatarGridPage() {
   const sizeMeasurementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    void showUsernames;
+    void showFlags;
+
     // 测量第一个头像的实际尺寸
     if (!selectedStyle) return;
 
@@ -174,7 +177,7 @@ export default function AvatarGridPage() {
         setAvatarSize({ width, height });
       }
     }
-  }, [users, selectedStyle, isExporting, devicePixelRatio]);
+  }, [users, selectedStyle, isExporting, devicePixelRatio, showUsernames, showFlags]);
 
   // 更新预览尺寸计算，使用实际测量的头像尺寸
   const previewDimensions = useMemo(() => {
@@ -184,16 +187,16 @@ export default function AvatarGridPage() {
     const totalGapY = (effectiveRows - 1) * layout.gap;
 
     const width = cols * avatarSize.width + totalGapX + layout.padding * 2;
-    const height = effectiveRows * (avatarSize.height + (showUsernames ? 24 : 0)) + totalGapY + layout.padding * 2;
+    const height = effectiveRows * avatarSize.height + totalGapY + layout.padding * 2;
 
     return { width, height };
-  }, [gridCells, layout.columns, layout.gap, layout.padding, showUsernames, avatarSize]);
+  }, [gridCells, layout.columns, layout.gap, layout.padding, avatarSize]);
 
   // 更新图像映射区域计算，使用实际测量的头像尺寸
   const imageMapAreas = useMemo((): ImageMapArea[] => {
     return gridCells.cells.map((cell, index) => {
       const x = layout.padding + cell.col * (avatarSize.width + layout.gap);
-      const y = layout.padding + cell.row * (avatarSize.height + layout.gap + (showUsernames ? 24 : 0));
+      const y = layout.padding + cell.row * (avatarSize.height + layout.gap);
 
       return {
         id: cell.user?.id || `area-${index}`,
@@ -205,7 +208,7 @@ export default function AvatarGridPage() {
         alt: cell.user?.username || "",
       };
     });
-  }, [gridCells, layout.padding, layout.gap, showUsernames, avatarSize]);
+  }, [gridCells, layout.padding, layout.gap, avatarSize]);
 
   const previewScale = useMemo(() => {
     return devicePixelRatio > 0 ? 1 / devicePixelRatio : 1;
@@ -430,6 +433,8 @@ export default function AvatarGridPage() {
       imageUrl: user.avatarUrl,
       username: user.username,
       countryCode: user.countryCode?.trim() ? user.countryCode.trim().toUpperCase() : undefined,
+      showUsername: showUsernames,
+      showFlag: showFlags,
     };
     const resolved = resolveCachedAvatarComponent(
       user.id,
@@ -438,6 +443,8 @@ export default function AvatarGridPage() {
         imageUrl: inputs.imageUrl,
         username: inputs.username,
         countryCode: inputs.countryCode,
+        showUsername: inputs.showUsername,
+        showFlag: inputs.showFlag,
       },
       AVATAR_STYLE_REGISTRY,
       avatarCacheRef.current,

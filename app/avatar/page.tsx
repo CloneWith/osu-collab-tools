@@ -15,6 +15,7 @@ import { Camera, Eye, OctagonAlert, Settings, UserRoundPen } from "lucide-react"
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AvatarInputs } from "./styles/IAvatarStyle";
+import { Switch } from "@/components/ui/switch";
 
 const SUPPORTED_SCALES = [0.5, 0.75, 1, 1.5, 2, 3, 4] as const;
 
@@ -26,6 +27,8 @@ export default function AvatarGeneratorPage() {
   const selectedStyle = useMemo(() => AVATAR_STYLE_REGISTRY.find((s) => s.key === styleKey)?.style, [styleKey]);
 
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [showUsername, setShowUsername] = useState(true);
+  const [showFlag, setShowFlag] = useState(true);
   const [username, setUsername] = useState<string>("");
   const [countryCode, setCountryCode] = useState<string>("");
   const [exportScale, setExportScale] = useState(1);
@@ -45,8 +48,10 @@ export default function AvatarGeneratorPage() {
       imageUrl,
       username,
       countryCode: countryCode || undefined,
+      showUsername,
+      showFlag,
     }),
-    [imageUrl, username, countryCode],
+    [imageUrl, username, countryCode, showUsername, showFlag],
   );
 
   useEffect(() => {
@@ -64,7 +69,11 @@ export default function AvatarGeneratorPage() {
 
   const previewResult = useMemo(() => {
     try {
-      if (isNullOrWhitespace(imageUrl) || isNullOrWhitespace(username)) {
+      if (
+        isNullOrWhitespace(imageUrl) ||
+        (showUsername && isNullOrWhitespace(username)) ||
+        (showFlag && isNullOrWhitespace(countryCode))
+      ) {
         return { node: null, isAvatarCard: false };
       }
 
@@ -91,7 +100,7 @@ export default function AvatarGeneratorPage() {
         isAvatarCard: false,
       };
     }
-  }, [selectedStyle, inputs, imageUrl, username, t]);
+  }, [selectedStyle, inputs, imageUrl, username, countryCode, showUsername, showFlag, t]);
 
   const previewEl = previewResult.node;
   const shouldScalePreview = previewResult.isAvatarCard;
@@ -173,14 +182,23 @@ export default function AvatarGeneratorPage() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-row space-x-2 items-center">
+                <Switch checked={showUsername} onCheckedChange={(value) => setShowUsername(value)} />
                 <Label htmlFor="user">{t("settings.username")}</Label>
-                <Input id="user" placeholder="peppy" value={username} onChange={(e) => setUsername(e.target.value)} />
+                <Input
+                  className="flex-1"
+                  id="user"
+                  placeholder="peppy"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-row space-x-2 items-center">
+                <Switch checked={showFlag} onCheckedChange={(value) => setShowFlag(value)} />
                 <Label htmlFor="countryCode">{t("settings.countryCode")}</Label>
                 <Input
+                  className="flex-1"
                   id="countryCode"
                   placeholder={t("settings.countryCodeDescription")}
                   value={inputCountryCode}
