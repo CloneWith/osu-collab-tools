@@ -1,3 +1,8 @@
+/**
+ * File validation function tests
+ * @module-tag utils
+ */
+
 import { validateFilename } from "@/lib/validation";
 import { describe, expect, it } from "vitest";
 
@@ -57,5 +62,9 @@ describe("validateFilename", () => {
     it("rejects filenames with byte length over 255", () => {
         const overByteLimit = "你".repeat(90);
         expect(validateFilename(overByteLimit).success).toBe(false);
+    });
+
+    it("rejects empty filename", () => {
+        expect(validateFilename("").success).toBe(false);
     });
 });

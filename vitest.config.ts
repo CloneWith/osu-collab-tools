@@ -6,6 +6,12 @@ export default defineConfig({
     plugins: [react()],
     test: {
         environment: 'node',
+        tags: [
+            {
+                name: "utils",
+                description: "Tests for utility methods",
+            },
+        ],
     },
     resolve: {
         alias: {
