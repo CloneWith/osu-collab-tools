@@ -1,4 +1,16 @@
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  esbuild: true
+  sharp: true
 overrides:
+  '@codemirror/autocomplete': 6.20.3
+  '@codemirror/commands': 6.10.4
+  '@codemirror/language': 6.12.4
+  '@codemirror/lint': 6.9.7
+  '@codemirror/search': 6.7.1
+  '@codemirror/state': 6.7.1
+  '@codemirror/view': 6.43.6
   file-type@>=13.0.0 <21.3.1: '>=21.3.1'
   file-type@>=20.0.0 <=21.3.1: '>=21.3.2'
   icu-minify@<=4.9.1: '>=4.9.2'
