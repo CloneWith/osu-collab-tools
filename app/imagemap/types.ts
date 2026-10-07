@@ -146,7 +146,12 @@ export function parseImageMapBBCode(bbcode: string, width: number, height: numbe
     } catch (error) {
         return {
             success: false,
-            messageKey: error instanceof Error ? error.message : "无法解析 BBCode",
+            // 这里必须是真实的 i18n key：调用方会执行 t(messageKey)，
+            // 直接塞原始 message 会让 next-intl 抛出 MISSING_MESSAGE。
+            messageKey: "check.bbcodeUnknown",
+            details: {
+                message: error instanceof Error ? error.message : String(error),
+            },
         };
     }
 
