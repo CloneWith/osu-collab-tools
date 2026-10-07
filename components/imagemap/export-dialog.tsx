@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -18,22 +17,31 @@ import { DownloadCloud, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
 
-interface ExportDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface ExportPanelContentProps {
   data: ImageMapConfig;
 }
 
-export function ExportDialog({ open, onOpenChange, data }: ExportDialogProps) {
+// hljs 的语言注册是全局的，放在模块作用域配合守卫，
+// 避免每次渲染都重复调用 registerLanguage。
+let hljsInitialized = false;
+const ensureJsonHljs = () => {
+  if (hljsInitialized) return;
+  hljs.registerLanguage("json", json);
+  hljsInitialized = true;
+};
+
+/**
+ * 导出面板的内容体。侧边栏卡片直接内联渲染它；
+ * 需要弹窗外壳的调用方可以用 {@link ExportDialog} 包裹。
+ */
+export function ExportPanelContent({ data }: ExportPanelContentProps) {
   const triggerConfetti = useConfetti();
   const t = useTranslations("imagemap");
-  const tc = useTranslations("common");
-
   const downloadBtnRef = useRef<HTMLButtonElement>(null);
 
   const jsonString = JSON.stringify(data, null, 2);
 
-  hljs.registerLanguage("json", json);
+  ensureJsonHljs();
 
   const handleDownload = () => {
     if (downloadBtnRef.current) triggerConfetti(downloadBtnRef.current);
@@ -49,6 +57,41 @@ export function ExportDialog({ open, onOpenChange, data }: ExportDialogProps) {
   };
 
   return (
+    <>
+      <div className="bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-72 border border-gray-700">
+        <pre
+          className="whitespace-pre-wrap wrap-break-word"
+          dangerouslySetInnerHTML={{
+            __html: hljs.highlight(jsonString, { language: "json" }).value,
+          }}
+        />
+      </div>
+
+      <div className="flex flex-row gap-2 justify-end">
+        <CopyButton text={jsonString} variant="default" />
+        <Button
+          ref={downloadBtnRef}
+          onClick={handleDownload}
+          className="gap-2 confetti-button"
+        >
+          <DownloadCloud className="w-4 h-4" />
+          {t("export.downloadButton")}
+        </Button>
+      </div>
+    </>
+  );
+}
+
+interface ExportDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  data: ImageMapConfig;
+}
+
+export function ExportDialog({ open, onOpenChange, data }: ExportDialogProps) {
+  const t = useTranslations("imagemap");
+
+  return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
@@ -60,26 +103,8 @@ export function ExportDialog({ open, onOpenChange, data }: ExportDialogProps) {
         </DialogHeader>
 
         <div className="space-y-3">
-          <div className="bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-lg text-sm font-mono overflow-auto max-h-96 border border-gray-700">
-            <pre
-              className="whitespace-pre-wrap wrap-break-word"
-              dangerouslySetInnerHTML={{
-                __html: hljs.highlight(jsonString, { language: "json" }).value,
-              }}
-            />
-          </div>
+          <ExportPanelContent data={data} />
         </div>
-
-        <DialogFooter className="flex flex-row gap-2 justify-end">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <CopyButton text={jsonString} variant="default" />
-          <Button ref={downloadBtnRef} onClick={handleDownload} className="gap-2 confetti-button">
-            <DownloadCloud className="w-4 h-4" />
-            {t("export.downloadButton")}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -1,36 +1,65 @@
 "use client";
 
-import { type ImageMapConfig, parseImageMapBBCode, validateImageMapJsonConfig } from "@/app/imagemap/types";
+import {
+  type ImageMapConfig,
+  parseImageMapBBCode,
+  validateImageMapJsonConfig,
+} from "@/app/imagemap/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import type { Timeout } from "@radix-ui/primitive";
-import { AlertCircle, CheckCircle, ClipboardPaste, Download, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  ClipboardPaste,
+  Download,
+  Upload,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CodeMirrorEditor } from "../codemirror-editor";
 
-interface ImportDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+type DataSource = "json" | "bbcode";
+
+interface ImportPanelContentProps {
   onImport: (data: ImageMapConfig) => void;
   imageWidth: number;
   imageHeight: number;
+  /** 侧栏内联渲染时不需要「取消」按钮。 */
+  showCancel?: boolean;
+  onCancel?: () => void;
+  /** 侧栏只有 22rem 宽，编辑器相应矮一些。 */
+  editorClassName?: string;
 }
 
-type DataSource = "json" | "bbcode";
-
-export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHeight }: ImportDialogProps) {
+/**
+ * 导入面板的内容体。侧边栏卡片直接内联渲染它；
+ * 需要弹窗外壳的调用方可以用 {@link ImportDialog} 包裹。
+ */
+export function ImportPanelContent({
+  onImport,
+  imageWidth,
+  imageHeight,
+  showCancel = false,
+  onCancel,
+  editorClassName = "h-48",
+}: ImportPanelContentProps) {
   const { toast } = useToast();
   const t = useTranslations("imagemap.import");
   const tc = useTranslations("common");
@@ -55,11 +84,16 @@ export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHe
         // 验证 JSON 语法和数据结构
         try {
           const parsed = JSON.parse(confInput);
-          const result = validateImageMapJsonConfig(parsed, imageWidth, imageHeight);
+          const result = validateImageMapJsonConfig(
+            parsed,
+            imageWidth,
+            imageHeight,
+          );
 
-          // 验证数据结构
           if (!result.success) {
-            setValidationError(t(result.messageKey ?? "check.invalid", result.details));
+            setValidationError(
+              t(result.messageKey ?? "check.invalid", result.details),
+            );
             return;
           }
 
@@ -67,7 +101,9 @@ export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHe
           setValidationError("");
         } catch (error) {
           if (error instanceof SyntaxError) {
-            setValidationError(t("check.jsonSyntaxError", { message: error.message }));
+            setValidationError(
+              t("check.jsonSyntaxError", { message: error.message }),
+            );
           } else {
             setValidationError(t("check.invalidJsonFormat"));
           }
@@ -79,7 +115,9 @@ export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHe
         const result = parseImageMapBBCode(confInput, imageWidth, imageHeight);
 
         if (!result.success) {
-          setValidationError(t(result.messageKey ?? "check.invalid", result.details));
+          setValidationError(
+            t(result.messageKey ?? "check.invalid", result.details),
+          );
           return;
         }
 
@@ -110,12 +148,19 @@ export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHe
 
       if (currentSource === "json") {
         parsed = JSON.parse(confInput) as ImageMapConfig;
-        const result = validateImageMapJsonConfig(parsed, imageWidth, imageHeight);
+        const result = validateImageMapJsonConfig(
+          parsed,
+          imageWidth,
+          imageHeight,
+        );
 
         if (!result.success) {
           toast({
             title: t("failed"),
-            description: t(result.messageKey ?? "check.invalid", result.details),
+            description: t(
+              result.messageKey ?? "check.invalid",
+              result.details,
+            ),
             variant: "destructive",
           });
           return;
@@ -126,7 +171,10 @@ export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHe
         if (!result.success || !result.config) {
           toast({
             title: t("failed"),
-            description: t(result.messageKey ?? "check.invalid", result.details),
+            description: t(
+              result.messageKey ?? "check.invalid",
+              result.details,
+            ),
             variant: "destructive",
           });
           return;
@@ -139,7 +187,7 @@ export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHe
       setConfInput("");
       setValidationError("");
       setIsValid(false);
-      onOpenChange(false);
+      onCancel?.();
 
       toast({
         title: t("success"),
@@ -148,7 +196,8 @@ export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHe
     } catch (error) {
       toast({
         title: t("failed"),
-        description: error instanceof Error ? error.message : tc("unknownError"),
+        description:
+          error instanceof Error ? error.message : tc("unknownError"),
         variant: "destructive",
       });
     }
@@ -167,6 +216,100 @@ export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHe
   };
 
   return (
+    <div className="space-y-3">
+      <Alert variant="warning">
+        <AlertDescription>{t("overrideWarning")}</AlertDescription>
+      </Alert>
+
+      <div className="space-y-3">
+        <Label htmlFor="dataSource">{t("dataSource")}</Label>
+        <Select
+          value={currentSource}
+          onValueChange={(s) => setCurrentSource(s as DataSource)}
+        >
+          <SelectTrigger id="dataSource">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="json">{t("sources.json")}</SelectItem>
+            <SelectItem value="bbcode">{t("sources.bbcode")}</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <CodeMirrorEditor
+          value={confInput}
+          onChange={setConfInput}
+          className={`border-gray-700 ${editorClassName}`}
+        />
+
+        {/* 验证状态指示 */}
+        {validationError ? (
+          <div
+            className={`flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md ${inputActive && "opacity-30"}`}
+          >
+            <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                {t("validationFailed")}
+              </p>
+              <p className="text-sm text-red-700 dark:text-red-300">
+                {validationError}
+              </p>
+            </div>
+          </div>
+        ) : isValid ? (
+          <div
+            className={`flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-md ${inputActive && "opacity-30"}`}
+          >
+            <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+            <p className="text-sm font-medium text-green-800 dark:text-green-200">
+              {t("validationPassed")}
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="flex flex-row gap-2 justify-end">
+        {showCancel && (
+          <Button variant="outline" onClick={() => onCancel?.()}>
+            {tc("cancel")}
+          </Button>
+        )}
+        <Button variant="outline" onClick={handlePaste} className="gap-2">
+          <ClipboardPaste className="w-4 h-4" />
+          {t("fromClipboard")}
+        </Button>
+        <Button
+          onClick={handleImport}
+          disabled={!isValid || inputActive}
+          className="gap-2"
+        >
+          <Download className="w-4 h-4" />
+          {t("confirm")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+interface ImportDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onImport: (data: ImageMapConfig) => void;
+  imageWidth: number;
+  imageHeight: number;
+}
+
+export function ImportDialog({
+  open,
+  onOpenChange,
+  onImport,
+  imageWidth,
+  imageHeight,
+}: ImportDialogProps) {
+  const t = useTranslations("imagemap");
+
+  return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
@@ -179,59 +322,14 @@ export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHe
           </DialogDescription>
         </DialogHeader>
 
-        <Alert variant="warning">
-          <AlertDescription>{t("overrideWarning")}</AlertDescription>
-        </Alert>
-
-        <div className="space-y-3">
-          <Label htmlFor="dataSource">{t("dataSource")}</Label>
-          <Select value={currentSource} onValueChange={(s) => setCurrentSource(s as DataSource)}>
-            <SelectTrigger id="dataSource">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="json">{t("sources.json")}</SelectItem>
-              <SelectItem value="bbcode">{t("sources.bbcode")}</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* CodeMirror 编辑器区域 */}
-          <CodeMirrorEditor value={confInput} onChange={setConfInput} className="border-gray-700 h-80" />
-
-          {/* 验证状态指示 */}
-          {validationError ? (
-            <div
-              className={`flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md ${inputActive && "opacity-30"}`}
-            >
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-red-800 dark:text-red-200">{t("validationFailed")}</p>
-                <p className="text-sm text-red-700 dark:text-red-300">{validationError}</p>
-              </div>
-            </div>
-          ) : isValid ? (
-            <div
-              className={`flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-md ${inputActive && "opacity-30"}`}
-            >
-              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-              <p className="text-sm font-medium text-green-800 dark:text-green-200">{t("validationPassed")}</p>
-            </div>
-          ) : null}
-        </div>
-
-        <DialogFooter className="flex flex-row gap-2 justify-end">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <Button variant="outline" onClick={handlePaste} className="gap-2">
-            <ClipboardPaste className="w-4 h-4" />
-            {t("fromClipboard")}
-          </Button>
-          <Button onClick={handleImport} disabled={!isValid || inputActive} className="gap-2">
-            <Download className="w-4 h-4" />
-            {t("confirm")}
-          </Button>
-        </DialogFooter>
+        <ImportPanelContent
+          onImport={onImport}
+          imageWidth={imageWidth}
+          imageHeight={imageHeight}
+          showCancel
+          onCancel={() => onOpenChange(false)}
+          editorClassName="h-80"
+        />
       </DialogContent>
     </Dialog>
   );
