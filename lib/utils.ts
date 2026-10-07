@@ -25,7 +25,9 @@ export function isNullOrWhitespace(value?: string) {
 }
 
 export function generateId(fallback: string = `rect-${Date.now()}`) {
-    return typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : fallback;
+    return typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : fallback;
 }
 
 // 用户设置的服务器链接，用于生成资料链接与获取头像
@@ -45,22 +47,45 @@ export function generateUserLinkFromName(username: string) {
     return encodeURI(`${getServerLink()}/u/${username}`.toWellFormed());
 }
 
+/**
+ * 转义 HTML 属性值中会影响解析的字符。
+ *
+ * 生成的 imagemap 会被直接贴进 profile 页面，`alt` 里一个双引号就足以
+ * 撑破属性并注入任意标记，因此这里必须转义。
+ */
+const HTML_ATTRIBUTE_ESCAPES: Record<string, string> = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+};
+
+export function escapeHtmlAttribute(value: string): string {
+    return value.replace(
+        /[&<>"']/g,
+        (char) => HTML_ATTRIBUTE_ESCAPES[char] ?? char,
+    );
+}
+
 export function generateImageMapHtml(
     rectangles: MappableArea[],
     imagePath: string | undefined,
     mapName: string | undefined,
 ) {
-    const name = mapName ?? "imagemap";
+    const name = escapeHtmlAttribute(mapName ?? "imagemap");
     const areas = rectangles
         .map(
             (rect) =>
                 `  <area shape="rect" coords="${Math.round(rect.x)},${Math.round(rect.y)},${Math.round(
                     rect.x + rect.width,
-                )},${Math.round(rect.y + rect.height)}" href="${rect.href}" alt="${rect.alt}">`,
+                )},${Math.round(rect.y + rect.height)}" href="${escapeHtmlAttribute(rect.href)}" alt="${escapeHtmlAttribute(
+                    rect.alt,
+                )}">`,
         )
         .join("\n");
 
-    return `<img src="${imagePath ?? "your-image.jpg"}" alt="Collab Image" usemap="#${name}">
+    return `<img src="${escapeHtmlAttribute(imagePath ?? "your-image.jpg")}" alt="Collab Image" usemap="#${name}">
 <map name="${name}">
 ${areas}
 </map>`;
@@ -95,7 +120,10 @@ export enum FlagTheme {
  * Get a country flag image URL from ISO country code.
  * Uses Twemoji SVG assets and proxies the request to avoid CORS issues.
  */
-export async function getCountryFlagDataUrl(code: string, theme: FlagTheme): Promise<string> {
+export async function getCountryFlagDataUrl(
+    code: string,
+    theme: FlagTheme,
+): Promise<string> {
     const trimmed = code.trim();
     let url = "";
 
@@ -164,7 +192,10 @@ export function getProxiedImageUrl(url?: string): string {
  * @param wait duration in milliseconds
  * @returns the debounced function
  */
-export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+export function debounce<T extends (...args: any[]) => any>(
+    func: T,
+    wait: number,
+): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout | null = null;
 
     return (...args: Parameters<T>) => {
@@ -183,7 +214,10 @@ export function debounce<T extends (...args: any[]) => any>(func: T, wait: numbe
  * @param limit time limitation in milliseconds
  * @returns the throttled function
  */
-export function throttle<T extends (...args: any[]) => any>(func: T, limit: number): (...args: Parameters<T>) => void {
+export function throttle<T extends (...args: any[]) => any>(
+    func: T,
+    limit: number,
+): (...args: Parameters<T>) => void {
     let inThrottle: boolean = false;
 
     return (...args: Parameters<T>) => {
