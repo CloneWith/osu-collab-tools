@@ -116,6 +116,19 @@
   "imagemap": {
     "title": "Imagemap 编辑器",
     "description": "划定可点击区域，以便在个人资料等中使用",
+    "sidebar": {
+      "title": "卡片",
+      "closeCard": "关闭卡片",
+      "cards": {
+        "image": "图像属性",
+        "areas": "区域列表",
+        "area": "区域设置",
+        "code": "代码输出",
+        "save": "保存 / 分享",
+        "io": "导入 / 导出"
+      },
+      "railLabel": "侧栏卡片"
+    },
     "tools": {
       "select": "选择",
       "create": "创建区域",
@@ -125,6 +138,15 @@
     "toolbar": {
       "selectImage": "选择图片",
       "save": "保存"
+    },
+    "zoom": {
+      "label": "缩放级别",
+      "in": "放大",
+      "out": "缩小",
+      "fit": "适应窗口",
+      "actual": "原始大小",
+      "presets": "快捷比例",
+      "hint": "提示：Ctrl + 滚轮缩放，按住鼠标中键拖动平移。"
     },
     "imgAttrs": {
       "title": "图像属性",
@@ -151,7 +173,14 @@
       "x": "X 坐标",
       "y": "Y 坐标",
       "width": "宽度",
-      "height": "高度"
+      "height": "高度",
+      "rotation": "旋转",
+      "rotationAbout": "旋转仅影响预览与导出的合成图片。HTML area 元素与 BBCode 均无法表达旋转，生成的代码中不包含旋转信息。",
+      "rotationReset": "重置旋转",
+      "rotationHint": {
+        "title": "关于旋转",
+        "description": "旋转作用于预览与导出的合成图片。HTML area 元素与 BBCode [imagemap] 均无法表达旋转，因此生成的代码不会包含旋转信息。"
+      }
     },
     "placeholder": {
       "noImage": {
@@ -185,7 +214,8 @@
     "export": {
       "title": "导出配置",
       "description": "以下是当前 Imagemap 的 JSON 配置，您可以复制或下载它以供后用。",
-      "downloadButton": "下载 JSON"
+      "downloadButton": "下载 JSON",
+      "unavailable": "请先加载图片，再导出配置。"
     },
     "import": {
       "title": "导入配置",
@@ -213,7 +243,10 @@
         "imagemapContentRequired": "[imagemap] 标签缺少内容",
         "topLinkRequired": "标签内首行必须是有效的链接",
         "invalidAreaDefinition": "第 {line} 行格式错误：不是有效的区域定义",
-        "invalidSizeDefinition": "第 {line} 行格式错误：坐标或尺寸不是数字"
+        "invalidSizeDefinition": "第 {line} 行格式错误：坐标或尺寸不是数字",
+        "invalidRotation": "区域 {id} 的旋转值无效",
+        "rotationNotAllowed": "仅头像卡片区域支持旋转：{id}",
+        "bbcodeUnknown": "无法解析 BBCode：{message}"
       },
       "validationFailed": "验证失败",
       "validationPassed": "未发现问题",
@@ -238,12 +271,15 @@
       "apiKeyGuide": "若已有账户，可在登录后访问<infoPageLink>用户信息页面</infoPageLink>以获取 API 密钥。",
       "uploadSuccess": "图像已上传",
       "uploadSuccessDescription": "使用以下链接访问图像",
-      "uploadFailed": "无法上传"
+      "uploadFailed": "无法上传",
+      "failedTitle": "保存失败",
+      "unknownError": "未知错误"
     },
     "error": {
       "loadImage": "无法加载文件",
       "imageFormat": "图像文件格式不支持或已损坏",
-      "exportFailed": "导出失败"
+      "exportFailed": "导出失败",
+      "generateFailed": "无法生成合成图像"
     }
   },
   "navbar": {
@@ -487,11 +523,11 @@
       "steps": {
         "upload": {
           "title": "1. 上传图片",
-          "description": "点击\"上传图片\"按钮，选择需要使用的图片文件。"
+          "description": "点击底部工具栏的“选择图片”按钮，选择需要使用的图片文件；也可以直接把文件拖放到预览区。"
         },
         "manage": {
           "title": "2. 管理区域",
-          "description": "使用以下工具在图片上创建、更改或删除矩形区域：",
+          "description": "使用底部工具栏中的工具在图片上创建、修改或删除矩形区域。区域列表位于右侧栏：拖动行可调整顺序，卡片右上角的 X 可将其隐藏，侧栏顶部的图标条可以重新打开任意卡片。",
           "tools": {
             "select": {
               "title": "选择工具",
@@ -512,10 +548,10 @@
           }
         },
         "properties": {
-          "title": "3. 设置属性",
+          "title": "3. 区域设置",
           "description": [
             "为每个区域设置链接地址、描述文本与区域类型，也可继续调整位置与大小。",
-            "目前支持将区域设置为头像区域，以在该区域显示指定用户的头像卡片，设置与头像卡片生成工具相似。"
+            "区域可以设置为头像区域，在该区域内展示指定用户的头像卡片，设置方式与头像卡片生成工具类似。"
           ],
           "tip": {
             "title": "小提示",
@@ -528,13 +564,21 @@
           "layers": "所有区域在<b>区域列表</b>中统一显示，可以拖动左侧的控制柄调整所在层级。",
           "imageProps": "与此同时，你可以在<b>图像属性</b>中修改要使用的图像地址与 ImageMap 名称（这个名称只会在 HTML 代码中用到），以便生成的代码直接使用这些属性。"
         },
+        "rotation": {
+          "title": "旋转",
+          "description": "头像区域支持旋转。旋转仅作用于预览与导出的合成图片：生成的 HTML 与 BBCode 无法携带旋转信息，因此实际点击区域仍为轴对齐矩形。"
+        },
+        "viewport": {
+          "title": "预览与缩放",
+          "description": "图片加载后会自动适应预览区。可使用底部工具栏的缩放控件在“适应窗口”、“原始大小”或 10% - 400% 的固定比例之间切换。当图片超出预览区时会显示滚动条，也可以按住鼠标中键拖动来平移视图。"
+        },
         "code": {
           "title": "4. 复制代码",
-          "description": "点击\"复制代码\"按钮，按需获取生成的 HTML 或 BBCode 代码。"
+          "description": "打开右侧栏的“代码输出”卡片，使用每个代码块旁的复制按钮即可获取生成的 HTML 或 BBCode 代码。"
         },
         "export": {
-          "title": "5. 导出图像",
-          "description": "如果为图像添加了头像区域，可以点击预览区的\"保存\"按钮，将叠加了头像卡片的图像保存到本地。"
+          "title": "5. 保存图片",
+          "description": "如果为图片添加了头像区域，可在右侧栏的“保存 / 分享”卡片中，将叠加了头像卡片的图片保存到本地。"
         }
       },
       "usage": {
@@ -573,7 +617,8 @@
           "description": [
             "导出编辑器配置时，编辑的图像<b>不会</b>随之导出，导入时也是如此。因此在导入配置前，请确保加载了适合的图像。",
             "从配置导入更改时，已有区域<b>会被覆盖</b>，配置文件中已有的设置会<b>覆盖</b>现有值。",
-            "从 BBCode 导入的区域<b>不会</b>包含区域类型信息。"
+            "从 BBCode 导入的区域<b>不会</b>包含区域类型信息。",
+            "区域的旋转不会导出到生成的 HTML 或 BBCode 中，因为这两种格式都无法表达旋转；该值会保留在配置文件里，并仍然作用于导出的图片。"
           ]
         },
         "content": [
@@ -586,7 +631,11 @@
         "description": "ImageMap 编辑器支持使用键盘按键快速进行一些操作。",
         "global": {
           "title": "全局",
-          "items": ["<altKey></altKey> + 数字键：切换编辑模式（按从 1 开始的对应数字序）"]
+          "items": [
+            "<altKey></altKey> + 数字键：切换编辑模式（按从 1 开始的对应数字序）",
+            "<ctrlKey></ctrlKey> + 鼠标滚轮：以指针为中心缩放预览",
+            "鼠标中键 + 拖动：放大后拖动平移预览"
+          ]
         },
         "selected": {
           "title": "选定区域时",

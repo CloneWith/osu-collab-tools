@@ -116,6 +116,19 @@
   "imagemap": {
     "title": "Imagemap Editor",
     "description": "Define clickable areas for use in profiles, etc.",
+    "sidebar": {
+      "title": "Cards",
+      "closeCard": "Close card",
+      "cards": {
+        "image": "Image attributes",
+        "areas": "Areas",
+        "area": "Area settings",
+        "code": "Generated code",
+        "save": "Save / Share",
+        "io": "Import / Export"
+      },
+      "railLabel": "Sidebar cards"
+    },
     "tools": {
       "select": "Select",
       "create": "New Area",
@@ -125,6 +138,15 @@
     "toolbar": {
       "selectImage": "Select Image",
       "save": "Save"
+    },
+    "zoom": {
+      "label": "Zoom level",
+      "in": "Zoom in",
+      "out": "Zoom out",
+      "fit": "Fit to window",
+      "actual": "Actual size",
+      "presets": "Presets",
+      "hint": "Tip: Ctrl + wheel to zoom, hold the middle mouse button to pan."
     },
     "imgAttrs": {
       "title": "Image attributes",
@@ -151,7 +173,14 @@
       "x": "X position",
       "y": "Y position",
       "width": "Width",
-      "height": "Height"
+      "height": "Height",
+      "rotation": "Rotation",
+      "rotationAbout": "Rotation affects the preview and the exported image only. HTML area shapes and BBCode cannot express rotation, so the generated code omits it.",
+      "rotationReset": "Reset rotation",
+      "rotationHint": {
+        "title": "About rotation",
+        "description": "Rotation applies to the preview and the exported composite image. Neither the HTML area element nor the BBCode imagemap tag can express rotation, so the generated code does not include it."
+      }
     },
     "placeholder": {
       "noImage": {
@@ -185,7 +214,8 @@
     "export": {
       "title": "Export Configuration",
       "description": "Below is the JSON configuration for the current Imagemap. You can copy or download it for later use.",
-      "downloadButton": "Download JSON"
+      "downloadButton": "Download JSON",
+      "unavailable": "Load an image before exporting a configuration."
     },
     "import": {
       "title": "Import configuration",
@@ -213,7 +243,10 @@
         "imagemapContentRequired": "The [imagemap] tag is missing content",
         "topLinkRequired": "The first line inside the tag must be a valid link",
         "invalidAreaDefinition": "Formatting error on line {line}: Invalid area definition",
-        "invalidSizeDefinition": "Formatting error on line {line}: Incorrect types for position and size"
+        "invalidSizeDefinition": "Formatting error on line {line}: Incorrect types for position and size",
+        "invalidRotation": "Area {id} has an invalid rotation value",
+        "rotationNotAllowed": "Only avatar card areas support rotation: {id}",
+        "bbcodeUnknown": "Unable to parse the BBCode: {message}"
       },
       "validationFailed": "Validation failed",
       "validationPassed": "No issue found",
@@ -238,12 +271,15 @@
       "apiKeyGuide": "If you have an existing account, you can get your API key in the <infoPageLink>info page</infoPageLink> after login.",
       "uploadSuccess": "Image uploaded",
       "uploadSuccessDescription": "Access the image via the link below",
-      "uploadFailed": "Unable to upload"
+      "uploadFailed": "Unable to upload",
+      "failedTitle": "Save failed",
+      "unknownError": "Unknown error"
     },
     "error": {
       "loadImage": "Cannot load file",
       "imageFormat": "Image file format not supported or corrupted",
-      "exportFailed": "Export failed"
+      "exportFailed": "Export failed",
+      "generateFailed": "Unable to generate the composited image"
     }
   },
   "navbar": {
@@ -487,11 +523,11 @@
       "steps": {
         "upload": {
           "title": "1. Upload Image",
-          "description": "Click the \"Upload Image\" button and select the image file you need to use."
+          "description": "Click \"Select Image\" in the bottom toolbar and pick the image file you want to use. You can also drag and drop the file onto the preview area."
         },
         "manage": {
           "title": "2. Manage Areas",
-          "description": "Use the following tools to create, modify, or delete rectangular areas on the image:",
+          "description": "Use the tools in the bottom toolbar to create, modify, or delete rectangular areas on the image. The area list lives in the right sidebar: drag a row to reorder it, use the X button on a card to hide it, and the icon bar at the top of the sidebar brings any card back.",
           "tools": {
             "select": {
               "title": "Selection Tool",
@@ -512,7 +548,7 @@
           }
         },
         "properties": {
-          "title": "3. Set Properties",
+          "title": "3. Area Settings",
           "description": [
             "Set link addresses, description text, and area types for each area, and continue to adjust positions and sizes.",
             "Currently, areas can be set as avatar areas to display specified users' avatar cards in those areas, with settings similar to the avatar card generation tool."
@@ -528,13 +564,21 @@
           "layers": "All areas are displayed uniformly in the <b>Area List</b>, and you can drag the control handle on the left to adjust their layer order.",
           "imageProps": "At the same time, you can modify the image address to be used and the ImageMap name (this name is only used in HTML code) in the <b>Image Properties</b> so that the generated code directly uses these properties."
         },
+        "rotation": {
+          "title": "Rotation",
+          "description": "Avatar areas can be rotated in 45 degree steps. Rotation applies to the preview and to the exported image only: the generated HTML and BBCode cannot carry a rotation, so the clickable area stays axis-aligned."
+        },
+        "viewport": {
+          "title": "Preview and Zoom",
+          "description": "The image fits the preview area automatically when it loads. Use the zoom controls in the bottom toolbar to switch between fit, actual size, or a fixed percentage between 10% and 400%. When the image is larger than the preview area, scrollbars appear and you can also hold the middle mouse button to drag the view."
+        },
         "code": {
           "title": "4. Copy Code",
-          "description": "Click the \"Copy Code\" button to obtain the generated HTML or BBCode code as needed."
+          "description": "Open the \"Generated code\" card in the right sidebar and use the copy button next to each block to obtain the generated HTML or BBCode code."
         },
         "export": {
-          "title": "5. Export Image",
-          "description": "If you have added avatar areas to the image, you can click the \"Save\" button in the preview area to save the image with the avatar cards overlaid to your local device."
+          "title": "5. Save the Image",
+          "description": "If you have added avatar areas to the image, open the \"Save / Share\" card in the right sidebar to save the image with the avatar cards overlaid to your local device."
         }
       },
       "usage": {
@@ -573,7 +617,8 @@
           "description": [
             "When exporting editor configuration, the edited image <b>will not</b> be exported with it, and the same applies when importing. Therefore, before importing configuration, please ensure you have loaded a suitable image.",
             "When importing changes from configuration, existing areas <b>will be overwritten</b>, and settings already in the configuration file <b>will overwrite</b> existing values.",
-            "Areas imported from BBCode <b>will not</b> contain area type information."
+            "Areas imported from BBCode <b>will not</b> contain area type information.",
+            "Area rotation is not exported into the generated HTML or BBCode, since neither format can express it. It is kept in the configuration file and still affects the exported image."
           ]
         },
         "content": [
@@ -587,7 +632,9 @@
         "global": {
           "title": "Global",
           "items": [
-            "<altKey></altKey> + number keys: Switch edit mode (in order starting from 1)"
+            "<altKey></altKey> + number keys: Switch edit mode (in order starting from 1)",
+            "<ctrlKey></ctrlKey> + mouse wheel: Zoom the preview around the pointer",
+            "Middle mouse button + drag: Pan the preview when it is zoomed in"
           ]
         },
         "selected": {
