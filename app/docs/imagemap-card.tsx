@@ -1,5 +1,11 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import {
   Code,
@@ -8,10 +14,12 @@ import {
   Keyboard,
   Map as MapIcon,
   MousePointer,
+  RotateCw,
   Square,
   Trash2,
   TriangleAlert,
   UserRound,
+  ZoomIn,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -43,11 +51,15 @@ export default function ImagemapDocCard() {
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">{t("steps.upload.title")}</h3>
-          <p className="text-secondary-foreground">{t("steps.upload.description")}</p>
+          <p className="text-secondary-foreground">
+            {t("steps.upload.description")}
+          </p>
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">{t("steps.manage.title")}</h3>
-          <p className="text-secondary-foreground inline-flex items-center">{t("steps.manage.description")}</p>
+          <p className="text-secondary-foreground inline-flex items-center">
+            {t("steps.manage.description")}
+          </p>
 
           {/* Part - 工具用法说明 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -56,42 +68,58 @@ export default function ImagemapDocCard() {
                 <MousePointer className="w-4 h-4" />
                 {t("steps.manage.tools.select.title")}
               </h3>
-              <p className="text-secondary-foreground">{t("steps.manage.tools.select.description")}</p>
+              <p className="text-secondary-foreground">
+                {t("steps.manage.tools.select.description")}
+              </p>
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold flex items-center gap-2 text-primary">
                 <Square className="w-4 h-4" />
                 {t("steps.manage.tools.create.title")}
               </h3>
-              <p className="text-secondary-foreground">{t("steps.manage.tools.create.description")}</p>
+              <p className="text-secondary-foreground">
+                {t("steps.manage.tools.create.description")}
+              </p>
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold flex items-center gap-2 text-primary">
                 <UserRound className="w-4 h-4" />
                 {t("steps.manage.tools.avatar.title")}
               </h3>
-              <p className="text-secondary-foreground">{t("steps.manage.tools.avatar.description")}</p>
+              <p className="text-secondary-foreground">
+                {t("steps.manage.tools.avatar.description")}
+              </p>
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold flex items-center gap-2 text-primary">
                 <Trash2 className="w-4 h-4" />
                 {t("steps.manage.tools.delete.title")}
               </h3>
-              <p className="text-secondary-foreground">{t("steps.manage.tools.delete.description")}</p>
+              <p className="text-secondary-foreground">
+                {t("steps.manage.tools.delete.description")}
+              </p>
             </div>
           </div>
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">{t("steps.properties.title")}</h3>
-          <p className="text-secondary-foreground">{t("steps.properties.description.0")}</p>
-          <p className="text-secondary-foreground">{t("steps.properties.description.1")}</p>
+          <p className="text-secondary-foreground">
+            {t("steps.properties.description.0")}
+          </p>
+          <p className="text-secondary-foreground">
+            {t("steps.properties.description.1")}
+          </p>
           <Alert>
             <AlertTitle className="flex-title">
               <Info />
               <span>{t("steps.properties.tip.title")}</span>
             </AlertTitle>
             <AlertDescription>
-              <p>{t.rich("steps.properties.tip.description.0", { b: (text) => <b>{text}</b> })}</p>
+              <p>
+                {t.rich("steps.properties.tip.description.0", {
+                  b: (text) => <b>{text}</b>,
+                })}
+              </p>
               <ul className="list-disc list-inside space-y-1">
                 <li>
                   {t.rich("steps.properties.tip.description.1", {
@@ -100,7 +128,9 @@ export default function ImagemapDocCard() {
                 </li>
                 <li>
                   {t.rich("steps.properties.tip.description.2", {
-                    button: () => <UserRound className="inline-block w-4 h-4" />,
+                    button: () => (
+                      <UserRound className="inline-block w-4 h-4" />
+                    ),
                   })}
                 </li>
               </ul>
@@ -110,16 +140,40 @@ export default function ImagemapDocCard() {
             {t.rich("steps.properties.layers", { b: (text) => <b>{text}</b> })}
           </p>
           <p className="text-secondary-foreground">
-            {t.rich("steps.properties.imageProps", { b: (text) => <b>{text}</b> })}
+            {t.rich("steps.properties.imageProps", {
+              b: (text) => <b>{text}</b>,
+            })}
+          </p>
+        </div>
+        <div className="space-y-2">
+          <h3 className="font-semibold flex items-center gap-2 text-primary">
+            <RotateCw className="w-4 h-4" />
+            {t("steps.rotation.title")}
+          </h3>
+          <p className="text-secondary-foreground">
+            {t("steps.rotation.description")}
+          </p>
+        </div>
+        <div className="space-y-2">
+          <h3 className="font-semibold flex items-center gap-2 text-primary">
+            <ZoomIn className="w-4 h-4" />
+            {t("steps.viewport.title")}
+          </h3>
+          <p className="text-secondary-foreground">
+            {t("steps.viewport.description")}
           </p>
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">{t("steps.code.title")}</h3>
-          <p className="text-secondary-foreground">{t("steps.code.description")}</p>
+          <p className="text-secondary-foreground">
+            {t("steps.code.description")}
+          </p>
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">{t("steps.export.title")}</h3>
-          <p className="text-secondary-foreground">{t("steps.export.description")}</p>
+          <p className="text-secondary-foreground">
+            {t("steps.export.description")}
+          </p>
         </div>
       </CardContent>
       <CardHeader>
@@ -181,9 +235,21 @@ export default function ImagemapDocCard() {
           </AlertTitle>
           <AlertDescription>
             <ul className="list-disc list-inside space-y-1">
-              <li>{t.rich("importExport.warning.description.0", { b: (text) => <b>{text}</b> })}</li>
-              <li>{t.rich("importExport.warning.description.1", { b: (text) => <b>{text}</b> })}</li>
-              <li>{t.rich("importExport.warning.description.2", { b: (text) => <b>{text}</b> })}</li>
+              <li>
+                {t.rich("importExport.warning.description.0", {
+                  b: (text) => <b>{text}</b>,
+                })}
+              </li>
+              <li>
+                {t.rich("importExport.warning.description.1", {
+                  b: (text) => <b>{text}</b>,
+                })}
+              </li>
+              <li>
+                {t.rich("importExport.warning.description.2", {
+                  b: (text) => <b>{text}</b>,
+                })}
+              </li>
             </ul>
           </AlertDescription>
         </Alert>
@@ -203,7 +269,17 @@ export default function ImagemapDocCard() {
         <div className="space-y-2">
           <h3 className="font-semibold">{t("shortcuts.global.title")}</h3>
           <ul className="list-disc list-inside space-y-1 text-secondary-foreground">
-            <li>{t.rich("shortcuts.global.items.0", { altKey: () => <Kbd>Alt</Kbd> })}</li>
+            <li>
+              {t.rich("shortcuts.global.items.0", {
+                altKey: () => <Kbd>Alt</Kbd>,
+              })}
+            </li>
+            <li>
+              {t.rich("shortcuts.global.items.1", {
+                ctrlKey: () => <Kbd>Ctrl</Kbd>,
+              })}
+            </li>
+            <li>{t("shortcuts.global.items.2")}</li>
           </ul>
         </div>
         <div className="space-y-2">
@@ -223,8 +299,16 @@ export default function ImagemapDocCard() {
               - {t("shortcuts.selected.items.2")}
             </li>
             <li>{t("shortcuts.selected.items.3")}</li>
-            <li>{t.rich("shortcuts.selected.items.4", { shiftKey: () => <Kbd>Shift</Kbd> })}</li>
-            <li>{t.rich("shortcuts.selected.items.5", { ctrlKey: () => <Kbd>Ctrl</Kbd> })}</li>
+            <li>
+              {t.rich("shortcuts.selected.items.4", {
+                shiftKey: () => <Kbd>Shift</Kbd>,
+              })}
+            </li>
+            <li>
+              {t.rich("shortcuts.selected.items.5", {
+                ctrlKey: () => <Kbd>Ctrl</Kbd>,
+              })}
+            </li>
           </ul>
         </div>
       </CardContent>
