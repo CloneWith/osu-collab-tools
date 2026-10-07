@@ -1,4 +1,8 @@
-import type { AvatarInputs, IAvatarStyle } from "@/app/avatar/styles/IAvatarStyle";
+import type {
+  AvatarInputs,
+  IAvatarStyle,
+} from "@/app/avatar/styles/IAvatarStyle";
+import { normalizeRotation } from "@/app/imagemap/editor/geometry";
 import type { Rectangle } from "@/app/imagemap/types";
 import { RectangleType } from "@/app/imagemap/types";
 import {
@@ -93,7 +97,12 @@ export function resolveAvatar(
     : null;
 }
 
-export const computeUniformScale = (naturalW: number, naturalH: number, displayW: number, displayH: number) => {
+export const computeUniformScale = (
+  naturalW: number,
+  naturalH: number,
+  displayW: number,
+  displayH: number,
+) => {
   const nw = Math.max(0, naturalW);
   const nh = Math.max(0, naturalH);
   const s = Math.min(nw > 0 ? displayW / nw : 1, nh > 0 ? displayH / nh : 1);
@@ -122,7 +131,12 @@ export function AvatarBox({
   const { AvatarComponent } = resolved;
   const naturalW = measured?.width ?? displayW;
   const naturalH = measured?.height ?? displayH;
-  const uniformScale = computeUniformScale(naturalW, naturalH, displayW, displayH);
+  const uniformScale = computeUniformScale(
+    naturalW,
+    naturalH,
+    displayW,
+    displayH,
+  );
   const contentW = Math.max(0, naturalW * uniformScale);
   const contentH = Math.max(0, naturalH * uniformScale);
   const offsetX = Math.max(0, (displayW - contentW) / 2);
@@ -144,7 +158,12 @@ export function AvatarBox({
         }
       }}
     >
-      <MeasuredAvatar onMeasure={onMeasure} scale={uniformScale} offsetX={offsetX} offsetY={offsetY}>
+      <MeasuredAvatar
+        onMeasure={onMeasure}
+        scale={uniformScale}
+        offsetX={offsetX}
+        offsetY={offsetY}
+      >
         <AvatarComponent />
       </MeasuredAvatar>
     </div>
@@ -160,13 +179,15 @@ import ReactDOM from "react-dom/client";
 
 /**
  * 生成头像组件的 dataURL
+ *
+ * 头像始终按原始像素渲染，与预览缩放无关：预览的缩放只影响屏幕显示，
+ * 而导出图应当在原始分辨率下合成，否则放大预览后导出会浪费成倍的内存与带宽。
+ *
  * @param rect 头像区域的 Rectangle 对象
  * @param styleRegistry 头像样式注册表
  * @param cacheRef 头像组件缓存
  * @param measured 测量的头像尺寸（可选）
  * @param onMeasure 尺寸测量回调（可选）
- * @param previewScaleX 预览区的X轴缩放比例（可选）
- * @param previewScaleY 预览区的Y轴缩放比例（可选）
  * @returns 头像组件的 dataURL，失败则返回 null
  */
 export async function getAvatarDataURL(
@@ -175,23 +196,14 @@ export async function getAvatarDataURL(
   cacheRef: React.RefObject<AvatarComponentCache>,
   measured?: { width: number; height: number },
   onMeasure?: (w: number, h: number) => void,
-  previewScaleX?: number,
-  previewScaleY?: number,
 ): Promise<string | null> {
   // 检查是否为可渲染的头像
   if (!canRenderAvatar(rect)) {
     return null;
   }
 
-  // 如果提供了预览缩放比例，使用与预览区相同的显示逻辑
-  let displayW = rect.width;
-  let displayH = rect.height;
-
-  if (previewScaleX && previewScaleY) {
-    // 确保渲染一致性
-    displayW = rect.width / previewScaleX;
-    displayH = rect.height / previewScaleY;
-  }
+  const displayW = rect.width;
+  const displayH = rect.height;
 
   // 创建临时容器
   const tempContainer = document.createElement("div");
@@ -230,17 +242,23 @@ export async function getAvatarDataURL(
     // 等待组件渲染完成并且所有资源加载完毕
     await new Promise<void>((resolve) => {
       const checkResourcesLoaded = (time: number = 0) => {
-        const renderedNode = tempContainer.firstElementChild as HTMLElement | null;
+        const renderedNode =
+          tempContainer.firstElementChild as HTMLElement | null;
         const renderedRect = renderedNode?.getBoundingClientRect();
         const hasRenderableContent =
-          !!renderedNode && !!renderedRect && renderedRect.width > 0 && renderedRect.height > 0;
+          !!renderedNode &&
+          !!renderedRect &&
+          renderedRect.width > 0 &&
+          renderedRect.height > 0;
         const images = tempContainer.querySelectorAll("img");
         const allImagesLoaded = Array.from(images).every((img) => {
           return img.complete && img.naturalHeight !== 0;
         });
 
         // 检查字体是否加载完成
-        const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+        const fontsReady = document.fonts
+          ? document.fonts.ready
+          : Promise.resolve();
 
         // 图像已加载 / 超时，按需增加超时限制
         if ((hasRenderableContent && allImagesLoaded) || time >= 2000) {
@@ -292,6 +310,40 @@ export async function getAvatarDataURL(
 }
 
 /**
+ * 把头像位图绘制到合成画布上，必要时绕区域中心旋转。
+ *
+ * 未旋转时走原来的整数坐标路径，行为完全不变；旋转时才引入变换。
+ * 旋转后超出画布的部分由 canvas 自动裁剪，与预览中的表现一致。
+ */
+function drawRotatedAvatar(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  attrs: Rectangle,
+): void {
+  const width = Math.round(attrs.width);
+  const height = Math.round(attrs.height);
+  const rotation = normalizeRotation(attrs.rotation);
+
+  if (rotation === 0) {
+    ctx.drawImage(
+      image,
+      Math.round(attrs.x),
+      Math.round(attrs.y),
+      width,
+      height,
+    );
+    return;
+  }
+
+  ctx.save();
+  // 不取整：舍入会累积误差，在大图上表现为可见的偏移。
+  ctx.translate(attrs.x + attrs.width / 2, attrs.y + attrs.height / 2);
+  ctx.rotate((rotation * Math.PI) / 180);
+  ctx.drawImage(image, -width / 2, -height / 2, width, height);
+  ctx.restore();
+}
+
+/**
  * 使用原生 Canvas 方式，生成带有头像组件的合成图像
  * @param backgroundDataURL 背景图像的 dataURL
  * @param avatars 所有需要合成到背景的头像
@@ -328,9 +380,6 @@ export async function generateCompositeImage(
           // 绘制背景图像
           ctx.drawImage(bgImage, 0, 0);
 
-          console.log(`Drawing background: ${bgImage.naturalWidth}x${bgImage.naturalHeight}`);
-          console.log(`${avatars.length} avatars will be rendered.`);
-
           // 加载并绘制所有头像
           const avatarPromises = avatars.map((avatar) => {
             return new Promise<void>((resolveAvatar) => {
@@ -338,14 +387,7 @@ export async function generateCompositeImage(
               avatarImage.crossOrigin = "anonymous";
               avatarImage.onload = () => {
                 try {
-                  // 绘制头像到指定位置和尺寸
-                  ctx.drawImage(
-                    avatarImage,
-                    Math.round(avatar.attrs.x),
-                    Math.round(avatar.attrs.y),
-                    Math.round(avatar.attrs.width),
-                    Math.round(avatar.attrs.height),
-                  );
+                  drawRotatedAvatar(ctx, avatarImage, avatar.attrs);
                 } catch (error) {
                   console.error("绘制头像失败:", error);
                 } finally {
@@ -353,10 +395,9 @@ export async function generateCompositeImage(
                 }
               };
               avatarImage.onerror = () => {
-                console.warn("Failed to load avatar image:", avatar);
+                console.warn("Failed to load avatar image");
                 resolveAvatar();
               };
-              console.log(avatar.data);
               avatarImage.src = avatar.data;
             });
           });

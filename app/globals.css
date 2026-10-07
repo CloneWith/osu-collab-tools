@@ -203,6 +203,22 @@
   }
 
   /**
+   * Hide a scrollbar while keeping the element scrollable.
+   *
+   * Used by the imagemap sidebar: a classic scrollbar there would take ~15px off the
+   * content width, so opening a card that overflows would reflow every text line
+   * sideways. Hiding it keeps the layout perfectly stable.
+   */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /**
    * Change the display style of images to prevent mispositioning of them in canvas caused by preflight.
    * Details: https://stackoverflow.com/questions/74980740/html2canvas-shifting-text-downwards
    */
