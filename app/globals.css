@@ -1,12 +1,12 @@
 /* highlight.js Theme */
-@import 'highlight.js/styles/github-dark.css' layer(base);
+@import "highlight.js/styles/github-dark.css" layer(base);
 
-@import 'tailwindcss';
-@import '../components/styles/confetti.css';
+@import "tailwindcss";
+@import "../components/styles/confetti.css";
 
-@plugin 'tailwindcss-animate';
+@plugin "tailwindcss-animate";
 
-@source '../*.{js,ts,jsx,tsx,mdx}';
+@source "../*.{js,ts,jsx,tsx,mdx}";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -61,29 +61,6 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
-  /**
-   * Homepage hero entrance: a short rise paired with a fade.
-   *
-   * The stagger comes from `--hero-rise-delay` rather than a separate `animation-delay`
-   * utility: `animate-*` expands to the `animation` *shorthand*, which resets `animation-delay`
-   * to `0s`, so a sibling `[animation-delay:80ms]` would be unreliable. A custom property is a
-   * different declaration and cannot be clobbered, so the timing stays per-element while the
-   * curve stays in exactly one place.
-   */
-  --hero-rise-delay: 0ms;
-  --animate-hero-rise: hero-rise 600ms cubic-bezier(0.22, 1, 0.36, 1) var(--hero-rise-delay, 0ms) both;
-
-  @keyframes hero-rise {
-    from {
-      opacity: 0;
-      transform: translateY(0.75rem);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
   @keyframes accordion-down {
     from {
       height: 0;
@@ -99,6 +76,41 @@
     to {
       height: 0;
     }
+  }
+}
+
+/**
+ * Homepage hero entrance: a short rise paired with a fade, staggered by `--hero-rise-delay`.
+ *
+ * 1. The shorthand resets `animation-delay` to `0s`, so a sibling `[animation-delay:80ms]` utility
+ *    would be fighting the shorthand over the same declaration.
+ * 2. A custom property whose value contains `var()` is substituted on the element that *declares*
+ *    it, not the element that uses it. Routing the delay through an `--animate-*` theme variable
+ *    therefore bakes in whatever `--hero-rise-delay` was on `:root`, and every element inherits
+ *    that same already-resolved timing — per-element overrides are silently ignored. (The dark
+ *    theme escapes this only because `.dark` sits on the same `<html>` element as the tokens.)
+ *
+ * Declaring `animation-delay` here keeps the `var()` on the animating element itself, so the delay
+ * is read where it is set while the curve still lives in exactly one place.
+ */
+@utility animate-hero-rise {
+  animation-name: hero-rise;
+  animation-duration: 600ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+  animation-delay: var(--hero-rise-delay, 0ms);
+}
+
+/* Deliberately outside `@theme`: theme keyframes are only emitted together with the `--animate-*`
+   variable that references them, and this one is referenced by the `@utility` above instead. */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -253,8 +265,8 @@
     @apply pointer-events-none;
     image-rendering: high-quality;
 
-    /* Non-standard attribute */
-    font-smooth: always;
+    /* WebKit-only. `font-smooth` used to sit next to this as well, but it is not a real property
+       in any engine — biome flags it as unknown, and it never did anything. */
     -webkit-font-smoothing: antialiased;
   }
 }
