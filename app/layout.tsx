@@ -1,6 +1,7 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -11,23 +12,22 @@ import { IntlProvider } from "@/components/providers/intl-provider";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const inter = Inter({subsets: ["latin"]});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "osu! Collab Tools",
   description: "A simple, easy-to-use collab toolbox site",
 };
 
-export default function RootLayout({
-                                           children,
-                                         }: {
-  children: React.ReactNode
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   // Suppressing hydration warning due to dark mode class
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={inter.className}>
-        <IntlProvider>
+        <IntlProvider locale={locale} messages={messages}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <TooltipProvider delayDuration={300}>
               <Navbar />
