@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type React from "react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface Triangle {
   x: number;
@@ -29,6 +29,21 @@ interface TrianglesBackgroundProps {
 const EQUILATERAL_TRIANGLE_RATIO = Math.sqrt(3) / 2;
 const BASE_VELOCITY = 50;
 
+/**
+ * Ceiling on how many device pixels we draw per CSS pixel. This helps reduce the amount of work done
+ * in the first frame, and also helps keep the triangles from looking too pixelated at high DPR.
+ */
+const MAX_SCALE = 2;
+
+/**
+ * The scale every number in this file was originally written against. Dropping the
+ * supersample without this would silently halve every triangle and double how fast they drift.
+ */
+const REFERENCE_SCALE = 4;
+
+/** 0.02 area per canvas pixel at the reference scale, i.e. what the original density worked out to. */
+const DENSITY_PER_CSS_PX = 0.02 * REFERENCE_SCALE;
+
 export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
   color = "#ffffff",
   opacity = 1,
@@ -43,7 +58,12 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
   const trianglesRef = useRef<Triangle[]>([]);
   const animationFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
-  const isPageVisibleRef = useRef<boolean>(true);
+  /** Device pixels per CSS pixel actually in use, refreshed on every resize. */
+  const scaleRef = useRef<number>(REFERENCE_SCALE);
+  /** Flipped once the first frame has been painted, purely to drive the reveal below. */
+  const [painted, setPainted] = useState(false);
+  /** Lets the prop-change effect skip the mount pass, which the init effect already covers. */
+  const propsSettled = useRef(false);
 
   // 生成符合正态分布的速度倍数
   const createSpeedMultiplier = useCallback((): number => {
@@ -58,10 +78,18 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     return Math.max(mean + stdDev * randStdNormal, 0.1);
   }, []);
 
+  /** How many triangles to keep alive. Measured in CSS pixels so the draw scale cannot thin the field. */
+  const aimCountFor = useCallback(
+    (canvas: HTMLCanvasElement) =>
+      Math.min(Math.max(1, Math.floor((canvas.width / scaleRef.current) * DENSITY_PER_CSS_PX * spawnRatio)), 1000),
+    [spawnRatio],
+  );
+
   // 创建新三角形
   const createTriangle = useCallback(
     (canvas: HTMLCanvasElement, randomY: boolean = false): Triangle => {
-      const maxOffset = triangleSize * EQUILATERAL_TRIANGLE_RATIO;
+      const size = triangleSize * (scaleRef.current / REFERENCE_SCALE);
+      const maxOffset = size * EQUILATERAL_TRIANGLE_RATIO;
       const y = randomY ? Math.random() * (canvas.height + maxOffset) - maxOffset : canvas.height + maxOffset;
 
       return {
@@ -99,29 +127,26 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     (canvas: HTMLCanvasElement, deltaTime: number) => {
       if (deltaTime === 0) return;
 
-      const movedDistance = (deltaTime / 1000) * velocity * BASE_VELOCITY;
+      // Travel is scaled like everything else, so the drift stays the same speed on screen.
+      const size = triangleSize * (scaleRef.current / REFERENCE_SCALE);
+      const movedDistance = (deltaTime / 1000) * velocity * BASE_VELOCITY * (scaleRef.current / REFERENCE_SCALE);
 
       // 更新现有三角形位置
       trianglesRef.current = trianglesRef.current.filter((triangle) => {
         triangle.y -= Math.max(0.5, triangle.speedMultiplier) * movedDistance;
 
         // 移除超出屏幕顶部的三角形
-        const bottomPos = triangle.y + triangleSize * EQUILATERAL_TRIANGLE_RATIO;
+        const bottomPos = triangle.y + size * EQUILATERAL_TRIANGLE_RATIO;
         return bottomPos > 0;
       });
 
-      // 计算目标数量
-      const aimCount = Math.min(
-        Math.max(1, Math.floor(canvas.width * 0.02 * spawnRatio)),
-        1000, // 限制最大数量以保证性能
-      );
-
       // 添加新三角形
+      const aimCount = aimCountFor(canvas);
       while (trianglesRef.current.length < aimCount) {
         trianglesRef.current.push(createTriangle(canvas, false));
       }
     },
-    [velocity, triangleSize, spawnRatio, createTriangle],
+    [velocity, triangleSize, aimCountFor, createTriangle],
   );
 
   // 渲染函数
@@ -136,11 +161,12 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
-      const lineWidth = triangleSize * thickness;
+      const size = triangleSize * (scaleRef.current / REFERENCE_SCALE);
+      const lineWidth = size * thickness;
 
       // 绘制所有三角形
       trianglesRef.current.forEach((triangle) => {
-        drawTriangle(ctx, triangle.x, triangle.y, triangleSize, lineWidth);
+        drawTriangle(ctx, triangle.x, triangle.y, size, lineWidth);
       });
     },
     [color, opacity, triangleSize, thickness, drawTriangle],
@@ -183,12 +209,12 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     trianglesRef.current = [];
 
     // 初始填充三角形
-    const aimCount = Math.min(Math.max(1, Math.floor(canvas.width * 0.02 * spawnRatio)), 1000);
+    const aimCount = aimCountFor(canvas);
 
     for (let i = 0; i < aimCount; i++) {
       trianglesRef.current.push(createTriangle(canvas, true));
     }
-  }, [spawnRatio, createTriangle]);
+  }, [aimCountFor, createTriangle]);
 
   // 处理窗口大小变化
   const handleResize = useCallback(() => {
@@ -198,22 +224,41 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
     const parent = canvas.parentElement;
     if (!parent) return;
 
-    // @4x，保证清晰度
-    canvas.width = parent.clientWidth * 4;
-    canvas.height = parent.clientHeight * 4;
+    // Match the device pixel grid instead of a fixed 4× blow-up: crisp where it matters, without
+    // asking a desktop hero for a ~100 MB bitmap to draw hairlines into.
+    const scale = Math.min(window.devicePixelRatio || 1, MAX_SCALE);
+
+    canvas.width = Math.round(parent.clientWidth * scale);
+    canvas.height = Math.round(parent.clientHeight * scale);
+    scaleRef.current = scale;
 
     reset();
   }, [reset]);
 
+  /**
+   * Resize and paint in one go.
+   *
+   * The paint cannot wait for the animation loop's next tick: a canvas is transparent until
+   * something draws into it, so every frame spent waiting is a frame where this layer is simply
+   * missing. Drawing immediately is also what makes the reduced-motion path below work, since
+   * that path has no loop to fall back on.
+   */
+  const resizeAndDraw = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    handleResize();
+    render(canvas, ctx);
+  }, [handleResize, render]);
+
   // 处理页面可见性变化
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // 页面进入后台
-        isPageVisibleRef.current = false;
-      } else {
+      if (!document.hidden) {
         // 页面返回前台，重置时间戳以避免时间跳跃
-        isPageVisibleRef.current = true;
         lastTimeRef.current = 0;
       }
     };
@@ -227,24 +272,51 @@ export const TrianglesBackground: React.FC<TrianglesBackgroundProps> = ({
 
   // 初始化
   useEffect(() => {
-    handleResize();
-    window.addEventListener("resize", handleResize);
+    // Size and paint straight away. See `resizeAndDraw` for why this cannot wait for a frame.
+    resizeAndDraw();
 
-    lastTimeRef.current = 0;
-    animationFrameRef.current = requestAnimationFrame(animate);
+    // Reveal only once something has actually been drawn. The canvas already occupies its box, so
+    // this animates alpha alone without layout shift or color change.
+    const revealFrame = requestAnimationFrame(() => setPainted(true));
+
+    window.addEventListener("resize", resizeAndDraw);
+
+    // Someone who asked for less motion gets a still poster instead of a drifting field: a single
+    // pass, no loop, and therefore nothing that moves. The frame above is already on screen.
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduceMotion) {
+      lastTimeRef.current = 0;
+      animationFrameRef.current = requestAnimationFrame(animate);
+    }
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(revealFrame);
+      window.removeEventListener("resize", resizeAndDraw);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [handleResize, animate]);
+  }, [animate, resizeAndDraw]);
 
-  // 参数变化时重置
+  // 参数变化时重新铺开三角形并立即重绘，而不是等到下一帧才反映新参数
   useEffect(() => {
-    reset();
-  }, [reset]);
+    // The mount draw is the effect above's job; this one only exists for changes after it.
+    if (!propsSettled.current) {
+      propsSettled.current = true;
+      return;
+    }
 
-  return <canvas ref={canvasRef} className={cn("block w-full h-full pointer-events-none", className)} />;
+    resizeAndDraw();
+  }, [resizeAndDraw]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className={cn(
+        "block w-full h-full pointer-events-none transition-opacity duration-700 ease-out motion-reduce:transition-none",
+        painted ? "opacity-100" : "opacity-0",
+        className,
+      )}
+    />
+  );
 };
