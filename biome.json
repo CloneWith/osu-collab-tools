@@ -27,8 +27,15 @@
       }
     }
   },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always"
+    }
+  },
   "formatter": {
-    "useEditorconfig": true
+    "useEditorconfig": true,
+    "lineWidth": 120
   },
   "assist": {
     "actions": {
