@@ -3,31 +3,15 @@
 import { TrianglesBackground } from "@/components/triangles-background";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { createScope, createTimeline, type Scope, splitText, stagger } from "animejs";
 import { ArrowRight, Construction } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
 
 export default function MainPage() {
   const t = useTranslations("home");
-  const root = useRef(null);
-  const scope = useRef<Scope>(null);
-
-  useEffect(() => {
-    scope.current = createScope({ root }).add((_) => {
-      const { words } = splitText(".hero-title", { words: { wrap: "clip" } });
-
-      createTimeline({ defaults: { ease: "inOut(3)", duration: 650 } })
-        .add(words, { y: ["100%", "0%"] }, stagger(125))
-        .init();
-    });
-
-    return () => scope.current?.revert();
-  }, []);
 
   return (
-    <div ref={root} className="relative min-h-screen hero flex flex-col">
+    <div className="relative min-h-screen hero flex flex-col">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* 三角形背景 */}
@@ -43,9 +27,13 @@ export default function MainPage() {
         </div>
         <div className="w-full px-4 sm:px-6 lg:px-8 py-24 relative z-10 bg-muted/50">
           <div className="text-center">
-            <h1 className="hero-title text-4xl md:text-6xl font-bold text-card-foreground mb-6">{t("hero.title")}</h1>
-            <p className="text-xl text-card-foreground mb-8 max-w-3xl mx-auto">{t("hero.description")}</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <h1 className="animate-hero-rise motion-reduce:animate-none text-4xl md:text-6xl font-bold text-card-foreground mb-6">
+              {t("hero.title")}
+            </h1>
+            <p className="animate-hero-rise [--hero-rise-delay:80ms] motion-reduce:animate-none text-xl text-card-foreground mb-8 max-w-3xl mx-auto">
+              {t("hero.description")}
+            </p>
+            <div className="animate-hero-rise [--hero-rise-delay:160ms] motion-reduce:animate-none flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/imagemap">
                 <Button size="lg" className="text-lg px-8 py-3">
                   {t("hero.startButton")}

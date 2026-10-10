@@ -61,6 +61,29 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
+  /**
+   * Homepage hero entrance: a short rise paired with a fade.
+   *
+   * The stagger comes from `--hero-rise-delay` rather than a separate `animation-delay`
+   * utility: `animate-*` expands to the `animation` *shorthand*, which resets `animation-delay`
+   * to `0s`, so a sibling `[animation-delay:80ms]` would be unreliable. A custom property is a
+   * different declaration and cannot be clobbered, so the timing stays per-element while the
+   * curve stays in exactly one place.
+   */
+  --hero-rise-delay: 0ms;
+  --animate-hero-rise: hero-rise 600ms cubic-bezier(0.22, 1, 0.36, 1) var(--hero-rise-delay, 0ms) both;
+
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   @keyframes accordion-down {
     from {
       height: 0;
