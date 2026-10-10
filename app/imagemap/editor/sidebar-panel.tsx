@@ -10,11 +10,7 @@ import {
   SIDEBAR_WIDTH_REM,
 } from "@/app/imagemap/editor/sidebar-cards";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
@@ -47,12 +43,7 @@ export function SidebarPanel({
       style={{ width: `${SIDEBAR_WIDTH_REM}rem` }}
     >
       {SIDEBAR_CARDS.map((def) => (
-        <SidebarCard
-          key={def.id}
-          def={def}
-          open={openCards.has(def.id)}
-          onClose={() => onToggleCard(def.id)}
-        >
+        <SidebarCard key={def.id} def={def} open={openCards.has(def.id)} onClose={() => onToggleCard(def.id)}>
           {renderCard(def)}
         </SidebarCard>
       ))}

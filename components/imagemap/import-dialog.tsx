@@ -1,36 +1,14 @@
 "use client";
 
-import {
-  type ImageMapConfig,
-  parseImageMapBBCode,
-  validateImageMapJsonConfig,
-} from "@/app/imagemap/types";
+import { type ImageMapConfig, parseImageMapBBCode, validateImageMapJsonConfig } from "@/app/imagemap/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import type { Timeout } from "@radix-ui/primitive";
-import {
-  AlertCircle,
-  CheckCircle,
-  ClipboardPaste,
-  Download,
-  Upload,
-} from "lucide-react";
+import { AlertCircle, CheckCircle, ClipboardPaste, Download, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CodeMirrorEditor } from "../codemirror-editor";
@@ -84,16 +62,10 @@ export function ImportPanelContent({
         // 验证 JSON 语法和数据结构
         try {
           const parsed = JSON.parse(confInput);
-          const result = validateImageMapJsonConfig(
-            parsed,
-            imageWidth,
-            imageHeight,
-          );
+          const result = validateImageMapJsonConfig(parsed, imageWidth, imageHeight);
 
           if (!result.success) {
-            setValidationError(
-              t(result.messageKey ?? "check.invalid", result.details),
-            );
+            setValidationError(t(result.messageKey ?? "check.invalid", result.details));
             return;
           }
 
@@ -101,9 +73,7 @@ export function ImportPanelContent({
           setValidationError("");
         } catch (error) {
           if (error instanceof SyntaxError) {
-            setValidationError(
-              t("check.jsonSyntaxError", { message: error.message }),
-            );
+            setValidationError(t("check.jsonSyntaxError", { message: error.message }));
           } else {
             setValidationError(t("check.invalidJsonFormat"));
           }
@@ -115,9 +85,7 @@ export function ImportPanelContent({
         const result = parseImageMapBBCode(confInput, imageWidth, imageHeight);
 
         if (!result.success) {
-          setValidationError(
-            t(result.messageKey ?? "check.invalid", result.details),
-          );
+          setValidationError(t(result.messageKey ?? "check.invalid", result.details));
           return;
         }
 
@@ -148,19 +116,12 @@ export function ImportPanelContent({
 
       if (currentSource === "json") {
         parsed = JSON.parse(confInput) as ImageMapConfig;
-        const result = validateImageMapJsonConfig(
-          parsed,
-          imageWidth,
-          imageHeight,
-        );
+        const result = validateImageMapJsonConfig(parsed, imageWidth, imageHeight);
 
         if (!result.success) {
           toast({
             title: t("failed"),
-            description: t(
-              result.messageKey ?? "check.invalid",
-              result.details,
-            ),
+            description: t(result.messageKey ?? "check.invalid", result.details),
             variant: "destructive",
           });
           return;
@@ -171,10 +132,7 @@ export function ImportPanelContent({
         if (!result.success || !result.config) {
           toast({
             title: t("failed"),
-            description: t(
-              result.messageKey ?? "check.invalid",
-              result.details,
-            ),
+            description: t(result.messageKey ?? "check.invalid", result.details),
             variant: "destructive",
           });
           return;
@@ -196,8 +154,7 @@ export function ImportPanelContent({
     } catch (error) {
       toast({
         title: t("failed"),
-        description:
-          error instanceof Error ? error.message : tc("unknownError"),
+        description: error instanceof Error ? error.message : tc("unknownError"),
         variant: "destructive",
       });
     }
@@ -223,10 +180,7 @@ export function ImportPanelContent({
 
       <div className="space-y-3">
         <Label htmlFor="dataSource">{t("dataSource")}</Label>
-        <Select
-          value={currentSource}
-          onValueChange={(s) => setCurrentSource(s as DataSource)}
-        >
+        <Select value={currentSource} onValueChange={(s) => setCurrentSource(s as DataSource)}>
           <SelectTrigger id="dataSource">
             <SelectValue />
           </SelectTrigger>
@@ -236,11 +190,7 @@ export function ImportPanelContent({
           </SelectContent>
         </Select>
 
-        <CodeMirrorEditor
-          value={confInput}
-          onChange={setConfInput}
-          className={`border-gray-700 ${editorClassName}`}
-        />
+        <CodeMirrorEditor value={confInput} onChange={setConfInput} className={`border-gray-700 ${editorClassName}`} />
 
         {/* 验证状态指示 */}
         {validationError ? (
@@ -249,12 +199,8 @@ export function ImportPanelContent({
           >
             <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-red-800 dark:text-red-200">
-                {t("validationFailed")}
-              </p>
-              <p className="text-sm text-red-700 dark:text-red-300">
-                {validationError}
-              </p>
+              <p className="text-sm font-medium text-red-800 dark:text-red-200">{t("validationFailed")}</p>
+              <p className="text-sm text-red-700 dark:text-red-300">{validationError}</p>
             </div>
           </div>
         ) : isValid ? (
@@ -262,9 +208,7 @@ export function ImportPanelContent({
             className={`flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-md ${inputActive && "opacity-30"}`}
           >
             <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-            <p className="text-sm font-medium text-green-800 dark:text-green-200">
-              {t("validationPassed")}
-            </p>
+            <p className="text-sm font-medium text-green-800 dark:text-green-200">{t("validationPassed")}</p>
           </div>
         ) : null}
       </div>
@@ -279,11 +223,7 @@ export function ImportPanelContent({
           <ClipboardPaste className="w-4 h-4" />
           {t("fromClipboard")}
         </Button>
-        <Button
-          onClick={handleImport}
-          disabled={!isValid || inputActive}
-          className="gap-2"
-        >
+        <Button onClick={handleImport} disabled={!isValid || inputActive} className="gap-2">
           <Download className="w-4 h-4" />
           {t("confirm")}
         </Button>
@@ -300,13 +240,7 @@ interface ImportDialogProps {
   imageHeight: number;
 }
 
-export function ImportDialog({
-  open,
-  onOpenChange,
-  onImport,
-  imageWidth,
-  imageHeight,
-}: ImportDialogProps) {
+export function ImportDialog({ open, onOpenChange, onImport, imageWidth, imageHeight }: ImportDialogProps) {
   const t = useTranslations("imagemap");
 
   return (

@@ -1,7 +1,4 @@
-import type {
-  AvatarInputs,
-  IAvatarStyle,
-} from "@/app/avatar/styles/IAvatarStyle";
+import type { AvatarInputs, IAvatarStyle } from "@/app/avatar/styles/IAvatarStyle";
 import { normalizeRotation } from "@/app/imagemap/editor/geometry";
 import type { Rectangle } from "@/app/imagemap/types";
 import { RectangleType } from "@/app/imagemap/types";
@@ -97,12 +94,7 @@ export function resolveAvatar(
     : null;
 }
 
-export const computeUniformScale = (
-  naturalW: number,
-  naturalH: number,
-  displayW: number,
-  displayH: number,
-) => {
+export const computeUniformScale = (naturalW: number, naturalH: number, displayW: number, displayH: number) => {
   const nw = Math.max(0, naturalW);
   const nh = Math.max(0, naturalH);
   const s = Math.min(nw > 0 ? displayW / nw : 1, nh > 0 ? displayH / nh : 1);
@@ -131,12 +123,7 @@ export function AvatarBox({
   const { AvatarComponent } = resolved;
   const naturalW = measured?.width ?? displayW;
   const naturalH = measured?.height ?? displayH;
-  const uniformScale = computeUniformScale(
-    naturalW,
-    naturalH,
-    displayW,
-    displayH,
-  );
+  const uniformScale = computeUniformScale(naturalW, naturalH, displayW, displayH);
   const contentW = Math.max(0, naturalW * uniformScale);
   const contentH = Math.max(0, naturalH * uniformScale);
   const offsetX = Math.max(0, (displayW - contentW) / 2);
@@ -158,12 +145,7 @@ export function AvatarBox({
         }
       }}
     >
-      <MeasuredAvatar
-        onMeasure={onMeasure}
-        scale={uniformScale}
-        offsetX={offsetX}
-        offsetY={offsetY}
-      >
+      <MeasuredAvatar onMeasure={onMeasure} scale={uniformScale} offsetX={offsetX} offsetY={offsetY}>
         <AvatarComponent />
       </MeasuredAvatar>
     </div>
@@ -242,23 +224,17 @@ export async function getAvatarDataURL(
     // 等待组件渲染完成并且所有资源加载完毕
     await new Promise<void>((resolve) => {
       const checkResourcesLoaded = (time: number = 0) => {
-        const renderedNode =
-          tempContainer.firstElementChild as HTMLElement | null;
+        const renderedNode = tempContainer.firstElementChild as HTMLElement | null;
         const renderedRect = renderedNode?.getBoundingClientRect();
         const hasRenderableContent =
-          !!renderedNode &&
-          !!renderedRect &&
-          renderedRect.width > 0 &&
-          renderedRect.height > 0;
+          !!renderedNode && !!renderedRect && renderedRect.width > 0 && renderedRect.height > 0;
         const images = tempContainer.querySelectorAll("img");
         const allImagesLoaded = Array.from(images).every((img) => {
           return img.complete && img.naturalHeight !== 0;
         });
 
         // 检查字体是否加载完成
-        const fontsReady = document.fonts
-          ? document.fonts.ready
-          : Promise.resolve();
+        const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
 
         // 图像已加载 / 超时，按需增加超时限制
         if ((hasRenderableContent && allImagesLoaded) || time >= 2000) {
@@ -315,23 +291,13 @@ export async function getAvatarDataURL(
  * 未旋转时走原来的整数坐标路径，行为完全不变；旋转时才引入变换。
  * 旋转后超出画布的部分由 canvas 自动裁剪，与预览中的表现一致。
  */
-function drawRotatedAvatar(
-  ctx: CanvasRenderingContext2D,
-  image: HTMLImageElement,
-  attrs: Rectangle,
-): void {
+function drawRotatedAvatar(ctx: CanvasRenderingContext2D, image: HTMLImageElement, attrs: Rectangle): void {
   const width = Math.round(attrs.width);
   const height = Math.round(attrs.height);
   const rotation = normalizeRotation(attrs.rotation);
 
   if (rotation === 0) {
-    ctx.drawImage(
-      image,
-      Math.round(attrs.x),
-      Math.round(attrs.y),
-      width,
-      height,
-    );
+    ctx.drawImage(image, Math.round(attrs.x), Math.round(attrs.y), width, height);
     return;
   }
 

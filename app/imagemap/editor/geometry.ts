@@ -48,22 +48,13 @@ export function clampZoom(zoom: number): number {
  * Largest zoom factor at which the whole image still fits inside the viewport,
  * clamped to the supported range. The padding is subtracted from both axes.
  */
-export function computeFitZoom(
-    natural: Size,
-    viewport: Size,
-    padding: number = ZOOM_FIT_PADDING,
-): number {
+export function computeFitZoom(natural: Size, viewport: Size, padding: number = ZOOM_FIT_PADDING): number {
     if (natural.width <= 0 || natural.height <= 0) return 1;
 
     const availableWidth = Math.max(1, viewport.width - padding * 2);
     const availableHeight = Math.max(1, viewport.height - padding * 2);
 
-    return clampZoom(
-        Math.min(
-            availableWidth / natural.width,
-            availableHeight / natural.height,
-        ),
-    );
+    return clampZoom(Math.min(availableWidth / natural.width, availableHeight / natural.height));
 }
 
 /**
@@ -83,11 +74,7 @@ export function rectCenter(rect: Rectangle): Point {
 }
 
 /** Rotate a point clockwise around a center, by `degrees`. */
-export function rotatePoint(
-    point: Point,
-    center: Point,
-    degrees: number,
-): Point {
+export function rotatePoint(point: Point, center: Point, degrees: number): Point {
     if (degrees === 0) return { x: point.x, y: point.y };
 
     const radians = (degrees * Math.PI) / 180;
@@ -103,11 +90,7 @@ export function rotatePoint(
 }
 
 /** Inverse of {@link rotatePoint}: bring a point back into the region's unrotated space. */
-export function inverseRotatePoint(
-    point: Point,
-    center: Point,
-    degrees: number,
-): Point {
+export function inverseRotatePoint(point: Point, center: Point, degrees: number): Point {
     return rotatePoint(point, center, -degrees);
 }
 
@@ -121,16 +104,10 @@ export function inverseRotatePoint(
  */
 export function hitTestRect(point: Point, rect: Rectangle): boolean {
     const rotation = normalizeRotation(rect.rotation);
-    const target =
-        rotation === 0
-            ? point
-            : inverseRotatePoint(point, rectCenter(rect), rotation);
+    const target = rotation === 0 ? point : inverseRotatePoint(point, rectCenter(rect), rotation);
 
     return (
-        target.x >= rect.x &&
-        target.x <= rect.x + rect.width &&
-        target.y >= rect.y &&
-        target.y <= rect.y + rect.height
+        target.x >= rect.x && target.x <= rect.x + rect.width && target.y >= rect.y && target.y <= rect.y + rect.height
     );
 }
 
@@ -141,10 +118,7 @@ export function hitTestRect(point: Point, rect: Rectangle): boolean {
  * `zIndex = rectangles.length - index`, so index 0 is the topmost layer. Keeping
  * this in sync with the render order is what makes clicks land on the right region.
  */
-export function findRectAt(
-    point: Point,
-    rectangles: readonly Rectangle[],
-): Rectangle | undefined {
+export function findRectAt(point: Point, rectangles: readonly Rectangle[]): Rectangle | undefined {
     return rectangles.find((rect) => hitTestRect(point, rect));
 }
 
@@ -158,10 +132,7 @@ function clamp(value: number, min: number, max: number): number {
  */
 export function clampRectToImage(rect: Rectangle, bounds: Size): Rectangle {
     const width = Math.min(rect.width, Math.max(MIN_RECT_SIZE, bounds.width));
-    const height = Math.min(
-        rect.height,
-        Math.max(MIN_RECT_SIZE, bounds.height),
-    );
+    const height = Math.min(rect.height, Math.max(MIN_RECT_SIZE, bounds.height));
 
     return {
         ...rect,
@@ -187,14 +158,10 @@ export function calculateResizedRect(
 ): Rectangle {
     let { x, y, width, height } = rect;
 
-    const maxWidth = (left: number) =>
-        Math.max(MIN_RECT_SIZE, bounds.width - left);
-    const maxHeight = (top: number) =>
-        Math.max(MIN_RECT_SIZE, bounds.height - top);
-    const clampWidth = (value: number, left: number) =>
-        clamp(value, MIN_RECT_SIZE, maxWidth(left));
-    const clampHeight = (value: number, top: number) =>
-        clamp(value, MIN_RECT_SIZE, maxHeight(top));
+    const maxWidth = (left: number) => Math.max(MIN_RECT_SIZE, bounds.width - left);
+    const maxHeight = (top: number) => Math.max(MIN_RECT_SIZE, bounds.height - top);
+    const clampWidth = (value: number, left: number) => clamp(value, MIN_RECT_SIZE, maxWidth(left));
+    const clampHeight = (value: number, top: number) => clamp(value, MIN_RECT_SIZE, maxHeight(top));
     const maxLeft = rect.x + rect.width - MIN_RECT_SIZE;
     const maxTop = rect.y + rect.height - MIN_RECT_SIZE;
 
@@ -241,12 +208,7 @@ export function calculateResizedRect(
         const naturalWidth = avatarNatural?.width;
         const naturalHeight = avatarNatural?.height;
         const ratio =
-            naturalWidth &&
-            naturalHeight &&
-            naturalWidth > 0 &&
-            naturalHeight > 0
-                ? naturalWidth / naturalHeight
-                : 1;
+            naturalWidth && naturalHeight && naturalWidth > 0 && naturalHeight > 0 ? naturalWidth / naturalHeight : 1;
 
         // Anchored at top-left, which keeps the constraint simple.
         const anchorX = rect.x;
@@ -256,11 +218,7 @@ export function calculateResizedRect(
         lockedHeight = clamp(lockedHeight, MIN_RECT_SIZE, maxHeight(anchorY));
         let lockedWidth = clampWidth(Math.round(lockedHeight * ratio), anchorX);
         lockedWidth = clamp(lockedWidth, MIN_RECT_SIZE, maxWidth(anchorX));
-        lockedHeight = clamp(
-            Math.round(lockedWidth / ratio),
-            MIN_RECT_SIZE,
-            maxHeight(anchorY),
-        );
+        lockedHeight = clamp(Math.round(lockedWidth / ratio), MIN_RECT_SIZE, maxHeight(anchorY));
 
         x = anchorX;
         y = anchorY;
@@ -302,21 +260,13 @@ const HANDLE_BASE_ANGLE: Record<ResizeHandle, number> = {
 };
 
 /** The four resize cursors, repeated around the circle as the angle increases. */
-const RESIZE_CURSORS = [
-    "ew-resize",
-    "nwse-resize",
-    "ns-resize",
-    "nesw-resize",
-] as const;
+const RESIZE_CURSORS = ["ew-resize", "nwse-resize", "ns-resize", "nesw-resize"] as const;
 
 /**
  * Map a handle to a resize cursor, accounting for the region's rotation.
  * Snapped to the nearest 45° so the cursor always matches one of the four axes.
  */
-export function cursorForRotatedHandle(
-    handle: ResizeHandle,
-    degrees: number,
-): string {
+export function cursorForRotatedHandle(handle: ResizeHandle, degrees: number): string {
     const base = HANDLE_BASE_ANGLE[handle] + degrees;
     const snapped = (Math.round((((base % 360) + 360) % 360) / 45) * 45) % 360;
     // The four cursors repeat every 180°, so the 8 octants map onto 4 indices.
@@ -341,9 +291,7 @@ export interface HandlePlacement {
  */
 export function resizeHandles(rect: Rectangle): HandlePlacement[] {
     const handles: ResizeHandle[] =
-        rect.type === RectangleType.Avatar
-            ? ["bottom-right"]
-            : (Object.keys(HANDLE_ANCHORS) as ResizeHandle[]);
+        rect.type === RectangleType.Avatar ? ["bottom-right"] : (Object.keys(HANDLE_ANCHORS) as ResizeHandle[]);
 
     const rotation = normalizeRotation(rect.rotation);
 

@@ -110,9 +110,7 @@ describe("escapeHtmlAttribute", () => {
         // into "&amp;" and then escape that ampersand again. The lookup table replaces
         // each character in one pass, so an ampersand is only ever escaped once.
         expect(escapeHtmlAttribute("&<>")).toBe("&amp;&lt;&gt;");
-        expect(escapeHtmlAttribute('<a href="x">&</a>')).toBe(
-            "&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;",
-        );
+        expect(escapeHtmlAttribute('<a href="x">&</a>')).toBe("&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;");
     });
 
     it("should leave ordinary text untouched", () => {
@@ -122,9 +120,7 @@ describe("escapeHtmlAttribute", () => {
     });
 
     it("should handle non-ASCII text without mangling it", () => {
-        expect(escapeHtmlAttribute("区域 🎯 Collaboration")).toBe(
-            "区域 🎯 Collaboration",
-        );
+        expect(escapeHtmlAttribute("区域 🎯 Collaboration")).toBe("区域 🎯 Collaboration");
     });
 
     it("should not be idempotent, so escaping twice double-escapes", () => {
@@ -145,15 +141,9 @@ describe("generateImageMapHtml", () => {
     };
 
     it("should render a well-formed img and map", () => {
-        const html = generateImageMapHtml(
-            [area],
-            "https://example.com/a.png",
-            "mymap",
-        );
+        const html = generateImageMapHtml([area], "https://example.com/a.png", "mymap");
 
-        expect(html).toContain(
-            '<img src="https://example.com/a.png" alt="Collab Image" usemap="#mymap">',
-        );
+        expect(html).toContain('<img src="https://example.com/a.png" alt="Collab Image" usemap="#mymap">');
         expect(html).toContain('<map name="mymap">');
         expect(html).toContain('coords="10,20,110,70"');
         expect(html).toContain('href="https://osu.ppy.sh/users/1"');
@@ -179,11 +169,7 @@ describe("generateImageMapHtml", () => {
     });
 
     it("should neutralise a quote in alt so it cannot terminate the attribute", () => {
-        const html = generateImageMapHtml(
-            [{ ...area, alt: '" onload="alert(1)' }],
-            undefined,
-            undefined,
-        );
+        const html = generateImageMapHtml([{ ...area, alt: '" onload="alert(1)' }], undefined, undefined);
 
         expect(html).not.toContain('alt="" onload="alert(1)"');
         expect(html).toContain('alt="&quot; onload=&quot;alert(1)"');
@@ -218,21 +204,14 @@ describe("generateImageMapHtml", () => {
             "a.png",
             "m",
         );
-        const tags =
-            html.match(/<\/?([a-z]+)/gi)?.map((tag) => tag.toLowerCase()) ?? [];
+        const tags = html.match(/<\/?([a-z]+)/gi)?.map((tag) => tag.toLowerCase()) ?? [];
 
-        expect(new Set(tags)).toEqual(
-            new Set(["<img", "<map", "</map", "<area"]),
-        );
+        expect(new Set(tags)).toEqual(new Set(["<img", "<map", "</map", "<area"]));
     });
 
     it("should emit one area element per rectangle", () => {
         const html = generateImageMapHtml(
-            [
-                area,
-                { ...area, x: 200, alt: "Area 2" },
-                { ...area, x: 400, alt: "Area 3" },
-            ],
+            [area, { ...area, x: 200, alt: "Area 2" }, { ...area, x: 400, alt: "Area 3" }],
             undefined,
             undefined,
         );

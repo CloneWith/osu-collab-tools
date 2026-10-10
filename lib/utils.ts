@@ -25,9 +25,7 @@ export function isNullOrWhitespace(value?: string) {
 }
 
 export function generateId(fallback: string = `rect-${Date.now()}`) {
-    return typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : fallback;
+    return typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : fallback;
 }
 
 // 用户设置的服务器链接，用于生成资料链接与获取头像
@@ -62,10 +60,7 @@ const HTML_ATTRIBUTE_ESCAPES: Record<string, string> = {
 };
 
 export function escapeHtmlAttribute(value: string): string {
-    return value.replace(
-        /[&<>"']/g,
-        (char) => HTML_ATTRIBUTE_ESCAPES[char] ?? char,
-    );
+    return value.replace(/[&<>"']/g, (char) => HTML_ATTRIBUTE_ESCAPES[char] ?? char);
 }
 
 export function generateImageMapHtml(
@@ -120,10 +115,7 @@ export enum FlagTheme {
  * Get a country flag image URL from ISO country code.
  * Uses Twemoji SVG assets and proxies the request to avoid CORS issues.
  */
-export async function getCountryFlagDataUrl(
-    code: string,
-    theme: FlagTheme,
-): Promise<string> {
+export async function getCountryFlagDataUrl(code: string, theme: FlagTheme): Promise<string> {
     const trimmed = code.trim();
     let url = "";
 
@@ -192,10 +184,7 @@ export function getProxiedImageUrl(url?: string): string {
  * @param wait duration in milliseconds
  * @returns the debounced function
  */
-export function debounce<T extends (...args: any[]) => any>(
-    func: T,
-    wait: number,
-): (...args: Parameters<T>) => void {
+export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout | null = null;
 
     return (...args: Parameters<T>) => {
@@ -214,10 +203,7 @@ export function debounce<T extends (...args: any[]) => any>(
  * @param limit time limitation in milliseconds
  * @returns the throttled function
  */
-export function throttle<T extends (...args: any[]) => any>(
-    func: T,
-    limit: number,
-): (...args: Parameters<T>) => void {
+export function throttle<T extends (...args: any[]) => any>(func: T, limit: number): (...args: Parameters<T>) => void {
     let inThrottle: boolean = false;
 
     return (...args: Parameters<T>) => {

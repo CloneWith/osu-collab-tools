@@ -1,11 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import {
   Code,
@@ -51,15 +45,11 @@ export default function ImagemapDocCard() {
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">{t("steps.upload.title")}</h3>
-          <p className="text-secondary-foreground">
-            {t("steps.upload.description")}
-          </p>
+          <p className="text-secondary-foreground">{t("steps.upload.description")}</p>
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">{t("steps.manage.title")}</h3>
-          <p className="text-secondary-foreground inline-flex items-center">
-            {t("steps.manage.description")}
-          </p>
+          <p className="text-secondary-foreground inline-flex items-center">{t("steps.manage.description")}</p>
 
           {/* Part - 工具用法说明 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -68,47 +58,35 @@ export default function ImagemapDocCard() {
                 <MousePointer className="w-4 h-4" />
                 {t("steps.manage.tools.select.title")}
               </h3>
-              <p className="text-secondary-foreground">
-                {t("steps.manage.tools.select.description")}
-              </p>
+              <p className="text-secondary-foreground">{t("steps.manage.tools.select.description")}</p>
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold flex items-center gap-2 text-primary">
                 <Square className="w-4 h-4" />
                 {t("steps.manage.tools.create.title")}
               </h3>
-              <p className="text-secondary-foreground">
-                {t("steps.manage.tools.create.description")}
-              </p>
+              <p className="text-secondary-foreground">{t("steps.manage.tools.create.description")}</p>
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold flex items-center gap-2 text-primary">
                 <UserRound className="w-4 h-4" />
                 {t("steps.manage.tools.avatar.title")}
               </h3>
-              <p className="text-secondary-foreground">
-                {t("steps.manage.tools.avatar.description")}
-              </p>
+              <p className="text-secondary-foreground">{t("steps.manage.tools.avatar.description")}</p>
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold flex items-center gap-2 text-primary">
                 <Trash2 className="w-4 h-4" />
                 {t("steps.manage.tools.delete.title")}
               </h3>
-              <p className="text-secondary-foreground">
-                {t("steps.manage.tools.delete.description")}
-              </p>
+              <p className="text-secondary-foreground">{t("steps.manage.tools.delete.description")}</p>
             </div>
           </div>
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">{t("steps.properties.title")}</h3>
-          <p className="text-secondary-foreground">
-            {t("steps.properties.description.0")}
-          </p>
-          <p className="text-secondary-foreground">
-            {t("steps.properties.description.1")}
-          </p>
+          <p className="text-secondary-foreground">{t("steps.properties.description.0")}</p>
+          <p className="text-secondary-foreground">{t("steps.properties.description.1")}</p>
           <Alert>
             <AlertTitle className="flex-title">
               <Info />
@@ -128,9 +106,7 @@ export default function ImagemapDocCard() {
                 </li>
                 <li>
                   {t.rich("steps.properties.tip.description.2", {
-                    button: () => (
-                      <UserRound className="inline-block w-4 h-4" />
-                    ),
+                    button: () => <UserRound className="inline-block w-4 h-4" />,
                   })}
                 </li>
               </ul>
@@ -150,30 +126,22 @@ export default function ImagemapDocCard() {
             <RotateCw className="w-4 h-4" />
             {t("steps.rotation.title")}
           </h3>
-          <p className="text-secondary-foreground">
-            {t("steps.rotation.description")}
-          </p>
+          <p className="text-secondary-foreground">{t("steps.rotation.description")}</p>
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold flex items-center gap-2 text-primary">
             <ZoomIn className="w-4 h-4" />
             {t("steps.viewport.title")}
           </h3>
-          <p className="text-secondary-foreground">
-            {t("steps.viewport.description")}
-          </p>
+          <p className="text-secondary-foreground">{t("steps.viewport.description")}</p>
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">{t("steps.code.title")}</h3>
-          <p className="text-secondary-foreground">
-            {t("steps.code.description")}
-          </p>
+          <p className="text-secondary-foreground">{t("steps.code.description")}</p>
         </div>
         <div className="space-y-2">
           <h3 className="font-semibold">{t("steps.export.title")}</h3>
-          <p className="text-secondary-foreground">
-            {t("steps.export.description")}
-          </p>
+          <p className="text-secondary-foreground">{t("steps.export.description")}</p>
         </div>
       </CardContent>
       <CardHeader>

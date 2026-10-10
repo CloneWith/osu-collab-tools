@@ -57,63 +57,28 @@ describe("clampZoom", () => {
 describe("computeFitZoom", () => {
     it("fits a landscape image by width", () => {
         // (800 - 64) / 1000 = 0.736; (600 - 64) / 500 = 1.072 -> width wins
-        expect(
-            computeFitZoom(
-                { width: 1000, height: 500 },
-                { width: 800, height: 600 },
-            ),
-        ).toBeCloseTo(0.736, 5);
+        expect(computeFitZoom({ width: 1000, height: 500 }, { width: 800, height: 600 })).toBeCloseTo(0.736, 5);
     });
 
     it("fits a portrait image by height", () => {
-        expect(
-            computeFitZoom(
-                { width: 500, height: 1000 },
-                { width: 800, height: 600 },
-            ),
-        ).toBeCloseTo(0.536, 5);
+        expect(computeFitZoom({ width: 500, height: 1000 }, { width: 800, height: 600 })).toBeCloseTo(0.536, 5);
     });
 
     it("honours a custom padding", () => {
-        expect(
-            computeFitZoom(
-                { width: 1000, height: 1000 },
-                { width: 1000, height: 1000 },
-                0,
-            ),
-        ).toBe(1);
-        expect(
-            computeFitZoom(
-                { width: 1000, height: 1000 },
-                { width: 1000, height: 1000 },
-                100,
-            ),
-        ).toBeCloseTo(0.8, 5);
+        expect(computeFitZoom({ width: 1000, height: 1000 }, { width: 1000, height: 1000 }, 0)).toBe(1);
+        expect(computeFitZoom({ width: 1000, height: 1000 }, { width: 1000, height: 1000 }, 100)).toBeCloseTo(0.8, 5);
     });
 
     it("clamps the result even when the viewport is far larger than the image", () => {
-        expect(
-            computeFitZoom(
-                { width: 10, height: 10 },
-                { width: 5000, height: 5000 },
-            ),
-        ).toBe(ZOOM_MAX);
+        expect(computeFitZoom({ width: 10, height: 10 }, { width: 5000, height: 5000 })).toBe(ZOOM_MAX);
     });
 
     it("returns 1 when the image has no measured size yet", () => {
-        expect(
-            computeFitZoom(
-                { width: 0, height: 0 },
-                { width: 800, height: 600 },
-            ),
-        ).toBe(1);
+        expect(computeFitZoom({ width: 0, height: 0 }, { width: 800, height: 600 })).toBe(1);
     });
 
     it("never returns 0 or negative for a tiny viewport", () => {
-        const zoom = computeFitZoom(
-            { width: 1000, height: 1000 },
-            { width: 10, height: 10 },
-        );
+        const zoom = computeFitZoom({ width: 1000, height: 1000 }, { width: 10, height: 10 });
         expect(zoom).toBeGreaterThan(0);
     });
 });
@@ -145,11 +110,7 @@ describe("rotatePoint / inverseRotatePoint", () => {
     it("round-trips", () => {
         const point = { x: 130, y: 170 };
         for (const deg of [0, 17, 45, 90, 180, 270, 359]) {
-            const back = inverseRotatePoint(
-                rotatePoint(point, center, deg),
-                center,
-                deg,
-            );
+            const back = inverseRotatePoint(rotatePoint(point, center, deg), center, deg);
             expect(back.x).toBeCloseTo(point.x, 6);
             expect(back.y).toBeCloseTo(point.y, 6);
         }
@@ -172,9 +133,7 @@ describe("rotatePoint / inverseRotatePoint", () => {
 
 describe("rectCenter", () => {
     it("returns the geometric center", () => {
-        expect(
-            rectCenter(makeRect({ x: 100, y: 100, width: 200, height: 150 })),
-        ).toEqual({ x: 200, y: 175 });
+        expect(rectCenter(makeRect({ x: 100, y: 100, width: 200, height: 150 }))).toEqual({ x: 200, y: 175 });
     });
 });
 
@@ -279,19 +238,13 @@ describe("clampRectToImage", () => {
     });
 
     it("pushes an overflowing origin back inside", () => {
-        const clamped = clampRectToImage(
-            makeRect({ x: 950, y: 780, width: 200, height: 150 }),
-            BOUNDS,
-        );
+        const clamped = clampRectToImage(makeRect({ x: 950, y: 780, width: 200, height: 150 }), BOUNDS);
         expect(clamped.x).toBe(800);
         expect(clamped.y).toBe(650);
     });
 
     it("never yields a negative maximum when the region is larger than the image", () => {
-        const clamped = clampRectToImage(
-            makeRect({ x: 0, y: 0, width: 5000, height: 5000 }),
-            BOUNDS,
-        );
+        const clamped = clampRectToImage(makeRect({ x: 0, y: 0, width: 5000, height: 5000 }), BOUNDS);
         expect(clamped.x).toBe(0);
         expect(clamped.y).toBe(0);
         expect(clamped.width).toBeLessThanOrEqual(BOUNDS.width);
@@ -302,45 +255,25 @@ describe("clampRectToImage", () => {
 describe("calculateResizedRect", () => {
     it("grows from the right edge", () => {
         const rect = makeRect({ x: 100, y: 100, width: 200, height: 150 });
-        const next = calculateResizedRect(
-            rect,
-            "right",
-            { x: 50, y: 0 },
-            BOUNDS,
-        );
+        const next = calculateResizedRect(rect, "right", { x: 50, y: 0 }, BOUNDS);
         expect(next).toMatchObject({ x: 100, y: 100, width: 250, height: 150 });
     });
 
     it("moves the left edge and compensates the width", () => {
         const rect = makeRect({ x: 100, y: 100, width: 200, height: 150 });
-        const next = calculateResizedRect(
-            rect,
-            "left",
-            { x: 40, y: 0 },
-            BOUNDS,
-        );
+        const next = calculateResizedRect(rect, "left", { x: 40, y: 0 }, BOUNDS);
         expect(next).toMatchObject({ x: 140, y: 100, width: 160, height: 150 });
     });
 
     it("moves both edges from the top-left corner", () => {
         const rect = makeRect({ x: 100, y: 100, width: 200, height: 150 });
-        const next = calculateResizedRect(
-            rect,
-            "top-left",
-            { x: 10, y: 20 },
-            BOUNDS,
-        );
+        const next = calculateResizedRect(rect, "top-left", { x: 10, y: 20 }, BOUNDS);
         expect(next).toMatchObject({ x: 110, y: 120, width: 190, height: 130 });
     });
 
     it("moves both edges from the bottom-right corner", () => {
         const rect = makeRect({ x: 100, y: 100, width: 200, height: 150 });
-        const next = calculateResizedRect(
-            rect,
-            "bottom-right",
-            { x: 10, y: 20 },
-            BOUNDS,
-        );
+        const next = calculateResizedRect(rect, "bottom-right", { x: 10, y: 20 }, BOUNDS);
         expect(next).toMatchObject({ x: 100, y: 100, width: 210, height: 170 });
     });
 
@@ -357,12 +290,7 @@ describe("calculateResizedRect", () => {
             "bottom-right",
         ] as const;
         for (const handle of handles) {
-            const next = calculateResizedRect(
-                rect,
-                handle,
-                { x: 37, y: -23 },
-                BOUNDS,
-            );
+            const next = calculateResizedRect(rect, handle, { x: 37, y: -23 }, BOUNDS);
             expect(next.width).toBeGreaterThanOrEqual(MIN_RECT_SIZE);
             expect(next.height).toBeGreaterThanOrEqual(MIN_RECT_SIZE);
             expect(next.x).toBeGreaterThanOrEqual(0);
@@ -374,36 +302,21 @@ describe("calculateResizedRect", () => {
 
     it("enforces the minimum size", () => {
         const rect = makeRect({ x: 100, y: 100, width: 200, height: 150 });
-        const next = calculateResizedRect(
-            rect,
-            "bottom-right",
-            { x: -9999, y: -9999 },
-            BOUNDS,
-        );
+        const next = calculateResizedRect(rect, "bottom-right", { x: -9999, y: -9999 }, BOUNDS);
         expect(next.width).toBe(MIN_RECT_SIZE);
         expect(next.height).toBe(MIN_RECT_SIZE);
     });
 
     it("stops the left/top edges from crossing the opposite one", () => {
         const rect = makeRect({ x: 100, y: 100, width: 200, height: 150 });
-        const next = calculateResizedRect(
-            rect,
-            "left",
-            { x: 9999, y: 0 },
-            BOUNDS,
-        );
+        const next = calculateResizedRect(rect, "left", { x: 9999, y: 0 }, BOUNDS);
         expect(next.x + next.width).toBeLessThanOrEqual(rect.x + rect.width);
         expect(next.width).toBe(MIN_RECT_SIZE);
     });
 
     it("clamps the right edge to the image width", () => {
         const rect = makeRect({ x: 900, y: 100, width: 100, height: 150 });
-        const next = calculateResizedRect(
-            rect,
-            "right",
-            { x: 9999, y: 0 },
-            BOUNDS,
-        );
+        const next = calculateResizedRect(rect, "right", { x: 9999, y: 0 }, BOUNDS);
         expect(next.x + next.width).toBe(BOUNDS.width);
     });
 
@@ -421,13 +334,7 @@ describe("calculateResizedRect", () => {
                 countryCode: "",
             },
         });
-        const next = calculateResizedRect(
-            rect,
-            "bottom-right",
-            { x: 100, y: 0 },
-            BOUNDS,
-            { width: 100, height: 50 },
-        );
+        const next = calculateResizedRect(rect, "bottom-right", { x: 100, y: 0 }, BOUNDS, { width: 100, height: 50 });
 
         // Natural ratio is 2:1, so a 100px wide drag yields a 50px tall box.
         expect(next.width).toBe(300);
@@ -451,13 +358,7 @@ describe("calculateResizedRect", () => {
                 countryCode: "",
             },
         });
-        const next = calculateResizedRect(
-            rect,
-            "bottom-right",
-            { x: -80, y: 0 },
-            BOUNDS,
-            { width: 100, height: 50 },
-        );
+        const next = calculateResizedRect(rect, "bottom-right", { x: -80, y: 0 }, BOUNDS, { width: 100, height: 50 });
 
         expect(next.width).toBe(120);
         expect(next.height).toBe(60);
@@ -465,13 +366,7 @@ describe("calculateResizedRect", () => {
 
     it("does not lock the aspect ratio for map-area regions", () => {
         const rect = makeRect({ x: 100, y: 100, width: 200, height: 200 });
-        const next = calculateResizedRect(
-            rect,
-            "bottom-right",
-            { x: 100, y: 0 },
-            BOUNDS,
-            { width: 100, height: 50 },
-        );
+        const next = calculateResizedRect(rect, "bottom-right", { x: 100, y: 0 }, BOUNDS, { width: 100, height: 50 });
         expect(next).toMatchObject({ width: 300, height: 200 });
     });
 
@@ -490,13 +385,7 @@ describe("calculateResizedRect", () => {
             },
         });
         // Ratio falls back to 1, so a 100px drag keeps the box square.
-        const next = calculateResizedRect(
-            rect,
-            "bottom-right",
-            { x: 100, y: 0 },
-            BOUNDS,
-            undefined,
-        );
+        const next = calculateResizedRect(rect, "bottom-right", { x: 100, y: 0 }, BOUNDS, undefined);
         expect(next).toMatchObject({ width: 300, height: 300 });
     });
 
@@ -511,13 +400,7 @@ describe("calculateResizedRect", () => {
                 countryCode: "",
             },
         });
-        const next = calculateResizedRect(
-            rect,
-            "bottom-right",
-            { x: 10, y: 10 },
-            BOUNDS,
-            { width: 100, height: 100 },
-        );
+        const next = calculateResizedRect(rect, "bottom-right", { x: 10, y: 10 }, BOUNDS, { width: 100, height: 100 });
         expect(next.rotation).toBe(45);
         expect(next.id).toBe(rect.id);
         expect(next.avatar).toEqual(rect.avatar);
@@ -551,9 +434,7 @@ describe("cursorForRotatedHandle", () => {
 
     it("is stable across a full turn", () => {
         for (const deg of [0, 90, 180, 270, 360, 450]) {
-            expect(cursorForRotatedHandle("right", deg)).toBe(
-                cursorForRotatedHandle("right", deg % 360),
-            );
+            expect(cursorForRotatedHandle("right", deg)).toBe(cursorForRotatedHandle("right", deg % 360));
         }
     });
 });
@@ -579,9 +460,7 @@ describe("resizeHandles", () => {
     });
 
     it("anchors corners and edges at the expected percentages", () => {
-        const byHandle = Object.fromEntries(
-            resizeHandles(makeRect()).map((h) => [h.handle, h]),
-        );
+        const byHandle = Object.fromEntries(resizeHandles(makeRect()).map((h) => [h.handle, h]));
         expect(byHandle["top-left"]).toMatchObject({ left: "0%", top: "0%" });
         expect(byHandle["top-right"]).toMatchObject({
             left: "100%",

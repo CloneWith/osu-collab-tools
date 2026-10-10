@@ -1,13 +1,7 @@
 "use client";
 
 import { CopyButton } from "@/components/ui/copy-button";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Code } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -34,16 +28,8 @@ export function CodeCard({
           from the inputs rather than from the output. */}
       {hasImage && hasRegions ? (
         <>
-          <CodeBlock
-            title="HTML"
-            text={htmlCode}
-            highlighted={highlightedHtml}
-          />
-          <CodeBlock
-            title="BBCode"
-            text={bbCode}
-            highlighted={highlightedBBCode}
-          />
+          <CodeBlock title="HTML" text={htmlCode} highlighted={highlightedHtml} />
+          <CodeBlock title="BBCode" text={bbCode} highlighted={highlightedBBCode} />
         </>
       ) : (
         <Empty>
@@ -52,9 +38,7 @@ export function CodeCard({
               <Code />
             </EmptyMedia>
             <EmptyTitle>{t("placeholder.noCode.title")}</EmptyTitle>
-            <EmptyDescription>
-              {t("placeholder.noCode.description")}
-            </EmptyDescription>
+            <EmptyDescription>{t("placeholder.noCode.description")}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       )}
@@ -62,15 +46,7 @@ export function CodeCard({
   );
 }
 
-function CodeBlock({
-  title,
-  text,
-  highlighted,
-}: {
-  title: string;
-  text: string;
-  highlighted: string;
-}) {
+function CodeBlock({ title, text, highlighted }: { title: string; text: string; highlighted: string }) {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">

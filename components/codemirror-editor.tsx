@@ -15,11 +15,7 @@ interface CodeMirrorEditorProps {
   className?: string;
 }
 
-export function CodeMirrorEditor({
-  value,
-  onChange,
-  className = "",
-}: CodeMirrorEditorProps) {
+export function CodeMirrorEditor({ value, onChange, className = "" }: CodeMirrorEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<EditorView | null>(null);
   const valueRef = useRef<string>(value);

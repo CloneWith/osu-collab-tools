@@ -1,17 +1,9 @@
 "use client";
 
-import DragAndDropOverlay, {
-  type DnDRejectReason,
-} from "@/app/imagemap/dnd-overlay";
+import DragAndDropOverlay, { type DnDRejectReason } from "@/app/imagemap/dnd-overlay";
 import { RegionOverlay } from "@/app/imagemap/editor/region-overlay";
 import type { ResizeHandle } from "@/app/imagemap/editor/geometry";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import type { AvatarComponentCache } from "@/lib/avatar/render-cache";
 import { cn } from "@/lib/utils";
 import { Copy, FolderOpen, Square, Trash, X } from "lucide-react";
@@ -94,11 +86,7 @@ export function PreviewStage({
   onPointerMove: (event: MouseEvent | TouchEvent) => void;
   onPointerUp: () => void;
   onContextMenu: (event: MouseEvent) => void;
-  onResizeStart: (
-    event: MouseEvent | TouchEvent,
-    id: string,
-    handle: ResizeHandle,
-  ) => void;
+  onResizeStart: (event: MouseEvent | TouchEvent, id: string, handle: ResizeHandle) => void;
   onAvatarMeasure: (id: string, width: number, height: number) => void;
   onDragEnter: (event: DragEvent<HTMLDivElement>) => void;
   onDragOver: (event: DragEvent<HTMLDivElement>) => void;
@@ -128,9 +116,7 @@ export function PreviewStage({
             <EmptyMedia>
               <FolderOpen className="w-12 h-12 text-muted-foreground" />
             </EmptyMedia>
-            <EmptyTitle className="text-muted-foreground">
-              {t("placeholder.noImage.title")}
-            </EmptyTitle>
+            <EmptyTitle className="text-muted-foreground">{t("placeholder.noImage.title")}</EmptyTitle>
             <EmptyDescription className="text-muted-foreground">
               {t("placeholder.noImage.description")}
             </EmptyDescription>
@@ -138,9 +124,7 @@ export function PreviewStage({
         </Empty>
 
         {/* 拖放状态显示 */}
-        {isDraggingOver && (
-          <DragAndDropOverlay isRounded rejectReason={rejectReason} />
-        )}
+        {isDraggingOver && <DragAndDropOverlay isRounded rejectReason={rejectReason} />}
       </div>
     );
   }
@@ -162,11 +146,7 @@ export function PreviewStage({
               ref={stageRef}
               className={cn(
                 "relative m-auto shrink-0 touch-none select-none",
-                isPanning
-                  ? "cursor-grabbing"
-                  : currentTool.startsWith("create")
-                    ? "cursor-crosshair"
-                    : "cursor-grab",
+                isPanning ? "cursor-grabbing" : currentTool.startsWith("create") ? "cursor-crosshair" : "cursor-grab",
               )}
               style={{
                 width: hasImage ? imageSize.width * zoom : undefined,
@@ -201,9 +181,7 @@ export function PreviewStage({
                 className="block h-full w-full select-none"
               />
 
-              {isDraggingOver && (
-                <DragAndDropOverlay rejectReason={rejectReason} />
-              )}
+              {isDraggingOver && <DragAndDropOverlay rejectReason={rejectReason} />}
 
               {rectangles.map((rect, index) => (
                 <RegionOverlay
@@ -249,10 +227,7 @@ export function PreviewStage({
             <ContextMenuItem onSelect={() => onDuplicate(contextTargetId)}>
               <Copy className="w-4 h-4 mr-2" /> {tc("duplicate")}
             </ContextMenuItem>
-            <ContextMenuItem
-              className="text-destructive"
-              onSelect={() => onDelete(contextTargetId)}
-            >
+            <ContextMenuItem className="text-destructive" onSelect={() => onDelete(contextTargetId)}>
               <Trash className="w-4 h-4 mr-2" /> {tc("delete")}
             </ContextMenuItem>
           </>

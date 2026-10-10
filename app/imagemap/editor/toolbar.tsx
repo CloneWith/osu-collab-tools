@@ -6,11 +6,7 @@ import { ZoomControls } from "@/app/imagemap/editor/zoom-controls";
 import { Button } from "@/components/ui/button";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Camera, FolderOpen, FolderSync, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";

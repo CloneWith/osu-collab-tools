@@ -1,22 +1,13 @@
 "use client";
 
-import {
-  canRenderAvatar,
-  generateCompositeImage,
-  getAvatarDataURL,
-} from "@/app/imagemap/avatar-render";
+import { canRenderAvatar, generateCompositeImage, getAvatarDataURL } from "@/app/imagemap/avatar-render";
 import { AreaSettingsCard } from "@/app/imagemap/editor/cards/area-settings-card";
 import { AreasListCard } from "@/app/imagemap/editor/cards/areas-list-card";
 import { CodeCard } from "@/app/imagemap/editor/cards/code-card";
 import { ImagePropsCard } from "@/app/imagemap/editor/cards/image-props-card";
 import { IoCard } from "@/app/imagemap/editor/cards/io-card";
 import { EditorShell } from "@/app/imagemap/editor/editor-shell";
-import {
-  calculateResizedRect,
-  findRectAt,
-  MIN_RECT_SIZE,
-  normalizeRotation,
-} from "@/app/imagemap/editor/geometry";
+import { calculateResizedRect, findRectAt, MIN_RECT_SIZE, normalizeRotation } from "@/app/imagemap/editor/geometry";
 import { PreviewStage } from "@/app/imagemap/editor/preview-stage";
 import {
   DEFAULT_OPEN_CARDS,
@@ -28,11 +19,7 @@ import { Toolbar } from "@/app/imagemap/editor/toolbar";
 import { useViewportZoom } from "@/app/imagemap/editor/use-viewport-zoom";
 import { SavePanelContent } from "@/components/imagemap/save-dialog";
 import { DnDRejectReason } from "@/app/imagemap/dnd-overlay";
-import {
-  type ImageMapConfig,
-  type Rectangle,
-  RectangleType,
-} from "@/app/imagemap/types";
+import { type ImageMapConfig, type Rectangle, RectangleType } from "@/app/imagemap/types";
 import { HelpIconButton } from "@/components/help-icon-button";
 import {
   AlertDialog,
@@ -49,22 +36,11 @@ import { useToast } from "@/hooks/use-toast";
 import type { AvatarComponentCache } from "@/lib/avatar/render-cache";
 import { AVATAR_STYLE_REGISTRY } from "@/lib/avatar/style-registry";
 import { registerBBCodeHighlight } from "@/lib/hljs-support";
-import {
-  clamp,
-  generateId,
-  generateImageMapBBCode,
-  generateImageMapHtml,
-} from "@/lib/utils";
+import { clamp, generateId, generateImageMapBBCode, generateImageMapHtml } from "@/lib/utils";
 import { fileTypeFromBlob } from "file-type";
 import hljs from "highlight.js/lib/core";
 import html from "highlight.js/lib/languages/xml";
-import {
-  CircleUserRound,
-  MousePointer,
-  OctagonAlert,
-  Square,
-  Trash2,
-} from "lucide-react";
+import { CircleUserRound, MousePointer, OctagonAlert, Square, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import type { ReactElement } from "react";
@@ -72,15 +48,7 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Avatar } from "../avatar/types";
 
 // 大小调整的八个点
-type ResizeHandle =
-  | "top"
-  | "bottom"
-  | "left"
-  | "right"
-  | "top-left"
-  | "top-right"
-  | "bottom-left"
-  | "bottom-right";
+type ResizeHandle = "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
 type EditorTool = "select" | "create" | "create-avatar" | "delete";
 
@@ -136,9 +104,7 @@ export default function ImagemapEditorPage() {
   const [resizingRect, setResizingRect] = useState<string | null>(null);
   const [resizeHandle, setResizeHandle] = useState<ResizeHandle | null>(null);
   const [resizeStartPoint, setResizeStartPoint] = useState({ x: 0, y: 0 });
-  const [resizeStartRect, setResizeStartRect] = useState<Rectangle | null>(
-    null,
-  );
+  const [resizeStartRect, setResizeStartRect] = useState<Rectangle | null>(null);
   const [draggingRectId, setDraggingRectId] = useState<string | null>(null);
   const [lastPositionInput, setLastPositionInput] = useState({
     x: "0",
@@ -158,9 +124,7 @@ export default function ImagemapEditorPage() {
 
   // Drag & drop states
   const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const [rejectReason, setRejectReason] = useState<DnDRejectReason | undefined>(
-    DnDRejectReason.Unknown,
-  );
+  const [rejectReason, setRejectReason] = useState<DnDRejectReason | undefined>(DnDRejectReason.Unknown);
 
   // Overwrite dialog state
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false);
@@ -168,8 +132,7 @@ export default function ImagemapEditorPage() {
 
   // Sidebar state. There is no separate open flag: the card column is shown exactly
   // when at least one card is open, so no expand/collapse button is needed.
-  const [openCards, setOpenCards] =
-    useState<ReadonlySet<SidebarCardId>>(DEFAULT_OPEN_CARDS);
+  const [openCards, setOpenCards] = useState<ReadonlySet<SidebarCardId>>(DEFAULT_OPEN_CARDS);
 
   // 中键平移状态
   const [isPanning, setIsPanning] = useState(false);
@@ -187,9 +150,7 @@ export default function ImagemapEditorPage() {
   const rectanglesRef = useRef<Rectangle[]>([]);
   const selectedRectRef = useRef<string | null>(null);
   const avatarCacheRef = useRef<AvatarComponentCache>(new Map());
-  const [avatarNaturalSizes, setAvatarNaturalSizes] = useState<
-    Record<string, { width: number; height: number }>
-  >({});
+  const [avatarNaturalSizes, setAvatarNaturalSizes] = useState<Record<string, { width: number; height: number }>>({});
 
   const handleSize = isTouchDevice ? 16 : 10;
 
@@ -199,16 +160,12 @@ export default function ImagemapEditorPage() {
    */
   const zoomApi = useViewportZoom({
     natural: imageSize,
-    interactionActive:
-      isDrawing || Boolean(movingRect) || Boolean(resizingRect) || isPanning,
+    interactionActive: isDrawing || Boolean(movingRect) || Boolean(resizingRect) || isPanning,
   });
   const zoom = zoomApi.zoom;
   const hasImage = zoomApi.hasImage;
   const { scrollRef, stageRef } = zoomApi;
-  const imageScale = useMemo(
-    () => ({ scaleX: 1 / zoom, scaleY: 1 / zoom }),
-    [zoom],
-  );
+  const imageScale = useMemo(() => ({ scaleX: 1 / zoom, scaleY: 1 / zoom }), [zoom]);
 
   useEffect(() => {
     rectanglesRef.current = rectangles;
@@ -238,10 +195,8 @@ export default function ImagemapEditorPage() {
         finish();
         return;
       }
-      scroller.scrollLeft =
-        origin.startScrollLeft - (event.clientX - origin.startClientX);
-      scroller.scrollTop =
-        origin.startScrollTop - (event.clientY - origin.startClientY);
+      scroller.scrollLeft = origin.startScrollLeft - (event.clientX - origin.startClientX);
+      scroller.scrollTop = origin.startScrollTop - (event.clientY - origin.startClientY);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -341,18 +296,12 @@ export default function ImagemapEditorPage() {
         height: target.height.toString(),
       });
     } else {
-      console.warn(
-        `Cannot find a rectangle with selected id ${id}. Got:`,
-        rectangles,
-      );
+      console.warn(`Cannot find a rectangle with selected id ${id}. Got:`, rectangles);
     }
   };
 
   const selectedRectData = useMemo(
-    () =>
-      selectedRect
-        ? (rectangles.find((r) => r.id === selectedRect) ?? null)
-        : null,
+    () => (selectedRect ? (rectangles.find((r) => r.id === selectedRect) ?? null) : null),
     [selectedRect, rectangles],
   );
 
@@ -360,9 +309,7 @@ export default function ImagemapEditorPage() {
   // 用户主动收起侧栏后被突然弹出会很惊悚。
   useEffect(() => {
     if (selectedRect === null) return;
-    setOpenCards((prev) =>
-      prev.has("area") ? prev : new Set(prev).add("area"),
-    );
+    setOpenCards((prev) => (prev.has("area") ? prev : new Set(prev).add("area")));
   }, [selectedRect]);
 
   const positionBounds = selectedRectData
@@ -375,10 +322,7 @@ export default function ImagemapEditorPage() {
   const sizeBounds = selectedRectData
     ? {
         maxWidth: Math.max(MIN_RECT_SIZE, imageSize.width - selectedRectData.x),
-        maxHeight: Math.max(
-          MIN_RECT_SIZE,
-          imageSize.height - selectedRectData.y,
-        ),
+        maxHeight: Math.max(MIN_RECT_SIZE, imageSize.height - selectedRectData.y),
       }
     : { maxWidth: imageSize.width, maxHeight: imageSize.height };
 
@@ -411,10 +355,7 @@ export default function ImagemapEditorPage() {
       // 判断会让快捷键整体失效。改为排除文本录入控件即可。
       const tagName = active?.tagName;
       const isTextEntry =
-        tagName === "INPUT" ||
-        tagName === "TEXTAREA" ||
-        tagName === "SELECT" ||
-        active?.isContentEditable === true;
+        tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT" || active?.isContentEditable === true;
       if (isTextEntry) return;
 
       // 模式切换
@@ -432,12 +373,7 @@ export default function ImagemapEditorPage() {
       const selectedId = selectedRectRef.current;
 
       // 创建副本
-      if (
-        event.ctrlKey &&
-        !event.altKey &&
-        !event.metaKey &&
-        event.key.toLowerCase() === "d"
-      ) {
+      if (event.ctrlKey && !event.altKey && !event.metaKey && event.key.toLowerCase() === "d") {
         setRectangles((prev) => {
           const rectToDuplicate = prev.find((rect) => rect.id === selectedId);
           if (!rectToDuplicate) return prev;
@@ -515,38 +451,23 @@ export default function ImagemapEditorPage() {
       const target = rectanglesRef.current.find((r) => r.id === selectedId);
       if (!target) return;
 
-      const newX = clamp(
-        target.x + dx,
-        0,
-        Math.max(0, imageSize.width - target.width),
-      );
-      const newY = clamp(
-        target.y + dy,
-        0,
-        Math.max(0, imageSize.height - target.height),
-      );
+      const newX = clamp(target.x + dx, 0, Math.max(0, imageSize.width - target.width));
+      const newY = clamp(target.y + dy, 0, Math.max(0, imageSize.height - target.height));
 
       if (newX === target.x && newY === target.y) {
         event.preventDefault();
         return;
       }
 
-      setRectangles((prev) =>
-        prev.map((r) => (r.id === selectedId ? { ...r, x: newX, y: newY } : r)),
-      );
+      setRectangles((prev) => prev.map((r) => (r.id === selectedId ? { ...r, x: newX, y: newY } : r)));
 
       event.preventDefault();
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
       // Update input fields after arrow key release
-      if (
-        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)
-      ) {
-        if (
-          selectedRectData &&
-          selectedRectRef.current === selectedRectData.id
-        ) {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+        if (selectedRectData && selectedRectRef.current === selectedRectData.id) {
           setLastPositionInput({
             x: selectedRectData.x.toString(),
             y: selectedRectData.y.toString(),
@@ -564,26 +485,13 @@ export default function ImagemapEditorPage() {
   }, [imageSize.height, imageSize.width, selectedRectData, tc]);
 
   // 几何计算已抽到 geometry.ts，纯函数且有单测覆盖
-  const resizeRect = (
-    rect: Rectangle,
-    handle: ResizeHandle,
-    deltaX: number,
-    deltaY: number,
-  ) => {
-    const styleObj = AVATAR_STYLE_REGISTRY.find(
-      (s) => s.key === (rect.avatar?.styleKey ?? "simple"),
-    )?.style;
+  const resizeRect = (rect: Rectangle, handle: ResizeHandle, deltaX: number, deltaY: number) => {
+    const styleObj = AVATAR_STYLE_REGISTRY.find((s) => s.key === (rect.avatar?.styleKey ?? "simple"))?.style;
     const measured = avatarNaturalSizes[rect.id];
-    return calculateResizedRect(
-      rect,
-      handle,
-      { x: deltaX, y: deltaY },
-      imageSize,
-      {
-        width: measured?.width ?? styleObj?.size.width ?? 0,
-        height: measured?.height ?? styleObj?.size.height ?? 0,
-      },
-    );
+    return calculateResizedRect(rect, handle, { x: deltaX, y: deltaY }, imageSize, {
+      width: measured?.width ?? styleObj?.size.width ?? 0,
+      height: measured?.height ?? styleObj?.size.height ?? 0,
+    });
   };
 
   const handleContextMenu = (event: React.MouseEvent) => {
@@ -613,11 +521,7 @@ export default function ImagemapEditorPage() {
     }
   };
 
-  const handleResizeStart = (
-    event: React.MouseEvent | React.TouchEvent,
-    rectId: string,
-    handle: ResizeHandle,
-  ) => {
+  const handleResizeStart = (event: React.MouseEvent | React.TouchEvent, rectId: string, handle: ResizeHandle) => {
     if (!uploadedImage || currentTool !== "select") return;
 
     event.stopPropagation();
@@ -625,10 +529,7 @@ export default function ImagemapEditorPage() {
       event.preventDefault();
     }
 
-    const coords =
-      "touches" in event
-        ? getTouchCoordinates(event)
-        : getRelativeCoordinates(event as React.MouseEvent);
+    const coords = "touches" in event ? getTouchCoordinates(event) : getRelativeCoordinates(event as React.MouseEvent);
     const targetRect = rectangles.find((r) => r.id === rectId);
     if (!targetRect) return;
 
@@ -674,10 +575,7 @@ export default function ImagemapEditorPage() {
       setIsTouchDevice(true);
     }
 
-    const coords =
-      "touches" in event
-        ? getTouchCoordinates(event)
-        : getRelativeCoordinates(event as React.MouseEvent);
+    const coords = "touches" in event ? getTouchCoordinates(event) : getRelativeCoordinates(event as React.MouseEvent);
 
     // 检查是否点击在矩形上
     const clickedRect = findRectAt(coords, rectangles);
@@ -723,8 +621,7 @@ export default function ImagemapEditorPage() {
   const handleAvatarMeasure = (id: string, width: number, height: number) => {
     setAvatarNaturalSizes((prev) => {
       const current = prev[id];
-      if (current && current.width === width && current.height === height)
-        return prev;
+      if (current && current.width === width && current.height === height) return prev;
       return { ...prev, [id]: { width, height } };
     });
   };
@@ -734,10 +631,7 @@ export default function ImagemapEditorPage() {
     // 平移期间不参与任何编辑手势，即使后续调整了 pointerdown 的分支顺序也不会误触发
     if (panRef.current) return;
 
-    const coords =
-      "touches" in event
-        ? getTouchCoordinates(event)
-        : getRelativeCoordinates(event as React.MouseEvent);
+    const coords = "touches" in event ? getTouchCoordinates(event) : getRelativeCoordinates(event as React.MouseEvent);
 
     if (resizingRect && resizeHandle && resizeStartRect) {
       const deltaX = coords.x - resizeStartPoint.x;
@@ -768,20 +662,14 @@ export default function ImagemapEditorPage() {
     }
 
     // 根据当前工具执行不同操作
-    if (
-      isDrawing &&
-      (currentTool === "create" || currentTool === "create-avatar")
-    ) {
+    if (isDrawing && (currentTool === "create" || currentTool === "create-avatar")) {
       // 创建新矩形
       const width = Math.round(coords.x - startPoint.x);
       const height = Math.round(coords.y - startPoint.y);
 
       const rect: Rectangle = {
         id: "temp",
-        type:
-          currentTool === "create-avatar"
-            ? RectangleType.Avatar
-            : RectangleType.MapArea,
+        type: currentTool === "create-avatar" ? RectangleType.Avatar : RectangleType.MapArea,
         x: Math.round(Math.min(startPoint.x, coords.x)),
         y: Math.round(Math.min(startPoint.y, coords.y)),
         width: Math.abs(width),
@@ -798,16 +686,8 @@ export default function ImagemapEditorPage() {
           if (rect.id === movingRect) {
             return {
               ...rect,
-              x: Math.round(
-                clamp(coords.x - moveOffset.x, 0, imageSize.width - rect.width),
-              ),
-              y: Math.round(
-                clamp(
-                  coords.y - moveOffset.y,
-                  0,
-                  imageSize.height - rect.height,
-                ),
-              ),
+              x: Math.round(clamp(coords.x - moveOffset.x, 0, imageSize.width - rect.width)),
+              y: Math.round(clamp(coords.y - moveOffset.y, 0, imageSize.height - rect.height)),
             };
           }
           return rect;
@@ -823,15 +703,8 @@ export default function ImagemapEditorPage() {
 
   const handlePointerUp = () => {
     // 处理绘制结束
-    if (
-      isDrawing &&
-      (currentTool === "create" || currentTool === "create-avatar")
-    ) {
-      if (
-        !currentRect ||
-        currentRect.width < MIN_RECT_SIZE ||
-        currentRect.height < MIN_RECT_SIZE
-      ) {
+    if (isDrawing && (currentTool === "create" || currentTool === "create-avatar")) {
+      if (!currentRect || currentRect.width < MIN_RECT_SIZE || currentRect.height < MIN_RECT_SIZE) {
         setIsDrawing(false);
         setCurrentRect(null);
         return;
@@ -840,12 +713,8 @@ export default function ImagemapEditorPage() {
       const newRect: Rectangle = {
         ...currentRect,
         id: generateId(),
-        width: Math.round(
-          Math.min(currentRect.width, imageSize.width - currentRect.x),
-        ),
-        height: Math.round(
-          Math.min(currentRect.height, imageSize.height - currentRect.y),
-        ),
+        width: Math.round(Math.min(currentRect.width, imageSize.width - currentRect.x)),
+        height: Math.round(Math.min(currentRect.height, imageSize.height - currentRect.y)),
       };
 
       // 初始化 Avatar 区域的默认配置
@@ -860,9 +729,7 @@ export default function ImagemapEditorPage() {
         // 绘制结束后按样式的宽高比调整为等比（contain）大小，锚定左上角。
         // 此处不能查 avatarNaturalSizes：id 刚由 generateId() 生成，该键从未被写入过，
         // 真正的等比调整会在首次 onMeasure 之后由 resizeRect 接手。
-        const styleObj = AVATAR_STYLE_REGISTRY.find(
-          (s) => s.key === "simple",
-        )?.style;
+        const styleObj = AVATAR_STYLE_REGISTRY.find((s) => s.key === "simple")?.style;
         const naturalW = styleObj?.size.width ?? newRect.width;
         const naturalH = styleObj?.size.height ?? newRect.height;
         const scale = Math.min(
@@ -872,16 +739,8 @@ export default function ImagemapEditorPage() {
         let lockedW = Math.round(naturalW * scale);
         let lockedH = Math.round(naturalH * scale);
         // 边界限制
-        lockedW = clamp(
-          lockedW,
-          MIN_RECT_SIZE,
-          Math.max(MIN_RECT_SIZE, imageSize.width - newRect.x),
-        );
-        lockedH = clamp(
-          lockedH,
-          MIN_RECT_SIZE,
-          Math.max(MIN_RECT_SIZE, imageSize.height - newRect.y),
-        );
+        lockedW = clamp(lockedW, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.width - newRect.x));
+        lockedH = clamp(lockedH, MIN_RECT_SIZE, Math.max(MIN_RECT_SIZE, imageSize.height - newRect.y));
         newRect.width = lockedW;
         newRect.height = lockedH;
       }
@@ -934,21 +793,12 @@ export default function ImagemapEditorPage() {
     }
   };
 
-  const updateRectangle = (
-    id: string,
-    field: keyof Rectangle,
-    value: string,
-    castToNumber: boolean = false,
-  ) => {
+  const updateRectangle = (id: string, field: keyof Rectangle, value: string, castToNumber: boolean = false) => {
     // Don't update if user needs a number, and we cannot convert the source value to one.
     if (castToNumber && Number.isNaN(Number(value))) return;
 
     setRectangles((prev) =>
-      prev.map((rect) =>
-        rect.id === id
-          ? { ...rect, [field]: castToNumber ? Number(value) : value }
-          : rect,
-      ),
+      prev.map((rect) => (rect.id === id ? { ...rect, [field]: castToNumber ? Number(value) : value } : rect)),
     );
   };
 
@@ -996,11 +846,7 @@ export default function ImagemapEditorPage() {
     );
   };
 
-  const updateAvatarField = (
-    id: string,
-    field: keyof Avatar,
-    value: string,
-  ) => {
+  const updateAvatarField = (id: string, field: keyof Avatar, value: string) => {
     setRectangles((prev) =>
       prev.map((rect) => {
         if (rect.id !== id) return rect;
@@ -1056,9 +902,10 @@ export default function ImagemapEditorPage() {
     });
   };
 
-  const openCardStates = Object.fromEntries(
-    SIDEBAR_CARDS.map((def) => [def.id, openCards.has(def.id)]),
-  ) as Record<SidebarCardId, boolean>;
+  const openCardStates = Object.fromEntries(SIDEBAR_CARDS.map((def) => [def.id, openCards.has(def.id)])) as Record<
+    SidebarCardId,
+    boolean
+  >;
 
   const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -1130,8 +977,7 @@ export default function ImagemapEditorPage() {
     setRectangles((prev) => {
       const fromIndex = prev.findIndex((r) => r.id === sourceId);
       const toIndex = prev.findIndex((r) => r.id === targetId);
-      if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex)
-        return prev;
+      if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return prev;
 
       const next = [...prev];
       const [moved] = next.splice(fromIndex, 1);
@@ -1181,9 +1027,7 @@ export default function ImagemapEditorPage() {
     const list = rectListRef.current;
     if (!list) return;
 
-    const target = document
-      .elementFromPoint(touch.clientX, touch.clientY)
-      ?.closest<HTMLElement>("[data-rect-id]");
+    const target = document.elementFromPoint(touch.clientX, touch.clientY)?.closest<HTMLElement>("[data-rect-id]");
 
     const targetId = target?.dataset.rectId;
     if (targetId && targetId !== touchDragRef.current.id) {
@@ -1207,36 +1051,30 @@ export default function ImagemapEditorPage() {
   };
 
   // 导出高质量图像，使用与预览区相同的渲染逻辑
-  const handleExportImage = async (options: {
-    format: string;
-    quality: number;
-  }): Promise<string> => {
+  const handleExportImage = async (options: { format: string; quality: number }): Promise<string> => {
     if (!uploadedImage) throw new Error(t("error.generateFailed"));
 
     try {
       // 不再传入预览缩放：头像按原始像素渲染，导出分辨率与预览缩放彻底解耦。
       // computeUniformScale 只取 min(dw/nw, dh/nh)，同倍放大时留白比例不变。
-      const avatarPromises = rectangles
-        .filter(canRenderAvatar)
-        .map(async (rect) => {
-          const avatarDataURL = await getAvatarDataURL(
-            rect,
-            AVATAR_STYLE_REGISTRY,
-            avatarCacheRef,
-            avatarNaturalSizes[rect.id],
-            // Keep previous measured sizes as the preview uses them
-            () => {},
-          );
-          return {
-            data: avatarDataURL,
-            attrs: rect,
-          };
-        });
+      const avatarPromises = rectangles.filter(canRenderAvatar).map(async (rect) => {
+        const avatarDataURL = await getAvatarDataURL(
+          rect,
+          AVATAR_STYLE_REGISTRY,
+          avatarCacheRef,
+          avatarNaturalSizes[rect.id],
+          // Keep previous measured sizes as the preview uses them
+          () => {},
+        );
+        return {
+          data: avatarDataURL,
+          attrs: rect,
+        };
+      });
 
       const avatarsWithData = await Promise.all(avatarPromises);
       const validAvatars = avatarsWithData.filter(
-        (item): item is { data: string; attrs: Rectangle } =>
-          typeof item.data === "string" && item.data.length > 0,
+        (item): item is { data: string; attrs: Rectangle } => typeof item.data === "string" && item.data.length > 0,
       );
 
       const compositeDataURL = await generateCompositeImage(
@@ -1266,24 +1104,12 @@ export default function ImagemapEditorPage() {
     [deferredRectangles, mapName, resolvedImagePath],
   );
   const bbCode = useMemo(
-    () =>
-      generateImageMapBBCode(
-        deferredRectangles,
-        imageSize.width,
-        imageSize.height,
-        resolvedImagePath,
-      ),
+    () => generateImageMapBBCode(deferredRectangles, imageSize.width, imageSize.height, resolvedImagePath),
     [deferredRectangles, imageSize.height, imageSize.width, resolvedImagePath],
   );
 
-  const highlightedHtmlCode = useMemo(
-    () => hljs.highlight(htmlCode, { language: "html" }).value,
-    [htmlCode],
-  );
-  const highlightedBBCode = useMemo(
-    () => hljs.highlight(bbCode, { language: "bbcode" }).value,
-    [bbCode],
-  );
+  const highlightedHtmlCode = useMemo(() => hljs.highlight(htmlCode, { language: "html" }).value, [htmlCode]);
+  const highlightedBBCode = useMemo(() => hljs.highlight(bbCode, { language: "bbcode" }).value, [bbCode]);
 
   const renderSidebarCard = (def: SidebarCardDef) => {
     switch (def.id) {
@@ -1354,9 +1180,7 @@ export default function ImagemapEditorPage() {
             onSave={handleExportImage}
           />
         ) : (
-          <p className="text-sm text-muted-foreground">
-            {t("placeholder.noImage.description")}
-          </p>
+          <p className="text-sm text-muted-foreground">{t("placeholder.noImage.description")}</p>
         );
       case "io":
         return (
@@ -1429,9 +1253,7 @@ export default function ImagemapEditorPage() {
                   <span className="text-primary">{t("title")}</span>
                   <HelpIconButton section="imagemap" />
                 </h1>
-                <p className="truncate text-xs text-secondary-foreground">
-                  {t("description")}
-                </p>
+                <p className="truncate text-xs text-secondary-foreground">{t("description")}</p>
               </div>
             </div>
           }
@@ -1452,19 +1274,14 @@ export default function ImagemapEditorPage() {
         />
 
         {/* 覆盖确认对话框 */}
-        <AlertDialog
-          open={overwriteDialogOpen}
-          onOpenChange={setOverwriteDialogOpen}
-        >
+        <AlertDialog open={overwriteDialogOpen} onOpenChange={setOverwriteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle className="flex flex-row items-center gap-2">
                 <OctagonAlert />
                 {t("dialog.overwrite.title")}
               </AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("dialog.overwrite.description")}
-              </AlertDialogDescription>
+              <AlertDialogDescription>{t("dialog.overwrite.description")}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel

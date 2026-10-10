@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { Button, ButtonProps } from "./button";
+import type React from "react";
+import { useRef, useState } from "react";
+import { Button, type ButtonProps } from "./button";
 import { Check, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useConfetti } from "@/hooks/use-confetti";
@@ -21,27 +22,28 @@ interface CopyButtonProps extends Omit<ButtonProps, "children"> {
   onCopySuccess?: () => void;
 }
 
-
 /**
  * A generic copy button with confetti feedback.
  */
 export function CopyButton({
-                             text,
-                             children,
-                             variant = "default",
-                             className = "",
-                             onCopySuccess,
-                             ...props
-                           }: CopyButtonProps) {
+  text,
+  children,
+  variant = "default",
+  className = "",
+  onCopySuccess,
+  ...props
+}: CopyButtonProps) {
   const t = useTranslations("common");
   const triggerConfetti = useConfetti();
-  const {toast} = useToast();
+  const { toast } = useToast();
   const copyBtnRef = useRef<HTMLButtonElement>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
-  const resetCopySuccess = useRef(debounce(() => {
-    setCopySuccess(false);
-  }, 1500)).current;
+  const resetCopySuccess = useRef(
+    debounce(() => {
+      setCopySuccess(false);
+    }, 1500),
+  ).current;
 
   const handleCopy = async () => {
     try {
@@ -74,10 +76,12 @@ export function CopyButton({
       {...props}
     >
       <div
-        className={`relative transition-all duration-300 ${copySuccess ? "scale-125 opacity-100" : "scale-100 opacity-100"}`}>
+        className={`relative transition-all duration-300 ${copySuccess ? "scale-125 opacity-100" : "scale-100 opacity-100"}`}
+      >
         <Copy
-          className={`w-4 h-4 absolute transition-opacity duration-300 ${copySuccess ? "opacity-0" : "opacity-100"}`}/>
-        <Check className={`w-4 h-4 transition-opacity duration-300 ${copySuccess ? "opacity-100" : "opacity-0"}`}/>
+          className={`w-4 h-4 absolute transition-opacity duration-300 ${copySuccess ? "opacity-0" : "opacity-100"}`}
+        />
+        <Check className={`w-4 h-4 transition-opacity duration-300 ${copySuccess ? "opacity-100" : "opacity-0"}`} />
       </div>
       {children || t("copy")}
     </Button>

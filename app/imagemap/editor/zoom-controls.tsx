@@ -3,11 +3,7 @@
 import { ZOOM_MAX, ZOOM_MIN } from "@/app/imagemap/editor/geometry";
 import type { ViewportZoomApi } from "@/app/imagemap/editor/use-viewport-zoom";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Scan, ZoomIn, ZoomOut } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -60,20 +56,13 @@ export function ZoomControls({ zoom }: { zoom: ViewportZoomApi }) {
           />
 
           <div className="flex flex-wrap gap-1">
-            <Button
-              size="sm"
-              variant={zoom.isFit ? "secondary" : "outline"}
-              className="gap-1"
-              onClick={zoom.fit}
-            >
+            <Button size="sm" variant={zoom.isFit ? "secondary" : "outline"} className="gap-1" onClick={zoom.fit}>
               <Scan className="size-4" />
               {t("zoom.fit")}
             </Button>
             <Button
               size="sm"
-              variant={
-                !zoom.isFit && zoom.percent === 100 ? "secondary" : "outline"
-              }
+              variant={!zoom.isFit && zoom.percent === 100 ? "secondary" : "outline"}
               onClick={zoom.actual}
             >
               {t("zoom.actual")}
@@ -85,11 +74,7 @@ export function ZoomControls({ zoom }: { zoom: ViewportZoomApi }) {
               <Button
                 key={preset}
                 size="sm"
-                variant={
-                  !zoom.isFit && zoom.percent === preset
-                    ? "secondary"
-                    : "outline"
-                }
+                variant={!zoom.isFit && zoom.percent === preset ? "secondary" : "outline"}
                 className="font-mono text-xs tabular-nums"
                 onClick={() => zoom.setPercent(preset)}
               >

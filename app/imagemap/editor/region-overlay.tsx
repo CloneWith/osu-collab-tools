@@ -1,11 +1,7 @@
 "use client";
 
 import { AvatarBox, canRenderAvatar } from "@/app/imagemap/avatar-render";
-import {
-  normalizeRotation,
-  resizeHandles,
-  type ResizeHandle,
-} from "@/app/imagemap/editor/geometry";
+import { normalizeRotation, resizeHandles, type ResizeHandle } from "@/app/imagemap/editor/geometry";
 import type { Rectangle } from "@/app/imagemap/types";
 import { AVATAR_STYLE_REGISTRY } from "@/lib/avatar/style-registry";
 import type { AvatarComponentCache } from "@/lib/avatar/render-cache";
@@ -41,11 +37,7 @@ export function RegionOverlay({
   avatarCacheRef: RefObject<AvatarComponentCache>;
   measured?: { width: number; height: number };
   onMeasure: (id: string, width: number, height: number) => void;
-  onResizeStart: (
-    event: MouseEvent | TouchEvent,
-    id: string,
-    handle: ResizeHandle,
-  ) => void;
+  onResizeStart: (event: MouseEvent | TouchEvent, id: string, handle: ResizeHandle) => void;
 }) {
   const rotation = normalizeRotation(rect.rotation);
   const minSize = isTouchDevice ? TOUCH_MIN_SIZE : 0;

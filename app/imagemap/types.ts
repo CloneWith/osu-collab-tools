@@ -59,22 +59,16 @@ export interface ImageMapConfig {
  * @param height 图像高度
  * @returns `true` 为有效，否则为 `false`
  */
-export function validateImageMapJsonConfig(
-    data: unknown,
-    width: number,
-    height: number,
-): ValidationResult {
+export function validateImageMapJsonConfig(data: unknown, width: number, height: number): ValidationResult {
     if (!data || typeof data !== "object") return { success: false };
 
     const obj = data as Record<string, unknown>;
 
     // 验证 rectangles 数组
-    if (!Array.isArray(obj.rectangles))
-        return { success: false, messageKey: "check.expectsArrayForAreas" };
+    if (!Array.isArray(obj.rectangles)) return { success: false, messageKey: "check.expectsArrayForAreas" };
 
     for (const rect of obj.rectangles) {
-        if (!rect || typeof rect !== "object")
-            return { success: false, messageKey: "check.invalidAreaEntry" };
+        if (!rect || typeof rect !== "object") return { success: false, messageKey: "check.invalidAreaEntry" };
 
         const r = rect as Record<string, unknown>;
 
@@ -96,10 +90,7 @@ export function validateImageMapJsonConfig(
             };
         }
 
-        if (
-            r.type !== RectangleType.MapArea &&
-            r.type !== RectangleType.Avatar
-        ) {
+        if (r.type !== RectangleType.MapArea && r.type !== RectangleType.Avatar) {
             return {
                 success: false,
                 messageKey: "check.invalidAreaType",
@@ -110,10 +101,7 @@ export function validateImageMapJsonConfig(
         // 旋转仅对头像区域有意义：产物格式（<area> / [imagemap]）无法表达旋转，
         // 因此普通区域携带 rotation 视为配置错误，而不是静默丢弃。
         if (r.rotation !== undefined) {
-            if (
-                typeof r.rotation !== "number" ||
-                !Number.isFinite(r.rotation)
-            ) {
+            if (typeof r.rotation !== "number" || !Number.isFinite(r.rotation)) {
                 return {
                     success: false,
                     messageKey: "check.invalidRotation",
@@ -130,12 +118,7 @@ export function validateImageMapJsonConfig(
         }
 
         // 基本数值范围
-        if (
-            (r.x as number) < 0 ||
-            (r.y as number) < 0 ||
-            (r.width as number) < 0 ||
-            (r.height as number) < 0
-        ) {
+        if ((r.x as number) < 0 || (r.y as number) < 0 || (r.width as number) < 0 || (r.height as number) < 0) {
             return {
                 success: false,
                 messageKey: "check.invalidAreaPosition",
@@ -146,10 +129,8 @@ export function validateImageMapJsonConfig(
         if (r.x + r.width > width || r.y + r.height > height) {
             const sizePrompt: string[] = [];
 
-            if (r.x + r.width > width)
-                sizePrompt.push(`${r.x} + ${r.width} > ${width}`);
-            if (r.y + r.height > height)
-                sizePrompt.push(`${r.y} + ${r.height} > ${height}`);
+            if (r.x + r.width > width) sizePrompt.push(`${r.x} + ${r.width} > ${width}`);
+            if (r.y + r.height > height) sizePrompt.push(`${r.y} + ${r.height} > ${height}`);
             return {
                 success: false,
                 messageKey: "check.areaSizeOutOfRange",
@@ -179,11 +160,7 @@ export interface ImageMapBBCodeParseResult extends ValidationResult {
 /**
  * 解析并验证 imagemap BBCode 内容，使用图像宽高将区域信息标准化。
  */
-export function parseImageMapBBCode(
-    bbcode: string,
-    width: number,
-    height: number,
-): ImageMapBBCodeParseResult {
+export function parseImageMapBBCode(bbcode: string, width: number, height: number): ImageMapBBCodeParseResult {
     let parseError: { line: number; col: number } | undefined;
 
     let ast: TagNode[];
@@ -225,9 +202,7 @@ export function parseImageMapBBCode(
 
     const content = Array.isArray(root.content) ? root.content : [];
     const rawText = content
-        .map((c: unknown) =>
-            typeof c === "string" || typeof c === "number" ? String(c) : "",
-        )
+        .map((c: unknown) => (typeof c === "string" || typeof c === "number" ? String(c) : ""))
         .join("");
 
     const lines = rawText
@@ -262,9 +237,7 @@ export function parseImageMapBBCode(
         }
 
         const [xStr, yStr, wStr, hStr, href, alt] = parts;
-        const numbers = [xStr, yStr, wStr, hStr].map((n) =>
-            Number.parseFloat(n),
-        );
+        const numbers = [xStr, yStr, wStr, hStr].map((n) => Number.parseFloat(n));
 
         if (numbers.some((n) => Number.isNaN(n))) {
             return {

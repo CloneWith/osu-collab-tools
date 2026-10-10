@@ -18,7 +18,7 @@ export function useConfetti() {
         const durationMs = options.durationMs ?? 1000;
 
         const confettiState = confettiStateRef.current;
-        const prev = confettiState.get(el) ?? {timer: null, token: 0};
+        const prev = confettiState.get(el) ?? { timer: null, token: 0 };
         prev.token += 1;
         const myToken = prev.token;
 

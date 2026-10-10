@@ -27,22 +27,14 @@ export function IoCard({
 
   return (
     <div className="space-y-4">
-      <ImportPanelContent
-        onImport={onImport}
-        imageWidth={imageWidth}
-        imageHeight={imageHeight}
-      />
+      <ImportPanelContent onImport={onImport} imageWidth={imageWidth} imageHeight={imageHeight} />
 
       <div className="space-y-2 border-t pt-3">
-        <p className="text-sm text-muted-foreground">
-          {t("export.description")}
-        </p>
+        <p className="text-sm text-muted-foreground">{t("export.description")}</p>
         {canExport ? (
           <ExportPanelContent data={exportData} />
         ) : (
-          <p className="text-sm text-muted-foreground">
-            {t("export.unavailable")}
-          </p>
+          <p className="text-sm text-muted-foreground">{t("export.unavailable")}</p>
         )}
       </div>
     </div>

@@ -1,46 +1,20 @@
 "use client";
 
-import {
-  MIN_RECT_SIZE,
-  normalizeRotation,
-} from "@/app/imagemap/editor/geometry";
+import { MIN_RECT_SIZE, normalizeRotation } from "@/app/imagemap/editor/geometry";
 import { RectangleType, type Rectangle } from "@/app/imagemap/types";
 import type { Avatar } from "@/app/avatar/types";
 import { common } from "@/app/common";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { AVATAR_STYLE_REGISTRY } from "@/lib/avatar/style-registry";
 import { generateUserLinkFromId, generateUserLinkFromName } from "@/lib/utils";
-import {
-  CircleHelp,
-  Copy,
-  Hash,
-  Info,
-  RotateCcw,
-  Trash2,
-  UserRound,
-} from "lucide-react";
+import { CircleHelp, Copy, Hash, Info, RotateCcw, Trash2, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 const ROTATION_PRESETS = [-90, 0, 90, 180];
@@ -70,12 +44,7 @@ export function AreaSettingsCard({
   userInfo: string;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
-  onChangeField: (
-    id: string,
-    field: keyof Rectangle,
-    value: string,
-    castToNumber?: boolean,
-  ) => void;
+  onChangeField: (id: string, field: keyof Rectangle, value: string, castToNumber?: boolean) => void;
   onChangeType: (id: string, type: RectangleType) => void;
   onChangeAvatarField: (id: string, field: keyof Avatar, value: string) => void;
   onChangeRotation: (id: string, degrees: number) => void;
@@ -96,21 +65,11 @@ export function AreaSettingsCard({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-end gap-1">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onDuplicate(rect.id)}
-          className="flex items-center gap-1"
-        >
+        <Button variant="outline" size="sm" onClick={() => onDuplicate(rect.id)} className="flex items-center gap-1">
           <Copy className="w-4 h-4" />
           {tc("duplicate")}
         </Button>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onDelete(rect.id)}
-          className="flex items-center gap-1"
-        >
+        <Button variant="destructive" size="sm" onClick={() => onDelete(rect.id)} className="flex items-center gap-1">
           <Trash2 className="w-4 h-4" />
           {tc("delete")}
         </Button>
@@ -119,10 +78,7 @@ export function AreaSettingsCard({
       {/* 区域类型选择 */}
       <div className="space-y-1">
         <Label htmlFor="rectType">{t("rectAttrs.rectType")}</Label>
-        <Select
-          value={rect.type}
-          onValueChange={(e) => onChangeType(rect.id, e as RectangleType)}
-        >
+        <Select value={rect.type} onValueChange={(e) => onChangeType(rect.id, e as RectangleType)}>
           <SelectTrigger id="rectType">
             <SelectValue />
           </SelectTrigger>
@@ -164,9 +120,7 @@ export function AreaSettingsCard({
               id="avatarLink"
               placeholder="https://a.ppy.sh/user_id"
               value={rect.avatar?.imageUrl ?? ""}
-              onChange={(e) =>
-                onChangeAvatarField(rect.id, "imageUrl", e.target.value)
-              }
+              onChange={(e) => onChangeAvatarField(rect.id, "imageUrl", e.target.value)}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -176,9 +130,7 @@ export function AreaSettingsCard({
                 id="user"
                 placeholder="peppy"
                 value={rect.avatar?.username ?? ""}
-                onChange={(e) =>
-                  onChangeAvatarField(rect.id, "username", e.target.value)
-                }
+                onChange={(e) => onChangeAvatarField(rect.id, "username", e.target.value)}
               />
             </div>
             <div className="space-y-1">
@@ -187,9 +139,7 @@ export function AreaSettingsCard({
                 id="countryCode"
                 placeholder={ta("settings.countryCodeDescription")}
                 value={rect.avatar?.countryCode ?? ""}
-                onChange={(e) =>
-                  onChangeAvatarField(rect.id, "countryCode", e.target.value)
-                }
+                onChange={(e) => onChangeAvatarField(rect.id, "countryCode", e.target.value)}
               />
             </div>
           </div>
@@ -210,15 +160,11 @@ export function AreaSettingsCard({
                       <CircleHelp className="size-3.5" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-64">
-                    {t("rectAttrs.rotationAbout")}
-                  </TooltipContent>
+                  <TooltipContent className="max-w-64">{t("rectAttrs.rotationAbout")}</TooltipContent>
                 </Tooltip>
               </Label>
               <div className="flex items-center gap-1">
-                <span className="font-mono text-sm tabular-nums">
-                  {rotation}°
-                </span>
+                <span className="font-mono text-sm tabular-nums">{rotation}°</span>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -291,21 +237,10 @@ export function AreaSettingsCard({
             <Tooltip>
               <TooltipTrigger asChild>
                 <InputGroupButton
-                  disabled={
-                    userInfo.trim().length === 0 ||
-                    Number.isNaN(Number(userInfo))
-                  }
+                  disabled={userInfo.trim().length === 0 || Number.isNaN(Number(userInfo))}
                   onClick={() => {
-                    onChangeField(
-                      rect.id,
-                      "href",
-                      generateUserLinkFromId(Number(userInfo)),
-                    );
-                    onChangeAvatarField(
-                      rect.id,
-                      "imageUrl",
-                      `https://a.ppy.sh/${userInfo}`,
-                    );
+                    onChangeField(rect.id, "href", generateUserLinkFromId(Number(userInfo)));
+                    onChangeAvatarField(rect.id, "imageUrl", `https://a.ppy.sh/${userInfo}`);
                   }}
                 >
                   <Hash className="w-4 h-4" />
@@ -318,18 +253,10 @@ export function AreaSettingsCard({
                 <InputGroupButton
                   disabled={userInfo.trim().length === 0}
                   onClick={() => {
-                    onChangeField(
-                      rect.id,
-                      "href",
-                      generateUserLinkFromName(userInfo),
-                    );
+                    onChangeField(rect.id, "href", generateUserLinkFromName(userInfo));
                     onChangeField(rect.id, "alt", userInfo);
                     onChangeAvatarField(rect.id, "username", userInfo);
-                    onChangeAvatarField(
-                      rect.id,
-                      "imageUrl",
-                      `https://a.ppy.sh/${userInfo}`,
-                    );
+                    onChangeAvatarField(rect.id, "imageUrl", `https://a.ppy.sh/${userInfo}`);
                   }}
                 >
                   <UserRound className="w-4 h-4" />
@@ -395,9 +322,7 @@ export function AreaSettingsCard({
             <Info className="size-4" />
             {t("rectAttrs.rotationHint.title")}
           </AlertTitle>
-          <AlertDescription className="text-xs">
-            {t("rectAttrs.rotationHint.description")}
-          </AlertDescription>
+          <AlertDescription className="text-xs">{t("rectAttrs.rotationHint.description")}</AlertDescription>
         </Alert>
       )}
     </div>

@@ -8,17 +8,11 @@ interface HelpIconButtonProps {
   className?: string;
 }
 
-export const HelpIconButton: React.FC<HelpIconButtonProps> = ({
-  section,
-  className,
-}) => (
+export const HelpIconButton: React.FC<HelpIconButtonProps> = ({ section, className }) => (
   <Link
     aria-label="Help Button"
     href={`/docs${section ? `#${section}` : ""}`}
-    className={cn(
-      "transition-all ease-out duration-200 hover:text-accent",
-      className,
-    )}
+    className={cn("transition-all ease-out duration-200 hover:text-accent", className)}
   >
     <HelpCircle />
   </Link>

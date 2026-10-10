@@ -3,13 +3,7 @@
 import type { ImageMapConfig } from "@/app/imagemap/types";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useConfetti } from "@/hooks/use-confetti";
 import hljs from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
@@ -69,11 +63,7 @@ export function ExportPanelContent({ data }: ExportPanelContentProps) {
 
       <div className="flex flex-row gap-2 justify-end">
         <CopyButton text={jsonString} variant="default" />
-        <Button
-          ref={downloadBtnRef}
-          onClick={handleDownload}
-          className="gap-2 confetti-button"
-        >
+        <Button ref={downloadBtnRef} onClick={handleDownload} className="gap-2 confetti-button">
           <DownloadCloud className="w-4 h-4" />
           {t("export.downloadButton")}
         </Button>

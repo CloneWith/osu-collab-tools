@@ -36,62 +36,40 @@ export default function Footer() {
             </div>
           </div>
           <div>
-            <h3 className="text-lg font-semibold mb-4">
-              {t("navbar.toolsTitle")}
-            </h3>
+            <h3 className="text-lg font-semibold mb-4">{t("navbar.toolsTitle")}</h3>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <Link
-                  href="/avatar"
-                  className="hover:text-white transition-colors"
-                >
+                <Link href="/avatar" className="hover:text-white transition-colors">
                   {t("navbar.nav.avatar")}
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/imagemap"
-                  className="hover:text-white transition-colors"
-                >
+                <Link href="/imagemap" className="hover:text-white transition-colors">
                   {t("navbar.nav.imagemap")}
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/docs"
-                  className="hover:text-white transition-colors"
-                >
+                <Link href="/docs" className="hover:text-white transition-colors">
                   {t("navbar.nav.docs")}
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-semibold mb-4">
-              {t("navbar.externalProjects")}
-            </h3>
+            <h3 className="text-lg font-semibold mb-4">{t("navbar.externalProjects")}</h3>
             <ul className="space-y-2 text-gray-400">
               <li>
-                <Link
-                  href="https://exsper.github.io/colorcode"
-                  className="hover:text-white transition-colors"
-                >
+                <Link href="https://exsper.github.io/colorcode" className="hover:text-white transition-colors">
                   {t("navbar.external.colorcode")}
                 </Link>
               </li>
               <li>
-                <Link
-                  href="https://mobe.deno.dev"
-                  className="hover:text-white transition-colors"
-                >
+                <Link href="https://mobe.deno.dev" className="hover:text-white transition-colors">
                   {t("navbar.external.mobe")}
                 </Link>
               </li>
               <li>
-                <Link
-                  href="https://vercel.com"
-                  className="hover:text-white transition-colors flex flex-row space-x-2"
-                >
+                <Link href="https://vercel.com" className="hover:text-white transition-colors flex flex-row space-x-2">
                   <SiVercel />
                   <span>{t("navbar.hostedByVercel")}</span>
                 </Link>

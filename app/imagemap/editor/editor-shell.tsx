@@ -1,21 +1,9 @@
 "use client";
 
-import type {
-  SidebarCardDef,
-  SidebarCardId,
-} from "@/app/imagemap/editor/sidebar-cards";
-import {
-  RAIL_WIDTH_REM,
-  SIDEBAR_WIDTH_REM,
-} from "@/app/imagemap/editor/sidebar-cards";
+import type { SidebarCardDef, SidebarCardId } from "@/app/imagemap/editor/sidebar-cards";
+import { RAIL_WIDTH_REM, SIDEBAR_WIDTH_REM } from "@/app/imagemap/editor/sidebar-cards";
 import { SidebarPanel, SidebarRail } from "@/app/imagemap/editor/sidebar-panel";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PanelRightOpen } from "lucide-react";
@@ -54,13 +42,7 @@ export function EditorShell({
 
   const cardsOpen = openCards.size > 0;
 
-  const panel = (
-    <SidebarPanel
-      openCards={openCards}
-      onToggleCard={onToggleCard}
-      renderCard={renderCard}
-    />
-  );
+  const panel = <SidebarPanel openCards={openCards} onToggleCard={onToggleCard} renderCard={renderCard} />;
 
   const leftColumn = (
     <div className="flex min-h-0 min-w-0 flex-col">
@@ -85,23 +67,11 @@ export function EditorShell({
           {toolbar}
         </div>
 
-        <SidebarRail
-          openCards={openCards}
-          onToggleCard={onToggleCard}
-          hasImage={hasImage}
-        />
+        <SidebarRail openCards={openCards} onToggleCard={onToggleCard} hasImage={hasImage} />
 
-        <Sheet
-          open={cardsOpen}
-          onOpenChange={(open) => !open && onToggleCard([...openCards][0])}
-        >
+        <Sheet open={cardsOpen} onOpenChange={(open) => !open && onToggleCard([...openCards][0])}>
           <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="sr-only"
-              aria-label={t("sidebar.title")}
-            >
+            <Button variant="outline" size="icon" className="sr-only" aria-label={t("sidebar.title")}>
               <PanelRightOpen className="w-4 h-4" />
             </Button>
           </SheetTrigger>
@@ -125,19 +95,11 @@ export function EditorShell({
     >
       {leftColumn}
 
-      <aside
-        className="min-h-0 overflow-hidden"
-        aria-hidden={!cardsOpen}
-        inert={!cardsOpen}
-      >
+      <aside className="min-h-0 overflow-hidden" aria-hidden={!cardsOpen} inert={!cardsOpen}>
         {panel}
       </aside>
 
-      <SidebarRail
-        openCards={openCards}
-        onToggleCard={onToggleCard}
-        hasImage={hasImage}
-      />
+      <SidebarRail openCards={openCards} onToggleCard={onToggleCard} hasImage={hasImage} />
     </div>
   );
 }

@@ -28,7 +28,7 @@ import {
   isNullOrWhitespace,
 } from "@/lib/utils";
 import {
-    Camera,
+  Camera,
   Copy,
   Eye,
   Grid3X3,
@@ -363,30 +363,33 @@ export default function AvatarGridPage() {
     [background, t, toast],
   );
 
-  const handleExportImage = useCallback(async (options: { format: string; quality: number }): Promise<string | null> => {
-    if (!previewRef.current) {
-      throw new Error(t("export.previewNotFound"));
-    }
+  const handleExportImage = useCallback(
+    async (options: { format: string; quality: number }): Promise<string | null> => {
+      if (!previewRef.current) {
+        throw new Error(t("export.previewNotFound"));
+      }
 
-    if (users.length === 0) {
-      throw new Error(t("export.noUsers"));
-    }
+      if (users.length === 0) {
+        throw new Error(t("export.noUsers"));
+      }
 
-    setIsExporting(true);
+      setIsExporting(true);
 
-    try {
-      return await exportElementSnapshotDataUrl(previewRef.current, {
-        format: options.format,
-        quality: options.quality,
-        waitFrames: 2,
-        exportOptions: {
-          scale: DEFAULT_EXPORT_SCALE,
-        },
-      });
-    } finally {
-      setIsExporting(false);
-    }
-  }, [t, users]);
+      try {
+        return await exportElementSnapshotDataUrl(previewRef.current, {
+          format: options.format,
+          quality: options.quality,
+          waitFrames: 2,
+          exportOptions: {
+            scale: DEFAULT_EXPORT_SCALE,
+          },
+        });
+      } finally {
+        setIsExporting(false);
+      }
+    },
+    [t, users],
+  );
 
   const imageMapHtml = useMemo(
     () => generateImageMapHtml(imageMapAreas, "your-image.png", "avatargrid"),

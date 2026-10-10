@@ -1,12 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import {
-    Camera,
-    Code,
-    FolderSync,
-    ImageIcon,
-    ListIcon,
-    SlidersHorizontal,
-} from "lucide-react";
+import { Camera, Code, FolderSync, ImageIcon, ListIcon, SlidersHorizontal } from "lucide-react";
 
 export type SidebarCardId = "image" | "areas" | "area" | "code" | "save" | "io";
 

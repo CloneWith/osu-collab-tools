@@ -8,24 +8,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { normalizeRotation } from "@/app/imagemap/editor/geometry";
 import { cn } from "@/lib/utils";
-import {
-  Copy,
-  GripVertical,
-  MoreVertical,
-  MousePointerClick,
-  Square,
-  Trash,
-  CircleUserRound,
-} from "lucide-react";
+import { Copy, GripVertical, MoreVertical, MousePointerClick, Square, Trash, CircleUserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { RefObject } from "react";
 
@@ -72,9 +58,7 @@ export function AreasListCard({
             <MousePointerClick />
           </EmptyMedia>
           <EmptyTitle>{t("placeholder.noRectangle.title")}</EmptyTitle>
-          <EmptyDescription>
-            {t("placeholder.noRectangle.description")}
-          </EmptyDescription>
+          <EmptyDescription>{t("placeholder.noRectangle.description")}</EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -90,9 +74,7 @@ export function AreasListCard({
             key={rect.id}
             className={cn(
               "flex w-full min-w-0 px-3 py-2 rounded-md border items-center justify-between gap-3 transition-colors",
-              selectedRect === rect.id
-                ? "border-primary bg-primary/15"
-                : "border-border bg-card",
+              selectedRect === rect.id ? "border-primary bg-primary/15" : "border-border bg-card",
               draggingRectId === rect.id ? "opacity-70" : "hover:bg-primary/5",
             )}
             // A real <button> would nest the drag handle and the dropdown trigger, which are
@@ -138,22 +120,13 @@ export function AreasListCard({
                 <GripVertical className="w-4 h-4" />
               </div>
 
-              {rect.type === RectangleType.Avatar ? (
-                <CircleUserRound />
-              ) : (
-                <Square />
-              )}
+              {rect.type === RectangleType.Avatar ? <CircleUserRound /> : <Square />}
 
               <div className="flex flex-col min-w-0 flex-1">
                 <span className="text-sm font-medium text-left truncate">
                   {rect.alt || t("rectAttrs.defaultName", { index: index + 1 })}
                 </span>
-                <span
-                  className={cn(
-                    "text-xs text-muted-foreground text-left truncate",
-                    !rect.href && "italic",
-                  )}
-                >
+                <span className={cn("text-xs text-muted-foreground text-left truncate", !rect.href && "italic")}>
                   {rect.href || t("rectAttrs.unsetLink")}
                 </span>
               </div>
@@ -168,12 +141,7 @@ export function AreasListCard({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 shrink-0"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={(e) => e.stopPropagation()}>
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>

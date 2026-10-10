@@ -1,39 +1,14 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { isNullOrWhitespace } from "@/lib/utils";
 import { validateFilename } from "@/lib/validation";
-import {
-  Camera,
-  CloudAlert,
-  CloudCheck,
-  CloudUpload,
-  Download,
-  Loader2,
-} from "lucide-react";
+import { Camera, CloudAlert, CloudCheck, CloudUpload, Download, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import * as React from "react";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
@@ -43,10 +18,7 @@ export interface SaveDialogProps {
   open: boolean;
   baseName: string;
   onOpenChange: (open: boolean) => void;
-  onSave: (options: {
-    format: string;
-    quality: number;
-  }) => Promise<string | null>;
+  onSave: (options: { format: string; quality: number }) => Promise<string | null>;
 }
 
 const infoLinks: Record<string, string> = {
@@ -55,10 +27,7 @@ const infoLinks: Record<string, string> = {
 
 export interface SavePanelContentProps {
   baseName: string;
-  onSave: (options: {
-    format: string;
-    quality: number;
-  }) => Promise<string | null>;
+  onSave: (options: { format: string; quality: number }) => Promise<string | null>;
 }
 
 /**
@@ -84,8 +53,7 @@ export function SavePanelContent({ baseName, onSave }: SavePanelContentProps) {
   );
 
   const finalFilename = React.useMemo(
-    () =>
-      `${!isNullOrWhitespace(filename) && filenameValidation.success ? filename : defaultName}.${extension}`,
+    () => `${!isNullOrWhitespace(filename) && filenameValidation.success ? filename : defaultName}.${extension}`,
     [filename, defaultName, extension, filenameValidation],
   );
 
@@ -130,8 +98,7 @@ export function SavePanelContent({ baseName, onSave }: SavePanelContentProps) {
       } catch (error) {
         toast({
           title: t("failedTitle"),
-          description:
-            error instanceof Error ? error.message : t("unknownError"),
+          description: error instanceof Error ? error.message : t("unknownError"),
           variant: "destructive",
         });
       }
@@ -196,13 +163,10 @@ export function SavePanelContent({ baseName, onSave }: SavePanelContentProps) {
           }
         }
       } catch (error) {
-        setUploadError(
-          error instanceof Error ? error.message : t("uploadFailed"),
-        );
+        setUploadError(error instanceof Error ? error.message : t("uploadFailed"));
         toast({
           title: t("uploadFailed"),
-          description:
-            error instanceof Error ? error.message : t("uploadFailed"),
+          description: error instanceof Error ? error.message : t("uploadFailed"),
           variant: "destructive",
         });
       } finally {
@@ -224,9 +188,7 @@ export function SavePanelContent({ baseName, onSave }: SavePanelContentProps) {
           placeholder={defaultName}
         ></Input>
         {!filenameValidation.success && filenameValidation.messageKey && (
-          <p className="text-sm text-yellow-600">
-            {tv(filenameValidation.messageKey)}
-          </p>
+          <p className="text-sm text-yellow-600">{tv(filenameValidation.messageKey)}</p>
         )}
       </div>
 
@@ -266,10 +228,7 @@ export function SavePanelContent({ baseName, onSave }: SavePanelContentProps) {
           <CardTitle className="text-lg">{t("saveLocally")}</CardTitle>
           <CardDescription>{t("saveLocallyDescription")}</CardDescription>
           <CardAction>
-            <Button
-              onClick={handleSave}
-              disabled={isWorking || isSaving || !filenameValidation.success}
-            >
+            <Button onClick={handleSave} disabled={isWorking || isSaving || !filenameValidation.success}>
               {isSaving ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -291,10 +250,7 @@ export function SavePanelContent({ baseName, onSave }: SavePanelContentProps) {
           <CardTitle className="text-lg">{t("upload")}</CardTitle>
           <CardDescription>{t("uploadDescription")}</CardDescription>
           <CardAction>
-            <Button
-              onClick={handleUpload}
-              disabled={isWorking || !token || isUploading}
-            >
+            <Button onClick={handleUpload} disabled={isWorking || !token || isUploading}>
               {isUploading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -335,12 +291,7 @@ export function SavePanelContent({ baseName, onSave }: SavePanelContentProps) {
                 })}
               </div>
             </div>
-            <Input
-              id="token"
-              type="password"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-            ></Input>
+            <Input id="token" type="password" value={token} onChange={(e) => setToken(e.target.value)}></Input>
           </div>
           {uploadResult && (
             <Alert variant="success">
@@ -372,12 +323,7 @@ export function SavePanelContent({ baseName, onSave }: SavePanelContentProps) {
   );
 }
 
-const SaveDialog: React.FC<SaveDialogProps> = ({
-  open,
-  baseName,
-  onOpenChange,
-  onSave,
-}) => {
+const SaveDialog: React.FC<SaveDialogProps> = ({ open, baseName, onOpenChange, onSave }) => {
   const t = useTranslations("imagemap.save");
 
   return (

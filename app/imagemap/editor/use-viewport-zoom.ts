@@ -1,22 +1,8 @@
 "use client";
 
-import {
-    clampZoom,
-    computeFitZoom,
-    type Point,
-    type Size,
-    ZOOM_MAX,
-    ZOOM_MIN,
-} from "@/app/imagemap/editor/geometry";
+import { clampZoom, computeFitZoom, type Point, type Size, ZOOM_MAX, ZOOM_MIN } from "@/app/imagemap/editor/geometry";
 import type React from "react";
-import {
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 /** Multiplicative step applied by the zoom in / zoom out buttons. */
 const ZOOM_STEP = 1.25;
@@ -88,14 +74,10 @@ export function useViewportZoom({
         return computeFitZoom(natural, viewport);
     }, [hasImage, natural, viewport, viewportReady]);
 
-    const zoom = hasImage
-        ? clampZoom(mode === "fit" ? fitZoom : manualZoom)
-        : 1;
+    const zoom = hasImage ? clampZoom(mode === "fit" ? fitZoom : manualZoom) : 1;
 
     /** Image-space point under a viewport point, captured before the zoom changes. */
-    const pendingAnchorRef = useRef<{ image: Point; viewport: Point } | null>(
-        null,
-    );
+    const pendingAnchorRef = useRef<{ image: Point; viewport: Point } | null>(null);
 
     const captureAnchor = useCallback(
         (viewportPoint?: Point) => {
@@ -135,28 +117,15 @@ export function useViewportZoom({
 
         pendingAnchorRef.current = null;
 
-        const contentLeft =
-            scroll.getBoundingClientRect().left - scroll.scrollLeft;
-        const contentTop =
-            scroll.getBoundingClientRect().top - scroll.scrollTop;
+        const contentLeft = scroll.getBoundingClientRect().left - scroll.scrollLeft;
+        const contentTop = scroll.getBoundingClientRect().top - scroll.scrollTop;
 
         // The stage is centred with `m-auto`, so it is offset when smaller than the viewport.
-        const offsetLeft = Math.max(
-            0,
-            (scroll.clientWidth - natural.width * zoom) / 2,
-        );
-        const offsetTop = Math.max(
-            0,
-            (scroll.clientHeight - natural.height * zoom) / 2,
-        );
+        const offsetLeft = Math.max(0, (scroll.clientWidth - natural.width * zoom) / 2);
+        const offsetTop = Math.max(0, (scroll.clientHeight - natural.height * zoom) / 2);
 
-        scroll.scrollLeft =
-            contentLeft +
-            offsetLeft +
-            anchor.image.x * zoom -
-            anchor.viewport.x;
-        scroll.scrollTop =
-            contentTop + offsetTop + anchor.image.y * zoom - anchor.viewport.y;
+        scroll.scrollLeft = contentLeft + offsetLeft + anchor.image.x * zoom - anchor.viewport.x;
+        scroll.scrollTop = contentTop + offsetTop + anchor.image.y * zoom - anchor.viewport.y;
     }, [hasImage, interactionActive, natural.height, natural.width, zoom]);
 
     // Track the viewport content box. `contentRect` excludes scrollbars, which is what
@@ -201,25 +170,20 @@ export function useViewportZoom({
     const fit = useCallback(() => setMode("fit"), []);
 
     const setPercent = useCallback(
-        (percent: number, anchorViewport?: Point) =>
-            applyZoom(percent / 100, anchorViewport),
+        (percent: number, anchorViewport?: Point) => applyZoom(percent / 100, anchorViewport),
         [applyZoom],
     );
 
     const step = useCallback(
         (direction: 1 | -1, anchorViewport?: Point) =>
-            applyZoom(
-                direction === 1 ? zoom * ZOOM_STEP : zoom / ZOOM_STEP,
-                anchorViewport,
-            ),
+            applyZoom(direction === 1 ? zoom * ZOOM_STEP : zoom / ZOOM_STEP, anchorViewport),
         [applyZoom, zoom],
     );
 
     const actual = useCallback(() => applyZoom(1), [applyZoom]);
 
     const zoomAtViewportPoint = useCallback(
-        (viewportPoint: Point, factor: number) =>
-            applyZoom(zoom * factor, viewportPoint),
+        (viewportPoint: Point, factor: number) => applyZoom(zoom * factor, viewportPoint),
         [applyZoom, zoom],
     );
 
@@ -240,12 +204,8 @@ export function useViewportZoom({
             if (!event.ctrlKey && !event.metaKey) return;
 
             event.preventDefault();
-            const delta =
-                event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
-            zoomAtViewportPoint(
-                { x: event.clientX, y: event.clientY },
-                Math.exp(-delta * 0.002),
-            );
+            const delta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
+            zoomAtViewportPoint({ x: event.clientX, y: event.clientY }, Math.exp(-delta * 0.002));
         };
 
         element.addEventListener("wheel", handleWheel, { passive: false });
@@ -268,15 +228,6 @@ export function useViewportZoom({
             scrollRef,
             stageRef,
         }),
-        [
-            actual,
-            fit,
-            hasImage,
-            mode,
-            setPercent,
-            step,
-            zoom,
-            zoomAtViewportPoint,
-        ],
+        [actual, fit, hasImage, mode, setPercent, step, zoom, zoomAtViewportPoint],
     );
 }
